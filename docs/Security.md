@@ -5,8 +5,11 @@
 - LDAPS-only directory communication over TCP 636.
 - LDAP filter escaping and configured-domain UPN validation.
 - Windows DPAPI-backed service-account credential loading.
-- RSA certificate-store signing with algorithm, issuer, audience, lifetime, key-ID, and claim validation.
+- RSA certificate-store signing with private-key-only issuance and public-key-only validation.
+- Certificate validity, RSA key-size, key-usage, EKU, and duplicate-match checks.
 - Default authenticated-user policy and explicit role policies.
+- Bounded fixed-window rate limiting on the login endpoint.
+- Encrypted SQL transport by default; development trust exceptions are isolated to development/test configuration.
 - Correlation IDs, minimized audit events, and generic ProblemDetails responses.
 - Typed stored-procedure audit writes with sensitive JSON rejection.
 - Startup validation for Active Directory, token, authorization, and audit configuration.
@@ -15,7 +18,7 @@
 
 Passwords, bearer tokens, authorization headers, private keys, DPAPI contents, raw LDAP responses, and stack traces must not be placed in source control, logs, SQL audit details, or API responses. Use `<SECRET_FILE>`, `<THUMBPRINT>`, `<CONNECTION_STRING>`, and `<USERNAME>` placeholders in examples.
 
-The repository does not implement MFA, federation, refresh tokens, stateful revocation, rate limiting, brute-force protection, or audit retention automation.
+The repository does not implement MFA, federation, refresh tokens, stateful revocation, account lockout, or audit retention automation. Login rate limiting is an application-level control and does not replace AD account-lockout policy.
 
 ## Operational responsibilities
 

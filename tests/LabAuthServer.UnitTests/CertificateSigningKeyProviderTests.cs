@@ -160,6 +160,114 @@ public sealed class CertificateSigningKeyProviderTests
     }
 
     [Fact]
+    public async Task GetValidationKeyAsync_AllowsCertificateWithoutPrivateKey()
+    {
+        using var certificate = CreateCertificate(includePrivateKey: false);
+        var provider = new CertificateSigningKeyProvider(
+            Options.Create(CreateOptions(certificate.Thumbprint)),
+            _ => certificate);
+
+        using var material = await provider.GetValidationKeyAsync("thumbprint-key");
+
+        Assert.NotNull(material.PublicKey);
+        Assert.Equal(2048, material.PublicKey.KeySize);
+        Assert.ThrowsAny<CryptographicException>(() => material.PublicKey.ExportParameters(true));
+    }
+
+    [Fact]
+    public async Task GetKeyAsync_RejectsExpiredCertificate()
+    {
+        using var certificate = CreateCertificate(DateTimeOffset.UtcNow.AddDays(-3), DateTimeOffset.UtcNow.AddDays(-1));
+        var provider = new CertificateSigningKeyProvider(
+            Options.Create(CreateOptions(certificate.Thumbprint)),
+            _ => certificate);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => provider.GetKeyAsync("thumbprint-key").AsTask());
+
+        Assert.Contains("valid", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task GetValidationKeyAsync_RejectsNotYetValidCertificate()
+    {
+        using var certificate = CreateCertificate(DateTimeOffset.UtcNow.AddDays(1), DateTimeOffset.UtcNow.AddDays(2));
+        var provider = new CertificateSigningKeyProvider(
+            Options.Create(CreateOptions(certificate.Thumbprint)),
+            _ => certificate);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => provider.GetValidationKeyAsync("thumbprint-key").AsTask());
+
+        Assert.Contains("valid", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void SelectCertificate_RejectsDuplicateCurrentlyValidCertificates()
+    {
+        using var first = CreateCertificate();
+        using var second = CreateCertificate();
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            CertificateSigningKeyProvider.SelectCertificate(
+                [first, second],
+                DateTimeOffset.UtcNow));
+
+        Assert.Contains("Multiple", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task GetKeyAsync_RejectsCertificateWithoutDigitalSignatureUsage()
+    {
+        using var certificate = CreateCertificate(
+            DateTimeOffset.UtcNow.AddDays(-1),
+            DateTimeOffset.UtcNow.AddDays(30),
+            X509KeyUsageFlags.KeyEncipherment);
+        var provider = new CertificateSigningKeyProvider(
+            Options.Create(CreateOptions(certificate.Thumbprint)),
+            _ => certificate);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => provider.GetKeyAsync("thumbprint-key").AsTask());
+
+        Assert.Contains("digital signatures", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task GetKeyAsync_RejectsInsufficientRsaKeySize()
+    {
+        using var certificate = CreateCertificate(
+            DateTimeOffset.UtcNow.AddDays(-1),
+            DateTimeOffset.UtcNow.AddDays(30),
+            keySize: 1024);
+        var provider = new CertificateSigningKeyProvider(
+            Options.Create(CreateOptions(certificate.Thumbprint)),
+            _ => certificate);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => provider.GetKeyAsync("thumbprint-key").AsTask());
+
+        Assert.Contains("too small", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task GetKeyAsync_RejectsCertificateWithEkuExtension()
+    {
+        using var certificate = CreateCertificate(
+            DateTimeOffset.UtcNow.AddDays(-1),
+            DateTimeOffset.UtcNow.AddDays(30),
+            extendedKeyUsageOid: "1.3.6.1.5.5.7.3.1");
+        var provider = new CertificateSigningKeyProvider(
+            Options.Create(CreateOptions(certificate.Thumbprint)),
+            _ => certificate);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => provider.GetKeyAsync("thumbprint-key").AsTask());
+
+        Assert.Contains("EKU", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void NormalizeThumbprint_RemovesWhitespaceAndNormalizesCase()
     {
         var normalized = CertificateSigningKeyProvider.NormalizeThumbprint(" BD5 45BA 289E BFC6 45C8 C3DC 4243 1197 5579D7E09 ");
@@ -167,11 +275,37 @@ public sealed class CertificateSigningKeyProviderTests
         Assert.Equal("BD545BA289EBFC645C8C3DC424311975579D7E09", normalized);
     }
 
-    private static X509Certificate2 CreateCertificate(bool includePrivateKey = true)
+    private static X509Certificate2 CreateCertificate(
+        bool includePrivateKey = true)
+        => CreateCertificate(
+            DateTimeOffset.UtcNow.AddDays(-1),
+            DateTimeOffset.UtcNow.AddDays(30),
+            keyUsage: null,
+            includePrivateKey: includePrivateKey);
+
+    private static X509Certificate2 CreateCertificate(
+        DateTimeOffset notBefore,
+        DateTimeOffset notAfter,
+        X509KeyUsageFlags? keyUsage = null,
+        string? extendedKeyUsageOid = null,
+        int keySize = 2048,
+        bool includePrivateKey = true)
     {
-        using var rsa = RSA.Create(2048);
+        using var rsa = RSA.Create(keySize);
         var request = new CertificateRequest("CN=LabAuthServer.Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        var cert = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(30));
+        if (keyUsage.HasValue)
+        {
+            request.CertificateExtensions.Add(new X509KeyUsageExtension(keyUsage.Value, critical: true));
+        }
+
+        if (extendedKeyUsageOid is not null)
+        {
+            request.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(
+                [new Oid(extendedKeyUsageOid)],
+                critical: true));
+        }
+
+        var cert = request.CreateSelfSigned(notBefore, notAfter);
 
         if (!includePrivateKey)
         {

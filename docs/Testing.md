@@ -24,11 +24,11 @@ dotnet test .\LabAuthServer.slnx -c Release --no-build --nologo
 
 ## Current result
 
-The current cleanup validation completed with **173 passed, 0 failed, and 0 skipped** tests.
+The current security-remediation validation completed with **184 passed, 0 failed, and 0 skipped** tests.
 
 ## Coverage areas
 
-The tests cover configuration fail-closed behavior, LDAPS/UPN validation, LDAP filter escaping, group-to-role mapping, JWT claims and signing, certificate/key-provider boundaries, issuer/audience/lifetime/algorithm/key-ID validation, 401/403 authorization behavior, correlation IDs, safe `ProblemDetails`, SQL audit persistence, sensitive-data filtering, and concurrency boundaries.
+The tests cover configuration fail-closed behavior, LDAPS/UPN validation, LDAP filter escaping, group-to-role mapping, JWT claims and signing, public-key-only JWT validation, certificate validity/key-size/key-usage/duplicate-selection boundaries, issuer/audience/lifetime/algorithm/key-ID validation, 401/403 authorization behavior, login rate limiting, correlation IDs, safe `ProblemDetails`, encrypted SQL test configuration, SQL audit persistence, sensitive-data filtering, and concurrency boundaries.
 
 ## What the tests do not prove
 

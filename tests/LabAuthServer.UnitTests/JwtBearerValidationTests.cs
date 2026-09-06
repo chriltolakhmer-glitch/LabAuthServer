@@ -85,6 +85,30 @@ public sealed class JwtBearerValidationTests
     }
 
     [Fact]
+    public void JwtBearerOptions_ResolvesPublicKeyWithoutPrivateParameters()
+    {
+        var options = CreateTokenOptions();
+        using var signingKey = RSA.Create(2048);
+        var provider = new ProtectedSigningKeyProvider(Options.Create(options), new[]
+        {
+            new KeyValuePair<string, RSA>(options.ActiveKeyId, signingKey)
+        });
+        var configurator = new JwtBearerAuthenticationOptions(Options.Create(options), provider);
+        var target = new JwtBearerOptions();
+
+        configurator.Configure(target);
+
+        var keys = target.TokenValidationParameters.IssuerSigningKeyResolver(
+            null,
+            null,
+            options.ActiveKeyId,
+            target.TokenValidationParameters);
+
+        var rsaKey = Assert.IsType<RsaSecurityKey>(Assert.Single(keys));
+        Assert.ThrowsAny<CryptographicException>(() => rsaKey.Rsa!.ExportParameters(true));
+    }
+
+    [Fact]
     public void JwtBearerOptions_ResolvesPreviousKeyDuringOverlapAndRejectsUnknownKey()
     {
         var options = CreateTokenOptions();

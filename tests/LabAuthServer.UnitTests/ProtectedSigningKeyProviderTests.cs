@@ -24,7 +24,12 @@ public sealed class ProtectedSigningKeyProviderTests
     {
         using var activeKey = RSA.Create(2048);
         using var previousKey = RSA.Create(2048);
-        var provider = CreateProvider(activeKey, previousKey, activeKeyId: "active-key-1", previousKeyId: "previous-key-1");
+        var provider = CreateProvider(
+            activeKey,
+            previousKey,
+            activeKeyId: "active-key-1",
+            previousKeyId: "previous-key-1",
+            previousKeyExpiresAt: DateTimeOffset.UtcNow.AddDays(1));
 
         using var overlapKey = await provider.GetKeyAsync("previous-key-1");
 
@@ -42,6 +47,87 @@ public sealed class ProtectedSigningKeyProviderTests
             () => provider.GetKeyAsync("ghost-key").AsTask());
 
         Assert.Contains("not approved", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task GetValidationKeyAsync_ReturnsPublicOnlyKeyMaterial()
+    {
+        using var activeKey = RSA.Create(2048);
+        using var previousKey = RSA.Create(2048);
+        var provider = CreateProvider(activeKey, previousKey, activeKeyId: "active-key-1");
+
+        using var validationKey = await provider.GetValidationKeyAsync("active-key-1");
+
+        Assert.Equal(2048, validationKey.PublicKey.KeySize);
+        Assert.ThrowsAny<CryptographicException>(() => validationKey.PublicKey.ExportParameters(true));
+    }
+
+    [Fact]
+    public async Task GetValidationKeyAsync_WithPreviousKeyWithinOverlapWindow_ReturnsPublicKey()
+    {
+        using var activeKey = RSA.Create(2048);
+        using var previousKey = RSA.Create(2048);
+        var provider = CreateProvider(
+            activeKey,
+            previousKey,
+            activeKeyId: "active-key-1",
+            previousKeyId: "previous-key-1",
+            previousKeyExpiresAt: DateTimeOffset.UtcNow.AddDays(1));
+
+        using var validationKey = await provider.GetValidationKeyAsync("previous-key-1");
+
+        Assert.Equal(2048, validationKey.PublicKey.KeySize);
+    }
+
+    [Fact]
+    public async Task GetValidationKeyAsync_WithMissingPreviousKeyExpiration_FailsClosed()
+    {
+        using var activeKey = RSA.Create(2048);
+        using var previousKey = RSA.Create(2048);
+        var provider = CreateProvider(
+            activeKey,
+            previousKey,
+            activeKeyId: "active-key-1",
+            previousKeyId: "previous-key-1");
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => provider.GetValidationKeyAsync("previous-key-1").AsTask());
+
+        Assert.Contains("overlap", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task GetValidationKeyAsync_WithExpiredPreviousKeyExpiration_FailsClosed()
+    {
+        using var activeKey = RSA.Create(2048);
+        using var previousKey = RSA.Create(2048);
+        var provider = CreateProvider(
+            activeKey,
+            previousKey,
+            activeKeyId: "active-key-1",
+            previousKeyId: "previous-key-1",
+            previousKeyExpiresAt: DateTimeOffset.UtcNow.AddMinutes(-1));
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => provider.GetValidationKeyAsync("previous-key-1").AsTask());
+
+        Assert.Contains("configuration", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task GetValidationKeyAsync_ActiveKeyRemainsUsableWhenPreviousExpirationIsMissing()
+    {
+        using var activeKey = RSA.Create(2048);
+        using var previousKey = RSA.Create(2048);
+        var provider = CreateProvider(
+            activeKey,
+            previousKey,
+            activeKeyId: "active-key-1",
+            previousKeyId: "previous-key-1");
+
+        using var validationKey = await provider.GetValidationKeyAsync("active-key-1");
+
+        Assert.Equal(2048, validationKey.PublicKey.KeySize);
     }
 
     [Fact]
@@ -128,7 +214,7 @@ public sealed class ProtectedSigningKeyProviderTests
             SigningAlgorithm = "RS256",
             ActiveKeyId = activeKeyId,
             PreviousKeyId = previousKeyId ?? string.Empty,
-            PreviousKeyExpiresAt = previousKeyExpiresAt ?? DateTimeOffset.UtcNow.AddDays(1),
+            PreviousKeyExpiresAt = previousKeyExpiresAt,
             ApprovedKeyIds = approvedKeyIds ?? [activeKeyId, previousKeyId ?? "another-key"],
             SigningKeyStoreReference = "environment://LabAuthServer/SigningKey",
             MaximumClaimSize = 4096,

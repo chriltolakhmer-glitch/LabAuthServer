@@ -78,6 +78,51 @@ public sealed class ProtectedSigningKeyProvider : IProtectedSigningKeyProvider
         throw new InvalidOperationException("The requested signing key identifier is not approved or is unavailable.");
     }
 
+    public ValueTask<ValidationKeyMaterial> GetValidationKeyAsync(
+        string keyIdentifier,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (string.IsNullOrWhiteSpace(keyIdentifier))
+        {
+            throw new InvalidOperationException("The signing key identifier is required.");
+        }
+
+        var options = _tokenOptions.Value;
+        var failures = TokenOptionsValidator.Validate(options);
+        if (failures.Count > 0)
+        {
+            throw new InvalidOperationException("Signing-key configuration is invalid.");
+        }
+
+        var isPreviousKey = string.Equals(options.PreviousKeyId, keyIdentifier, StringComparison.Ordinal);
+        if (isPreviousKey &&
+            (!options.PreviousKeyExpiresAt.HasValue || options.PreviousKeyExpiresAt.Value <= DateTimeOffset.UtcNow))
+        {
+            throw new InvalidOperationException(
+                "Signing-key configuration is invalid: previous signing key overlap has expired or is invalid.");
+        }
+
+        if (!_configuredKeys.TryGetValue(keyIdentifier, out var key))
+        {
+            if (string.Equals(options.ActiveKeyId, keyIdentifier, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("The configured active signing key is unavailable.");
+            }
+
+            if (!isPreviousKey)
+            {
+                throw new InvalidOperationException("The requested signing key identifier is not approved or is unavailable.");
+            }
+
+            throw new InvalidOperationException("The configured previous signing key is unavailable during the overlap window.");
+        }
+
+        return ValueTask.FromResult(
+            new ValidationKeyMaterial(keyIdentifier, RSA.Create(key.ExportParameters(false))));
+    }
+
     private static IReadOnlyDictionary<string, RSA> BuildKeyMap(IEnumerable<KeyValuePair<string, RSA>> configuredKeys)
     {
         var map = new Dictionary<string, RSA>(StringComparer.Ordinal);

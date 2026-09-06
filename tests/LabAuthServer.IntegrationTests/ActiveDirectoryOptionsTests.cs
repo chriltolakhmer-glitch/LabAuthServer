@@ -17,7 +17,6 @@ public sealed class ActiveDirectoryOptionsTests
     public void Validate_WithoutServiceAccountPassword_ReturnsNoFailure()
     {
         var options = CreateValidOptions();
-        options.ServiceAccountPassword = string.Empty;
         options.ServiceAccountUsername = "svc-lab-auth@lab.local";
 
         var failures = LdapOptionsValidator.Validate(options, isProduction: true);

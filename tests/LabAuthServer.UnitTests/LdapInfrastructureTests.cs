@@ -42,7 +42,6 @@ public sealed class LdapInfrastructureTests
     {
         var options = CreateOptions();
         options.ServiceAccountUsername = "svc-lab-auth@lab.local";
-        options.ServiceAccountPassword = string.Empty;
 
         var failures = LdapOptionsValidator.Validate(options, isProduction: false);
 

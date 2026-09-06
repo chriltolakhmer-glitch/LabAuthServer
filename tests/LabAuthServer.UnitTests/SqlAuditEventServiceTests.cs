@@ -1,6 +1,7 @@
 using LabAuthServer.Application.Auditing;
 using LabAuthServer.Infrastructure.Auditing;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
@@ -8,8 +9,33 @@ namespace LabAuthServer.UnitTests;
 
 public sealed class SqlAuditEventServiceTests
 {
+    [Fact]
+    public void DefaultConfiguration_EnablesSqlEncryption()
+    {
+        var configurationRoot = new DirectoryInfo(AppContext.BaseDirectory);
+        while (configurationRoot is not null &&
+               !File.Exists(Path.Combine(configurationRoot.FullName, "LabAuthServer.slnx")))
+        {
+            configurationRoot = configurationRoot.Parent;
+        }
+
+        Assert.NotNull(configurationRoot);
+
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Path.Combine(configurationRoot!.FullName, "src", "LabAuthServer.Api"))
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+        var connectionString = configuration["Audit:ConnectionString"];
+
+        Assert.False(string.IsNullOrWhiteSpace(connectionString));
+        var builder = new SqlConnectionStringBuilder(connectionString);
+
+        Assert.True(builder.Encrypt);
+        Assert.DoesNotContain("Encrypt=False", connectionString, StringComparison.OrdinalIgnoreCase);
+    }
+
     private const string ConnectionString =
-        "Server=localhost;Database=LabAuthServer;Integrated Security=True;Encrypt=False;Application Name=LabAuthServer.Phase12.Tests";
+        "Server=localhost;Database=LabAuthServer;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Application Name=LabAuthServer.Phase12.Tests";
 
     [Fact]
     public async Task WriteAsync_PersistsApprovedEventAndReturnsAuditEventId()

@@ -7,6 +7,8 @@ namespace LabAuthServer.Infrastructure.Security;
 
 public sealed class CertificateSigningKeyProvider : IProtectedSigningKeyProvider
 {
+    internal const int MinimumRsaKeySize = 2048;
+
     private readonly IOptions<TokenOptions> _tokenOptions;
     private readonly Func<TokenOptions, string, X509Certificate2> _certificateResolver;
     private readonly ILogger<CertificateSigningKeyProvider>? _logger;
@@ -111,49 +113,52 @@ public sealed class CertificateSigningKeyProvider : IProtectedSigningKeyProvider
         {
             _logger?.LogError(
                 ex,
-                "Signing certificate lookup failed for key identifier {KeyIdentifier} in store {StoreName} at {StoreLocation} using thumbprint {Thumbprint}.",
-                keyIdentifier,
-                options.SigningCertificateStoreName,
-                options.SigningCertificateStoreLocation,
-                options.SigningCertificateThumbprint);
+                "Signing certificate lookup failed for key identifier {KeyIdentifier}.",
+                keyIdentifier);
             throw;
         }
 
-        if (certificate is null)
-        {
-            _logger?.LogError(
-                "Signing certificate was not found for key identifier {KeyIdentifier} in store {StoreName} at {StoreLocation} using thumbprint {Thumbprint}.",
-                keyIdentifier,
-                options.SigningCertificateStoreName,
-                options.SigningCertificateStoreLocation,
-                options.SigningCertificateThumbprint);
-            throw new InvalidOperationException("The configured signing certificate could not be resolved from the certificate store.");
-        }
-
-        if (!certificate.HasPrivateKey)
-        {
-            _logger?.LogError(
-                "Signing certificate found but does not contain a private key for key identifier {KeyIdentifier} in store {StoreName} at {StoreLocation} using thumbprint {Thumbprint}.",
-                keyIdentifier,
-                options.SigningCertificateStoreName,
-                options.SigningCertificateStoreLocation,
-                options.SigningCertificateThumbprint);
-            throw new InvalidOperationException("The configured signing certificate does not contain a private key.");
-        }
+        ValidateCertificate(certificate, requirePrivateKey: true);
 
         var privateKey = certificate.GetRSAPrivateKey();
-        if (privateKey is null)
-        {
-            _logger?.LogError(
-                "Signing certificate private key is not an RSA key for key identifier {KeyIdentifier} in store {StoreName} at {StoreLocation} using thumbprint {Thumbprint}.",
-                keyIdentifier,
-                options.SigningCertificateStoreName,
-                options.SigningCertificateStoreLocation,
-                options.SigningCertificateThumbprint);
-            throw new InvalidOperationException("The configured signing certificate does not expose an RSA private key.");
-        }
+        ArgumentNullException.ThrowIfNull(privateKey);
 
         return ValueTask.FromResult(new SigningKeyMaterial(keyIdentifier, privateKey));
+    }
+
+    public ValueTask<ValidationKeyMaterial> GetValidationKeyAsync(
+        string keyIdentifier,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (string.IsNullOrWhiteSpace(keyIdentifier))
+        {
+            throw new InvalidOperationException("The signing key identifier is required.");
+        }
+
+        var options = _tokenOptions.Value;
+        var failures = TokenOptionsValidator.Validate(options);
+        if (failures.Count > 0)
+        {
+            throw new InvalidOperationException("Signing-key configuration is invalid.");
+        }
+
+        var isActiveKey = string.Equals(options.ActiveKeyId, keyIdentifier, StringComparison.Ordinal);
+        var isPreviousKey = string.Equals(options.PreviousKeyId, keyIdentifier, StringComparison.Ordinal);
+        if (!isActiveKey && (!isPreviousKey || !options.PreviousKeyExpiresAt.HasValue || options.PreviousKeyExpiresAt.Value <= DateTimeOffset.UtcNow))
+        {
+            throw new InvalidOperationException("The requested signing key identifier is not approved or is unavailable.");
+        }
+
+        var certificate = ResolveAndValidateCertificate(options, keyIdentifier, requirePrivateKey: false);
+        var publicKey = certificate.GetRSAPublicKey();
+        if (publicKey is null)
+        {
+            throw new InvalidOperationException("The configured signing certificate does not expose an RSA public key.");
+        }
+
+        return ValueTask.FromResult(new ValidationKeyMaterial(keyIdentifier, publicKey));
     }
 
     public static string NormalizeThumbprint(string? thumbprint)
@@ -187,12 +192,79 @@ public sealed class CertificateSigningKeyProvider : IProtectedSigningKeyProvider
         store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
 
         var certificates = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false);
-        var certificate = certificates.Count > 0 ? certificates[0] : null;
-        if (certificate is null)
+        return SelectCertificate(certificates, DateTimeOffset.UtcNow);
+    }
+
+    internal static X509Certificate2 SelectCertificate(
+        IEnumerable<X509Certificate2> certificates,
+        DateTimeOffset now)
+    {
+        var validCertificates = certificates
+            .Where(certificate => certificate.NotBefore.ToUniversalTime() <= now.UtcDateTime &&
+                                  certificate.NotAfter.ToUniversalTime() >= now.UtcDateTime)
+            .ToArray();
+
+        if (validCertificates.Length == 0)
         {
-            throw new InvalidOperationException("The configured signing certificate thumbprint was not found in the certificate store.");
+            throw new InvalidOperationException("No currently valid signing certificate matched the configured key.");
         }
 
+        if (validCertificates.Length != 1)
+        {
+            throw new InvalidOperationException("Multiple currently valid signing certificates matched the configured key.");
+        }
+
+        return validCertificates[0];
+    }
+
+    private X509Certificate2 ResolveAndValidateCertificate(
+        TokenOptions options,
+        string keyIdentifier,
+        bool requirePrivateKey)
+    {
+        var certificate = _certificateResolver(options, keyIdentifier);
+        ValidateCertificate(certificate, requirePrivateKey);
         return certificate;
+    }
+
+    private static void ValidateCertificate(X509Certificate2 certificate, bool requirePrivateKey)
+    {
+        ArgumentNullException.ThrowIfNull(certificate);
+
+        var now = DateTimeOffset.UtcNow;
+        if (certificate.NotBefore.ToUniversalTime() > now.UtcDateTime ||
+            certificate.NotAfter.ToUniversalTime() < now.UtcDateTime)
+        {
+            throw new InvalidOperationException("The signing certificate is not currently valid.");
+        }
+
+        using var publicKey = certificate.GetRSAPublicKey();
+        if (publicKey is null)
+        {
+            throw new InvalidOperationException("The signing certificate does not contain an RSA key.");
+        }
+
+        if (publicKey.KeySize < MinimumRsaKeySize)
+        {
+            throw new InvalidOperationException("The signing certificate RSA key is too small.");
+        }
+
+        var keyUsage = certificate.Extensions.OfType<X509KeyUsageExtension>().SingleOrDefault();
+        if (keyUsage is not null && !keyUsage.KeyUsages.HasFlag(X509KeyUsageFlags.DigitalSignature))
+        {
+            throw new InvalidOperationException("The signing certificate does not allow digital signatures.");
+        }
+
+        // JWT signing uses a general-purpose signing certificate; an EKU extension is rejected
+        // rather than treating an unrelated server/client authentication purpose as sufficient.
+        if (certificate.Extensions.OfType<X509EnhancedKeyUsageExtension>().Any())
+        {
+            throw new InvalidOperationException("The signing certificate must not contain an incompatible EKU extension.");
+        }
+
+        if (requirePrivateKey && !certificate.HasPrivateKey)
+        {
+            throw new InvalidOperationException("The signing certificate does not contain a private key.");
+        }
     }
 }

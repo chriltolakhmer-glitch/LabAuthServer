@@ -3,6 +3,7 @@ using LabAuthServer.Api.Health;
 using LabAuthServer.Api.Middleware;
 using LabAuthServer.Application.Interfaces;
 using LabAuthServer.Infrastructure.Auditing;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,19 @@ builder.Logging.AddDebug();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("Login", _ => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: "login",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        }));
+});
 builder.Services.AddActiveDirectoryOptions(builder.Configuration, builder.Environment);
 builder.Services.AddTokenConfiguration(builder.Configuration);
 builder.Services.AddOptions<AuditOptions>()
@@ -26,6 +40,8 @@ var app = builder.Build();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<CorrelationMiddleware>();
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<AuthorizationAuditMiddleware>();
 app.UseAuthorization();

@@ -24,7 +24,7 @@ This document is the authoritative summary of what can be established from the r
 
 ## Automated test status
 
-**VERIFIED:** The full solution test run completed with 173 passed, 0 failed, and 0 skipped tests. The suite includes unit tests and ASP.NET Core integration tests. Test results do not prove access to a production directory, certificate private key, DPAPI secret, or deployed IIS environment.
+**VERIFIED:** The full solution test run completed with 184 passed, 0 failed, and 0 skipped tests. The suite includes unit tests and ASP.NET Core integration tests. Test results do not prove access to a production directory, certificate private key, DPAPI secret, or deployed IIS environment.
 
 ## Authentication validation
 
@@ -40,7 +40,13 @@ This document is the authoritative summary of what can be established from the r
 
 ## JWT validation
 
-**VERIFIED:** Tests cover RSA signing, the configured algorithm, issuer, audience, lifetime, `kid`, previous-key overlap, required claims, role validation, tampering, and size limits. The current claim set includes `iss`, `aud`, `sub`, `jti`, `iat`, `nbf`, `exp`, `role`, and `scope`.
+**VERIFIED:** Tests cover RSA private-key signing, public-key-only validation, the configured algorithm, issuer, audience, lifetime, `kid`, previous-key overlap, required claims, role validation, tampering, and size limits. Certificate tests cover validity windows, RSA key size, digital-signature usage, duplicate matches, and validation without a private key. The current claim set includes `iss`, `aud`, `sub`, `jti`, `iat`, `nbf`, `exp`, `role`, and `scope`.
+
+**VERIFIED:** The certificate policy requires a currently valid RSA certificate with a key of at least 2048 bits. Signing requires a private key; validation uses only the public key. Incompatible KeyUsage is rejected, certificates containing an EKU extension are rejected under the current general-purpose signing policy, and multiple currently valid matching certificates fail closed.
+
+**VERIFIED:** Login requests use a bounded fixed-window rate limit of 10 requests per minute with no queue. Health and protected endpoint behavior remains covered separately.
+
+**VERIFIED:** The default audit connection configuration enables SQL transport encryption. Development/test configuration uses an explicit local certificate-trust exception only where required by the local SQL instance.
 
 ## Authorization validation
 
@@ -72,7 +78,7 @@ This document is the authoritative summary of what can be established from the r
 - Certificate-store private-key behavior depends on the target Windows certificate store and runtime identity.
 - DPAPI behavior depends on the protected secret file and Windows identity.
 - SQL integration depends on an authorized target database and application identity.
-- No refresh tokens, sessions, MFA, federation, rate limiting, or brute-force protection are implemented.
+- No refresh tokens, sessions, MFA, federation, account lockout, or directory-level brute-force protection are implemented. Login rate limiting is an application-level control.
 - Audit retention and purge ownership remain outside the implementation.
 
 ## Evidence and reproducibility

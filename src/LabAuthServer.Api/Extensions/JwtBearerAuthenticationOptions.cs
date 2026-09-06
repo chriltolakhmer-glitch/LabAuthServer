@@ -61,9 +61,9 @@ public sealed class JwtBearerAuthenticationOptions : IConfigureNamedOptions<JwtB
                     throw new SecurityTokenException("The JWT is missing a key identifier ('kid').");
                 }
 
-                var keyMaterial = _keyProvider.GetKeyAsync(kid).GetAwaiter().GetResult();
+                var keyMaterial = _keyProvider.GetValidationKeyAsync(kid).GetAwaiter().GetResult();
                 using var _ = keyMaterial;
-                var publicKey = RSA.Create(keyMaterial.PrivateKey.ExportParameters(false));
+                var publicKey = RSA.Create(keyMaterial.PublicKey.ExportParameters(includePrivateParameters: false));
                 return new[] { new RsaSecurityKey(publicKey) };
             }
         };

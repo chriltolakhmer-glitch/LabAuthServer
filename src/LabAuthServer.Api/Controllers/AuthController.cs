@@ -4,6 +4,7 @@ using LabAuthServer.Application.Enums;
 using LabAuthServer.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LabAuthServer.Api.Controllers;
@@ -55,6 +56,7 @@ public sealed class AuthController : ControllerBase
     /// 400 Bad Request if request is invalid.
     /// </returns>
     [AllowAnonymous]
+    [EnableRateLimiting("Login")]
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

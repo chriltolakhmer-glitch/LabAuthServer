@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc.Testing;
 
@@ -67,6 +68,31 @@ public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
         var response = await client.GetAsync("/api/v1/protected");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_AfterFixedWindowIsExhausted_ReturnsTooManyRequests()
+    {
+        var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            using var content = new StringContent("{}", Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("/api/v1/auth/login", content);
+            Assert.NotEqual(HttpStatusCode.TooManyRequests, response.StatusCode);
+        }
+
+        using var finalContent = new StringContent("{}", Encoding.UTF8, "application/json");
+        var limitedResponse = await client.PostAsync("/api/v1/auth/login", finalContent);
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, limitedResponse.StatusCode);
+
+        var protectedResponse = await client.GetAsync("/api/v1/protected");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, protectedResponse.StatusCode);
     }
 
     private sealed record HealthResponse(string Status);

@@ -16,8 +16,6 @@ public sealed class LdapOptions
 
     public string ServiceAccountUsername { get; set; } = string.Empty;
 
-    public string ServiceAccountPassword { get; set; } = string.Empty;
-
     public string ServiceAccountPasswordFile { get; set; } = @"C:\ProgramData\LabAuthServer\Secrets\ldap-service-account-password.dpapi";
 
     public bool UseLdaps { get; set; } = true;
