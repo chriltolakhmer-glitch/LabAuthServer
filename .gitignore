@@ -1,0 +1,39 @@
+# .NET / Build
+bin/
+obj/
+.dotnet-cli/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.rsuser
+
+# NuGet
+.nuget-packages/
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+
+# Local configuration / secrets
+appsettings.Local.json
+appsettings.Development.json
+secrets.json
+
+# Certificates / private keys
+*.pfx
+*.p12
+*.key
+
+# Logs
+*.log
+logs/
+
+# Publish output
+publish/
+
+# OS
+Thumbs.db
+.DS_Store

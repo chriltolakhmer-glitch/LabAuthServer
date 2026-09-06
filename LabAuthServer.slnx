@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/LabAuthServer.Api/LabAuthServer.Api.csproj" />
+  <Project Path="src/LabAuthServer.Application/LabAuthServer.Application.csproj" />
+  <Project Path="src/LabAuthServer.Domain/LabAuthServer.Domain.csproj" />
+  <Project Path="src/LabAuthServer.Infrastructure/LabAuthServer.Infrastructure.csproj" />
+  <Project Path="tests/LabAuthServer.IntegrationTests/LabAuthServer.IntegrationTests.csproj" />
+  <Project Path="tests/LabAuthServer.UnitTests/LabAuthServer.UnitTests.csproj" />
+</Solution>
