@@ -1,3 +1,7 @@
+# Historical Architecture Decision Record
+
+> This record documents the Phase 4 approval history. It is not current implementation guidance; current behavior is documented in `docs/Project_Status.md` and `docs/Validation_Status.md`.
+
 # Phase 4 Architect Approval Record
 
 **Status:** APPROVED  

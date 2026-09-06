@@ -8,7 +8,7 @@
 - SQL Server instance validated: default `MSSQLSERVER` at `localhost`.
 - Database: `LabAuthServer`.
 - Application connection uses Windows Authentication and contains no SQL username/password.
-- Application identity: inherited IIS `ApplicationPoolIdentity`, mapped as `IIS APPPOOL\LabAuthServerAppPool`.
+- Application identity: inherited IIS `ApplicationPoolIdentity`, mapped as `<IIS_APP_POOL_IDENTITY>`.
 - Application role: `LabAuthServer_AuditWriter`.
 - Granted permission: `EXECUTE` on `Audit.usp_WriteAuditEvent` only.
 
@@ -37,7 +37,7 @@ The proposed 12-month online retention remains deferred. Archive destination, le
 
 ## Security Boundaries
 
-IIS bindings and application-pool identity were not changed. The deployed `C:\Apps\LabAuthServer\Current` directory was not modified. DPAPI contents and certificate private keys were not accessed or exported. Deployment and IIS restart were not performed.
+IIS bindings and application-pool identity were not changed. The deployed `<DEPLOYMENT_PATH>` directory was not modified. DPAPI contents and certificate private keys were not accessed or exported. Deployment and IIS restart were not performed.
 
 ## Validation Record
 

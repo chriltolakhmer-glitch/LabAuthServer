@@ -4,7 +4,7 @@
 
 The verified end-to-end validation for Phase 17 produced the following results:
 
-- fresh `test.itd@lab.local` login: `200 OK`
+- fresh `<TEST_USER>` login: `200 OK`
 - fresh JWT issued successfully
 - authenticated call to `/api/v1/protected`: `200 OK`
 - anonymous `/api/v1/protected`: `401 Unauthorized`

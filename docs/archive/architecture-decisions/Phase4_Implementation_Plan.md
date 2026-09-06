@@ -1,7 +1,11 @@
+# Historical Implementation Plan
+
+> This plan records the Phase 4 implementation history. It is preserved for traceability and is not authoritative for current behavior.
+
 # Phase 4 Implementation Plan
 
 **Status:** Historical implementation plan; approved implementation slices are present in the repository
-**Phase:** Phase 4 — Token & Authorization  
+**Phase:** Phase 4 â€” Token & Authorization  
 **Authority:** `docs/Phase4_Architect_Approval_Record.md`  
 **Design basis:** `docs/Token_and_Authorization_Design.md`  
 **Date:** 2026-08-31
@@ -102,7 +106,7 @@ No circular dependency, dependency-direction change, new production project, or 
 
 Phase 3 is complete and must remain unchanged:
 
-- Login accepts a UPN in the configured `lab.local` domain.
+- Login accepts a UPN in the configured `<DOMAIN>` domain.
 - Authentication uses direct LDAP bind over LDAPS/TCP 636.
 - LDAPv3 is required.
 - Normal platform certificate validation is used; no certificate bypass exists.
@@ -472,76 +476,76 @@ Creating runtime test keys is test setup, not creation of a production signing k
 
 ## 18. Implementation Order with Small, Independently Verifiable Steps
 
-### Step 1 — Freeze and capture Phase 3 contract
+### Step 1 â€” Freeze and capture Phase 3 contract
 
 Document the unchanged authentication inputs, outputs, error categories, HTTPS requirement, and LDAPS boundary in tests.  
 **Verification:** Existing full unit/integration suite; no source behavior changes.
 
-### Step 2 — Define Application token contracts
+### Step 2 â€” Define Application token contracts
 
 Add token response, claim-input models, `ITokenService`, `ITokenSigningService`, and authorization mapping contracts.  
 **Verification:** Application build and focused unit tests for models and interfaces.
 
-### Step 3 — Add non-secret token configuration models
+### Step 3 â€” Add non-secret token configuration models
 
 Define issuer, audience, lifetime, clock-skew, algorithm, `kid`, claim-size, policy, and mapping settings with fail-closed validation.  
 **Verification:** Configuration unit tests for valid, missing, invalid, and oversized values.
 
-### Step 4 — Implement isolated claim construction
+### Step 4 â€” Implement isolated claim construction
 
 Build exact registered claims, approved subject fallback, bounded application claims, and prohibited-data tests.  
 **Verification:** Focused claim unit tests; no LDAP/network/key-store dependency.
 
-### Step 5 — Implement RSA signing abstraction with runtime test keys
+### Step 5 â€” Implement RSA signing abstraction with runtime test keys
 
 Implement Infrastructure signing and protected-key provider boundaries. Do not hard-code or generate production keys.  
 **Verification:** Signing unit tests with runtime keys, algorithm and `kid` checks.
 
-### Step 6 — Implement initial key selection and rotation overlap
+### Step 6 â€” Implement initial key selection and rotation overlap
 
 Support active key selection, public-key validation material, previous-key overlap until token expiry, unknown-key rejection, and emergency replacement hooks.  
 **Verification:** Key rotation tests using runtime fixtures.
 
-### Step 7 — Implement approved AD-group mapping
+### Step 7 â€” Implement approved AD-group mapping
 
 Read the versioned non-secret allowlist, map approved groups to application roles, reject implicit nesting, bound group data, and fail closed.  
 **Verification:** Mapping unit tests without live AD or a database.
 
-### Step 8 — Implement Application token issuance
+### Step 8 â€” Implement Application token issuance
 
 Orchestrate Phase 3 success into claim construction and RSA signing. Preserve all Phase 3 failures and avoid ordinary request-time AD revalidation.  
 **Verification:** Application service tests with faked authentication, mapping, and signer services.
 
-### Step 9 — Change the login success response
+### Step 9 â€” Change the login success response
 
 Update `AuthController` to return access token, token type, and expiration metadata only. Keep login public and preserve HTTPS/error behavior.  
 **Verification:** Controller/API tests with fake Application services; assert no password or unnecessary identity data.
 
-### Step 10 — Register JWT validation at the API boundary
+### Step 10 â€” Register JWT validation at the API boundary
 
 Add bearer-token validation only after confirming required capabilities are available without an unapproved package.  
 **Verification:** Token validation integration tests for signature, issuer, audience, algorithm, time, size, and `kid`.
 
-### Step 11 — Add named authorization policies and default deny
+### Step 11 â€” Add named authorization policies and default deny
 
 Register approved roles, group mappings, named policies, explicit public endpoints, and standard 401/403 responses.  
 **Verification:** Authorization integration tests for allowed, denied, anonymous, unknown-group, and missing-claim cases.
 
-### Step 12 — Complete deployment/key operational configuration
+### Step 12 â€” Complete deployment/key operational configuration
 
 Bind approved non-secret settings to the external key-storage boundary, document monitoring, ownership, rotation, incident response, and rollback.  
 **Verification:** Startup/configuration tests and deployment-readiness review; no secrets or keys committed.
 
-### Step 13 — Full regression and acceptance verification
+### Step 13 â€” Full regression and acceptance verification
 
 Run the complete solution checks, security tests, package/reference audit, and documentation/status review.  
 **Verification:** `dotnet restore`, `dotnet build LabAuthServer.slnx`, and `dotnet test LabAuthServer.slnx`.
 
 ### Implementation Sequence
 
-`Step 1 → Step 2 → Step 3 → Step 4 → Step 5 → Step 6 → Step 7 → Step 8 → Step 9 → Step 10 → Step 11 → Step 12 → Step 13`
+`Step 1 â†’ Step 2 â†’ Step 3 â†’ Step 4 â†’ Step 5 â†’ Step 6 â†’ Step 7 â†’ Step 8 â†’ Step 9 â†’ Step 10 â†’ Step 11 â†’ Step 12 â†’ Step 13`
 
-A step must not begin until the previous step’s focused verification passes. Any need for a new package, project reference, Phase 3 change, database, or architectural deviation stops the sequence for separate approval.
+A step must not begin until the previous stepâ€™s focused verification passes. Any need for a new package, project reference, Phase 3 change, database, or architectural deviation stops the sequence for separate approval.
 
 ## 19. Files Expected to Be Created
 
@@ -589,12 +593,12 @@ An exact file may be consolidated or split during implementation only where resp
 
 These are the only expected existing-file modifications for the approved implementation slices:
 
-- `src/LabAuthServer.Api/Controllers/AuthController.cs` — return the approved token response through `ITokenService`.
-- `src/LabAuthServer.Api/Program.cs` — compose approved authentication/authorization middleware and policies.
-- `src/LabAuthServer.Api/Extensions/ActiveDirectoryOptionsExtensions.cs` — register approved token, signing, mapping, and policy services if this existing composition extension remains the correct boundary.
-- `src/LabAuthServer.Api/appsettings.json` — add non-secret approved baseline configuration only if configuration is intentionally kept there.
-- `src/LabAuthServer.Api/appsettings.Development.json` — add non-secret development overrides only if required.
-- `tests/LabAuthServer.IntegrationTests/HealthEndpointTests.cs` — only if public endpoint policy behavior requires an assertion update.
+- `src/LabAuthServer.Api/Controllers/AuthController.cs` â€” return the approved token response through `ITokenService`.
+- `src/LabAuthServer.Api/Program.cs` â€” compose approved authentication/authorization middleware and policies.
+- `src/LabAuthServer.Api/Extensions/ActiveDirectoryOptionsExtensions.cs` â€” register approved token, signing, mapping, and policy services if this existing composition extension remains the correct boundary.
+- `src/LabAuthServer.Api/appsettings.json` â€” add non-secret approved baseline configuration only if configuration is intentionally kept there.
+- `src/LabAuthServer.Api/appsettings.Development.json` â€” add non-secret development overrides only if required.
+- `tests/LabAuthServer.IntegrationTests/HealthEndpointTests.cs` â€” only if public endpoint policy behavior requires an assertion update.
 - Existing test project files only if a required already-approved project reference is discovered; no such change is currently planned.
 
 Phase 3 LDAP files, infrastructure project files, solution files, and package manifests are not expected to change.

@@ -35,7 +35,7 @@ The process was stopped after validation. IIS was not used.
 ## Protected-boundary verification
 
 - IIS deployment: not performed.
-- `C:\Apps\LabAuthServer\Current`: not modified.
+- `<DEPLOYMENT_PATH>`: not modified.
 - IIS configuration: not modified.
 - AD/LDAP configuration: not modified.
 - Certificate configuration: not modified.

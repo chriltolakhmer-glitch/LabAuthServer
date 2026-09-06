@@ -1,6 +1,10 @@
-# Token and Authorization Design — Phase 4
+# Historical Design Document
 
-**Status:** APPROVED — IMPLEMENTATION AUTHORIZED  
+> This document records the Phase 4 design baseline. It predates the current implementation and is preserved for traceability. See `docs/JWT.md`, `docs/Authorization.md`, and `docs/Validation_Status.md` for current behavior.
+
+# Token and Authorization Design â€” Phase 4
+
+**Status:** APPROVED â€” IMPLEMENTATION AUTHORIZED  
 **Date:** 2026-08-31  
 **Prerequisite:** Phase 3 authentication remediation is complete and approved
 
@@ -10,7 +14,7 @@
 
 ## 1. Executive Summary
 
-Phase 3 authenticates a `user@lab.local` UPN against Active Directory over LDAPS/TCP 636. Phase 4 defines the approved decisions for issuing an access token after successful authentication and protecting future API resources with authorization policies.
+Phase 3 authenticates a `user@<DOMAIN>` UPN against Active Directory over LDAPS/TCP 636. Phase 4 defines the approved decisions for issuing an access token after successful authentication and protecting future API resources with authorization policies.
 
 The approved direction is a short-lived signed JWT access token issued by LabAuthServer after successful LDAP authentication. The token contract, signing algorithm, key lifecycle, claims, refresh behavior, revocation model, and authorization mapping are defined by the Architect Approval Record.
 
@@ -48,7 +52,7 @@ Phase 4 implementation may proceed according to the approved Architect Approval 
 
 1. The client submits `POST /api/v1/auth/login` over HTTPS.
 2. The API validates the login request shape.
-3. Phase 3 validates that the username is a UPN in the configured `lab.local` domain.
+3. Phase 3 validates that the username is a UPN in the configured `<DOMAIN>` domain.
 4. Infrastructure performs a direct LDAP bind using the supplied UPN and password.
 5. The bind uses LDAPv3 over LDAPS/TCP 636 with normal platform certificate validation.
 6. Passwords are not stored, returned, or logged.
@@ -499,67 +503,67 @@ The following 49 approved decisions are grouped by subject and remain individual
 
 ### Token Contract and Trust (1-9)
 
-1. **APPROVED — USE RECOMMENDATION:** Select JWT bearer tokens or opaque access tokens. **Recommendation:** JWT for local validation if the API remains the issuer.
-2. **APPROVED — USE RECOMMENDATION:** Select a self-issued token model or external identity provider. **Recommendation:** Self-issued tokens for the current single-service scope.
-3. **APPROVED — USE RECOMMENDATION:** Select the canonical `iss` value. **Recommendation:** A stable HTTPS issuer identifier owned by LabAuthServer.
-4. **APPROVED — USE RECOMMENDATION:** Decide whether the issuer is environment-specific. **Recommendation:** Use distinct issuer values per deployment environment.
-5. **APPROVED — USE RECOMMENDATION:** Select the `aud` identifier. **Recommendation:** One stable audience for the LabAuthServer API.
-6. **APPROVED — USE RECOMMENDATION:** Decide whether multiple audiences are supported. **Recommendation:** Reject multiple audiences initially.
-7. **APPROVED — USE RECOMMENDATION:** Select the `sub` identifier. **Recommendation:** A stable directory object identifier when available; otherwise normalized UPN.
-8. **APPROVED — USE RECOMMENDATION:** Define subject case and normalization rules. **Recommendation:** Normalize UPN comparison case-insensitively and preserve no sensitive directory data.
-9. **APPROVED — USE RECOMMENDATION:** Decide whether identity claims are revalidated against AD after issuance. **Recommendation:** Do not revalidate for ordinary requests; rely on short token lifetime unless risk requires otherwise.
+1. **APPROVED â€” USE RECOMMENDATION:** Select JWT bearer tokens or opaque access tokens. **Recommendation:** JWT for local validation if the API remains the issuer.
+2. **APPROVED â€” USE RECOMMENDATION:** Select a self-issued token model or external identity provider. **Recommendation:** Self-issued tokens for the current single-service scope.
+3. **APPROVED â€” USE RECOMMENDATION:** Select the canonical `iss` value. **Recommendation:** A stable HTTPS issuer identifier owned by LabAuthServer.
+4. **APPROVED â€” USE RECOMMENDATION:** Decide whether the issuer is environment-specific. **Recommendation:** Use distinct issuer values per deployment environment.
+5. **APPROVED â€” USE RECOMMENDATION:** Select the `aud` identifier. **Recommendation:** One stable audience for the LabAuthServer API.
+6. **APPROVED â€” USE RECOMMENDATION:** Decide whether multiple audiences are supported. **Recommendation:** Reject multiple audiences initially.
+7. **APPROVED â€” USE RECOMMENDATION:** Select the `sub` identifier. **Recommendation:** A stable directory object identifier when available; otherwise normalized UPN.
+8. **APPROVED â€” USE RECOMMENDATION:** Define subject case and normalization rules. **Recommendation:** Normalize UPN comparison case-insensitively and preserve no sensitive directory data.
+9. **APPROVED â€” USE RECOMMENDATION:** Decide whether identity claims are revalidated against AD after issuance. **Recommendation:** Do not revalidate for ordinary requests; rely on short token lifetime unless risk requires otherwise.
 
 ### Claims and Time (10-18)
 
-10. **APPROVED — USE RECOMMENDATION:** Select registered claims. **Recommendation:** `iss`, `aud`, `sub`, `iat`, and `exp`; add `nbf` only if needed.
-11. **APPROVED — USE RECOMMENDATION:** Select application claim names and formats. **Recommendation:** Use standard `role` and `scope` names only when their models are approved.
-12. **APPROVED — USE RECOMMENDATION:** Select the maximum claim and token size. **Recommendation:** Use a small bounded allowlist with an explicit maximum.
-13. **APPROVED — USE RECOMMENDATION:** Decide whether `jti` is issued. **Recommendation:** Omit it for stateless revocation; require it for a denylist model.
-14. **APPROVED — USE RECOMMENDATION:** Decide whether `role` claims are issued. **Recommendation:** Issue only approved application roles.
-15. **APPROVED — USE RECOMMENDATION:** Decide whether `scope`, `groups`, or display claims are issued. **Recommendation:** Issue only the minimum approved claim type; never raw LDAP data.
-16. **APPROVED — USE RECOMMENDATION:** Select access-token lifetime. **Recommendation:** Short-lived production tokens with separately approved environment values.
-17. **APPROVED — USE RECOMMENDATION:** Select clock-skew tolerance. **Recommendation:** A small bounded tolerance, such as five minutes.
-18. **APPROVED — USE RECOMMENDATION:** Define deployment time synchronization. **Recommendation:** Require synchronized UTC host clocks.
+10. **APPROVED â€” USE RECOMMENDATION:** Select registered claims. **Recommendation:** `iss`, `aud`, `sub`, `iat`, and `exp`; add `nbf` only if needed.
+11. **APPROVED â€” USE RECOMMENDATION:** Select application claim names and formats. **Recommendation:** Use standard `role` and `scope` names only when their models are approved.
+12. **APPROVED â€” USE RECOMMENDATION:** Select the maximum claim and token size. **Recommendation:** Use a small bounded allowlist with an explicit maximum.
+13. **APPROVED â€” USE RECOMMENDATION:** Decide whether `jti` is issued. **Recommendation:** Omit it for stateless revocation; require it for a denylist model.
+14. **APPROVED â€” USE RECOMMENDATION:** Decide whether `role` claims are issued. **Recommendation:** Issue only approved application roles.
+15. **APPROVED â€” USE RECOMMENDATION:** Decide whether `scope`, `groups`, or display claims are issued. **Recommendation:** Issue only the minimum approved claim type; never raw LDAP data.
+16. **APPROVED â€” USE RECOMMENDATION:** Select access-token lifetime. **Recommendation:** Short-lived production tokens with separately approved environment values.
+17. **APPROVED â€” USE RECOMMENDATION:** Select clock-skew tolerance. **Recommendation:** A small bounded tolerance, such as five minutes.
+18. **APPROVED â€” USE RECOMMENDATION:** Define deployment time synchronization. **Recommendation:** Require synchronized UTC host clocks.
 
 ### Signing and Key Lifecycle (19-30)
 
-19. **APPROVED — USE RECOMMENDATION:** Select RSA or symmetric signing. **Recommendation:** RSA asymmetric signing.
-20. **APPROVED — USE RECOMMENDATION:** Select production key storage. **Recommendation:** An approved managed key store or HSM-backed store.
-21. **APPROVED — USE RECOMMENDATION:** Select the non-production key source. **Recommendation:** Runtime-generated test keys or an approved development key store.
-22. **APPROVED — USE RECOMMENDATION:** Select the private-key access identity. **Recommendation:** A dedicated least-privilege issuer identity.
-23. **APPROVED — USE RECOMMENDATION:** Define private-key protection controls. **Recommendation:** Non-exportable protected keys where supported and least-privilege access.
-24. **APPROVED — USE RECOMMENDATION:** Define key-access auditing. **Recommendation:** Audit access and failures without logging key material.
-25. **APPROVED — USE RECOMMENDATION:** Assign operational key ownership. **Recommendation:** Explicit platform/security ownership with documented runbooks.
-26. **APPROVED — USE RECOMMENDATION:** Define rotation frequency. **Recommendation:** A scheduled rotation interval shorter than the maximum key-risk window.
-27. **APPROVED — USE RECOMMENDATION:** Define rotation overlap duration. **Recommendation:** Retain the previous public key until all tokens it signed expire.
-28. **APPROVED — USE RECOMMENDATION:** Define emergency rotation and retirement. **Recommendation:** Support immediate key replacement and bounded public-key retirement.
-29. **APPROVED — USE RECOMMENDATION:** Define `kid` generation and uniqueness. **Recommendation:** Stable random non-secret identifiers unique within the issuer.
-30. **APPROVED — USE RECOMMENDATION:** Define `kid` publication and unknown-key behavior. **Recommendation:** Publish approved public keys and reject unknown identifiers.
+19. **APPROVED â€” USE RECOMMENDATION:** Select RSA or symmetric signing. **Recommendation:** RSA asymmetric signing.
+20. **APPROVED â€” USE RECOMMENDATION:** Select production key storage. **Recommendation:** An approved managed key store or HSM-backed store.
+21. **APPROVED â€” USE RECOMMENDATION:** Select the non-production key source. **Recommendation:** Runtime-generated test keys or an approved development key store.
+22. **APPROVED â€” USE RECOMMENDATION:** Select the private-key access identity. **Recommendation:** A dedicated least-privilege issuer identity.
+23. **APPROVED â€” USE RECOMMENDATION:** Define private-key protection controls. **Recommendation:** Non-exportable protected keys where supported and least-privilege access.
+24. **APPROVED â€” USE RECOMMENDATION:** Define key-access auditing. **Recommendation:** Audit access and failures without logging key material.
+25. **APPROVED â€” USE RECOMMENDATION:** Assign operational key ownership. **Recommendation:** Explicit platform/security ownership with documented runbooks.
+26. **APPROVED â€” USE RECOMMENDATION:** Define rotation frequency. **Recommendation:** A scheduled rotation interval shorter than the maximum key-risk window.
+27. **APPROVED â€” USE RECOMMENDATION:** Define rotation overlap duration. **Recommendation:** Retain the previous public key until all tokens it signed expire.
+28. **APPROVED â€” USE RECOMMENDATION:** Define emergency rotation and retirement. **Recommendation:** Support immediate key replacement and bounded public-key retirement.
+29. **APPROVED â€” USE RECOMMENDATION:** Define `kid` generation and uniqueness. **Recommendation:** Stable random non-secret identifiers unique within the issuer.
+30. **APPROVED â€” USE RECOMMENDATION:** Define `kid` publication and unknown-key behavior. **Recommendation:** Publish approved public keys and reject unknown identifiers.
 
 ### Issuance and Authorization (31-39)
 
-31. **APPROVED — USE RECOMMENDATION:** Select the login token response contract. **Recommendation:** Return an access token, token type, and expiration metadata only.
-32. **APPROVED — USE RECOMMENDATION:** Select token issuance location. **Recommendation:** Application owns the use case; Infrastructure signs behind an abstraction.
-33. **APPROVED — USE RECOMMENDATION:** Select token validation location. **Recommendation:** API authentication middleware validates tokens at the HTTP boundary.
-34. **APPROVED — USE RECOMMENDATION:** Define the role catalogue and ownership. **Recommendation:** Application-owned roles with explicit names and default deny.
-35. **APPROVED — USE RECOMMENDATION:** Decide whether AD groups are an authorization source. **Recommendation:** Use only an explicit allowlist of approved groups.
-36. **APPROVED — USE RECOMMENDATION:** Define nested-group handling. **Recommendation:** Reject implicit nested expansion until explicitly supported and tested.
-37. **APPROVED — USE RECOMMENDATION:** Define disabled-account and membership-change behavior. **Recommendation:** Enforce account state at authentication and bound stale-token exposure with short lifetimes.
-38. **APPROVED — USE RECOMMENDATION:** Define group-size handling. **Recommendation:** Bound group claims and fail closed when the approved limit is exceeded.
-39. **APPROVED — USE RECOMMENDATION:** Select roles, scopes, groups, custom claims, or a combination. **Recommendation:** Application roles mapped from approved groups; add scopes only for a demonstrated need.
-40. **APPROVED — USE RECOMMENDATION:** Define policy model and default-deny behavior. **Recommendation:** Named API policies with default deny for protected endpoints.
-41. **APPROVED — USE RECOMMENDATION:** Define anonymous endpoint rules and authorization failure responses. **Recommendation:** Explicitly allow only health/login endpoints and return standard 401/403 responses.
-42. **APPROVED — USE RECOMMENDATION:** Select group-to-role mapping source and format. **Recommendation:** Versioned non-secret configuration allowlist initially.
-43. **APPROVED — USE RECOMMENDATION:** Define mapping change propagation and caching. **Recommendation:** Apply changes on token issuance; avoid long-lived authorization caches initially.
+31. **APPROVED â€” USE RECOMMENDATION:** Select the login token response contract. **Recommendation:** Return an access token, token type, and expiration metadata only.
+32. **APPROVED â€” USE RECOMMENDATION:** Select token issuance location. **Recommendation:** Application owns the use case; Infrastructure signs behind an abstraction.
+33. **APPROVED â€” USE RECOMMENDATION:** Select token validation location. **Recommendation:** API authentication middleware validates tokens at the HTTP boundary.
+34. **APPROVED â€” USE RECOMMENDATION:** Define the role catalogue and ownership. **Recommendation:** Application-owned roles with explicit names and default deny.
+35. **APPROVED â€” USE RECOMMENDATION:** Decide whether AD groups are an authorization source. **Recommendation:** Use only an explicit allowlist of approved groups.
+36. **APPROVED â€” USE RECOMMENDATION:** Define nested-group handling. **Recommendation:** Reject implicit nested expansion until explicitly supported and tested.
+37. **APPROVED â€” USE RECOMMENDATION:** Define disabled-account and membership-change behavior. **Recommendation:** Enforce account state at authentication and bound stale-token exposure with short lifetimes.
+38. **APPROVED â€” USE RECOMMENDATION:** Define group-size handling. **Recommendation:** Bound group claims and fail closed when the approved limit is exceeded.
+39. **APPROVED â€” USE RECOMMENDATION:** Select roles, scopes, groups, custom claims, or a combination. **Recommendation:** Application roles mapped from approved groups; add scopes only for a demonstrated need.
+40. **APPROVED â€” USE RECOMMENDATION:** Define policy model and default-deny behavior. **Recommendation:** Named API policies with default deny for protected endpoints.
+41. **APPROVED â€” USE RECOMMENDATION:** Define anonymous endpoint rules and authorization failure responses. **Recommendation:** Explicitly allow only health/login endpoints and return standard 401/403 responses.
+42. **APPROVED â€” USE RECOMMENDATION:** Select group-to-role mapping source and format. **Recommendation:** Versioned non-secret configuration allowlist initially.
+43. **APPROVED â€” USE RECOMMENDATION:** Define mapping change propagation and caching. **Recommendation:** Apply changes on token issuance; avoid long-lived authorization caches initially.
 
 ### Refresh, Revocation, and Operations (44-49)
 
-44. **APPROVED — USE RECOMMENDATION:** Decide whether refresh tokens are required. **Recommendation:** No refresh tokens initially; require reauthentication.
-45. **APPROVED — USE RECOMMENDATION:** If refresh tokens are later approved, define storage, rotation, reuse detection, revocation, transport, expiration, and client requirements. **Recommendation:** Separate design and explicit approval before implementation.
-46. **APPROVED — USE RECOMMENDATION:** Select token revocation and emergency invalidation. **Recommendation:** Short-lived stateless tokens initially, with documented emergency key rotation.
-47. **APPROVED — USE RECOMMENDATION:** Decide whether stateful revocation storage is permitted. **Recommendation:** Defer stateful storage until a concrete requirement exists.
-48. **APPROVED — USE RECOMMENDATION:** Approve configuration schema, environment overrides, validation, startup behavior, secret-store integration, deployment topology, key distribution, monitoring, and incident response. **Recommendation:** External non-secret configuration plus approved key storage, fail closed on invalid security configuration, and document operational ownership.
-49. **APPROVED — USE RECOMMENDATION:** Approve test-key strategy, rotation/revocation fixtures, live-directory boundaries, and any new package, project reference, middleware, or architecture change. **Recommendation:** Runtime test keys, isolated tests by default, no live DC dependency, and no new dependency or architectural change without separate approval.
+44. **APPROVED â€” USE RECOMMENDATION:** Decide whether refresh tokens are required. **Recommendation:** No refresh tokens initially; require reauthentication.
+45. **APPROVED â€” USE RECOMMENDATION:** If refresh tokens are later approved, define storage, rotation, reuse detection, revocation, transport, expiration, and client requirements. **Recommendation:** Separate design and explicit approval before implementation.
+46. **APPROVED â€” USE RECOMMENDATION:** Select token revocation and emergency invalidation. **Recommendation:** Short-lived stateless tokens initially, with documented emergency key rotation.
+47. **APPROVED â€” USE RECOMMENDATION:** Decide whether stateful revocation storage is permitted. **Recommendation:** Defer stateful storage until a concrete requirement exists.
+48. **APPROVED â€” USE RECOMMENDATION:** Approve configuration schema, environment overrides, validation, startup behavior, secret-store integration, deployment topology, key distribution, monitoring, and incident response. **Recommendation:** External non-secret configuration plus approved key storage, fail closed on invalid security configuration, and document operational ownership.
+49. **APPROVED â€” USE RECOMMENDATION:** Approve test-key strategy, rotation/revocation fixtures, live-directory boundaries, and any new package, project reference, middleware, or architecture change. **Recommendation:** Runtime test keys, isolated tests by default, no live DC dependency, and no new dependency or architectural change without separate approval.
 
 ---
 
@@ -576,4 +580,4 @@ Implementation may proceed according to all approved decisions in Section 18:
 - Do not modify project references or dependency direction.
 - Do not modify the Phase 3 LDAP authentication behavior.
 
-**Status: DESIGN APPROVED — IMPLEMENTATION AUTHORIZED; IMPLEMENTATION NOT YET COMPLETED**
+**Status: DESIGN APPROVED â€” IMPLEMENTATION AUTHORIZED; IMPLEMENTATION NOT YET COMPLETED**

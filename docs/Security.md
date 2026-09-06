@@ -1,59 +1,26 @@
 # Security
 
-## Security controls
+## Implemented controls
 
-LabAuthServer implements a layered security model built around the following controls:
+- LDAPS-only directory communication over TCP 636.
+- LDAP filter escaping and configured-domain UPN validation.
+- Windows DPAPI-backed service-account credential loading.
+- RSA certificate-store signing with algorithm, issuer, audience, lifetime, key-ID, and claim validation.
+- Default authenticated-user policy and explicit role policies.
+- Correlation IDs, minimized audit events, and generic ProblemDetails responses.
+- Typed stored-procedure audit writes with sensitive JSON rejection.
+- Startup validation for Active Directory, token, authorization, and audit configuration.
 
-- LDAPS-only directory access over TCP 636
-- service account password stored outside source control in a DPAPI-protected file
-- certificate-backed RSA signing keys in the Windows certificate store
-- JWT validation with issuer, audience, expiry, signing key, and role enforcement
-- default deny authorization policy
-- correlation IDs and auditable failures
-- sanitized ProblemDetails responses
+## Protected data boundaries
 
-## Secret and credential handling
+Passwords, bearer tokens, authorization headers, private keys, DPAPI contents, raw LDAP responses, and stack traces must not be placed in source control, logs, SQL audit details, or API responses. Use `<SECRET_FILE>`, `<THUMBPRINT>`, `<CONNECTION_STRING>`, and `<USERNAME>` placeholders in examples.
 
-### LDAP service account password
+The repository does not implement MFA, federation, refresh tokens, stateful revocation, rate limiting, brute-force protection, or audit retention automation.
 
-The AD service-account credential is not stored in source code or application settings. The runtime reads it from the Windows DPAPI-protected file at:
+## Operational responsibilities
 
-`C:\ProgramData\LabAuthServer\Secrets\ldap-service-account-password.dpapi`
+The target Windows identity must have only the access required to read the protected DPAPI file, use the signing certificate private key, and execute the audit writer procedure. Environment-specific identity and permission assignments belong in an approved private runbook, not public documentation.
 
-The application is expected to run under a Windows identity with permission to read this file. The secret is decrypted only inside the service-account credential provider and is never returned in logs or API responses.
+## Verification boundary
 
-### Signing certificate and keys
-
-The JWT signing certificate remains in the certificate store under the configured `LocalMachine\My` location. The software resolves the certificate by thumbprint and uses its RSA private key only when issuing tokens. The repository contains no private key material and no certificate export artifacts.
-
-### SQL access
-
-The application uses Windows Integrated Security with the `LabAuthServer` database. The runtime identity is the IIS app pool identity mapped to the SQL role `LabAuthServer_AuditWriter` with `EXECUTE` only on `Audit.usp_WriteAuditEvent`.
-
-## Fail-closed design
-
-The application is intentionally fail-closed in the following cases:
-
-- missing or unreadable DPAPI secret
-- invalid AD configuration
-- non-matching UPN domain
-- missing or invalid JWT signing configuration
-- invalid or missing required claims
-- unknown or malformed AD group mapping
-- invalid or unauthorized authorization result
-
-In each case the API returns a safe error and, where applicable, records an audit event.
-
-## Sensitive data handling rules
-
-The project explicitly avoids storing or returning:
-
-- passwords
-- JWTs
-- DPAPI contents
-- certificate private keys
-- service-account secrets
-- raw LDAP details
-- authorization headers
-
-This behavior is enforced by the validation and middleware layers and is covered in the automated tests.
+Automated tests cover security behavior and sensitive-data rejection. They do not prove production certificate, DPAPI, AD, SQL identity, or IIS configuration. See [Validation Status](Validation_Status.md) for the current evidence boundary.

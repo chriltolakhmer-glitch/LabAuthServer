@@ -8,6 +8,10 @@
 - Do not silently change project requirements.
 - If a requirement conflicts with the architecture or coding standard, stop and report the conflict instead of guessing.
 
+## Current implementation
+
+The repository currently implements LDAP/LDAPS authentication, RSA-signed JWT issuance and validation, AD group-to-role mapping, policy authorization, correlation/error middleware, and SQL Server audit persistence. Treat `docs/Project_Status.md` and `docs/Validation_Status.md` as the current documentation authority. Historical phase records under `docs/archive/` may describe earlier states and are not implementation guidance.
+
 ## Required reading before changes
 
 Before making any change, read these project-level instructions:

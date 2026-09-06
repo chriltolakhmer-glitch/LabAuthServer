@@ -1,84 +1,39 @@
-# Operations and Handover
+# Operations
 
-## Operational checklist
+## Pre-deployment requirements
 
-### Pre-deployment
+Confirm that the target environment provides:
 
-- confirm `.NET 10` is installed
-- confirm IIS site and app pool exist
-- confirm `Current` directory is present
-- confirm `Build` and `Releases` directories are writable
-- confirm the DPAPI secret file exists and the runtime identity can read it
-- confirm the certificate is installed in the configured store
-- confirm SQL server connectivity and permission mapping
-- verify the release package is staged and hash-checked
+- .NET 10 ASP.NET Core Hosting Bundle.
+- IIS site and application pool configuration.
+- An approved HTTPS certificate and accessible RSA private key.
+- LDAPS connectivity on TCP 636 with normal certificate validation.
+- A readable Windows DPAPI-protected service-account secret file at `<SECRET_FILE>`.
+- SQL connectivity through an approved `<CONNECTION_STRING>` and least-privilege application identity.
 
-### Deployment
+## Smoke checks
 
-- run `C:\Apps\LabAuthServer\Scripts\Deploy-LabAuthServerSafe.ps1`
-- permit the script to stage the release and validate parity
-- ensure app pool stop/start occurs only during the script workflow
-- confirm replacement copy matches the release package exactly
+After an authorized deployment:
 
-### Post-deployment
+- `GET /api/v1/health` returns `200`.
+- HTTP requests redirect to HTTPS where configured.
+- Anonymous `GET /api/v1/protected` returns `401`.
+- Correlation headers are canonical and returned on responses.
+- Approved audit events can be written through the stored procedure.
 
-- confirm the site is running
-- confirm the app pool is running
-- request the health endpoint over HTTPS
-- confirm anonymous access to the protected endpoint returns `401`
-- confirm login requests still require HTTPS
-- confirm SQL audit events are recorded when requests are made
+A valid real-user login should be tested only through the protected operational process. Do not place the identity or credential in source control, documentation, logs, or issue reports.
 
-### Rollback
+## Troubleshooting order
 
-- use the release backup stored under `Releases`
-- restore the prior `Current` directory state with the script rollback logic when validation fails
-- keep the backup until release verification is complete
+1. Check application startup and configuration-validation logs.
+2. Check HTTPS binding and certificate-store access.
+3. Check DPAPI file existence and runtime identity permissions without exposing its contents.
+4. Check LDAPS reachability, port 636, domain/UPN alignment, and search base.
+5. Check SQL connectivity and procedure-execution permissions.
+6. Check correlation IDs and safe audit-persistence diagnostics.
 
-### Authentication test
+## Rollback
 
-- POST a valid AD login to `/api/v1/auth/login` over HTTPS
-- confirm a JWT is issued
-- confirm the token contains the expected claims and `role`
-- confirm bearer authorization works against `/api/v1/protected`
+Use the approved deployment workflow to restore the last validated package. Database rollback must be handled by authorized database change control; do not delete audit history as an application rollback step.
 
-### Authorization test
-
-- anonymous protected call -> `401`
-- invalid token -> `401`
-- authenticated non-reader role -> `403` if not allowed by policy
-- Reader role -> `200`
-
-### Health test
-
-- `GET /api/v1/health` -> `200`
-- HTTP redirect to HTTPS should occur for non-HTTPS health requests
-
-## Release process
-
-The release process follows these steps:
-
-1. restore and build the solution in Release mode
-2. run the unit and integration test suites
-3. publish the API to a clean release directory
-4. verify the runtime package contents and hash parity
-5. create a versioned package under `Releases`
-6. run the safe deployment script against the target server
-7. validate health and authorization smoke tests
-8. keep the backup until the target release is confirmed stable
-
-## Final acceptance criteria
-
-The Phase 17 final acceptance criteria are satisfied by the validated production behavior observed in the project history:
-
-- HTTP 200 on fresh login
-- issued JWT successful
-- protected endpoint with valid token returns `200`
-- anonymous protected request returns `401`
-- malformed bearer token returns `401`
-- full suite passes at 173 tests with 0 failures
-- dependency vulnerability scan shows no advisories
-- IIS site and app pool remain started
-- safe deployment and current runtime parity checks pass
-
-The repository documentation must reflect only this verified result and must not claim features beyond the implemented boundary.
+Retention, archival, purge, and SQL Agent scheduling are not implemented by this repository.

@@ -16,7 +16,7 @@ Each feature begins with architect-approved requirements and acceptance criteria
 ## Planned work
 
 1. Define and approve configuration requirements and acceptance criteria.
-2. Define and approve the LDAPS connection-test design for `DC01.lab.local:636`.
+2. Define and approve the LDAPS connection-test design for `<LDAP_HOST>:636`.
 3. Implement the approved Active Directory integration in Infrastructure with Application abstractions.
 4. Define and approve authentication, token, authorization, database, and secrets designs before implementation.
 5. Implement each approved vertical slice with validation, error handling, API documentation, and relevant tests.

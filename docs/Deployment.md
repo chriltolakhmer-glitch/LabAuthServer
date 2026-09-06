@@ -1,60 +1,34 @@
-# Deployment and Operations
+# Deployment
 
-## IIS deployment
+## Deployment model
 
-The live production deployment is configured as follows:
+The API includes a file-system publish profile and is designed for Windows/IIS hosting with the .NET 10 ASP.NET Core Hosting Bundle. Deployment requires an approved HTTPS binding, external configuration, directory connectivity, certificate-store access, DPAPI access, and SQL permissions.
 
-- IIS site: `LabAuthServer`
-- application pool: `LabAuthServerAppPool`
-- app pool identity: `ApplicationPoolIdentity`
-- physical path: `C:\Apps\LabAuthServer\Current`
-- HTTPS binding: configured to the approved certificate for the site
-- ASP.NET Core hosting: .NET 10 ASP.NET Core hosting bundle required on the Windows server
+Use placeholders in environment-specific runbooks:
 
-The deployment keeps the live application under `Current` and uses staging and backup verification before any production replacement occurs.
+- `<IIS_SITE>`
+- `<IIS_APP_POOL>`
+- `<DEPLOYMENT_PATH>`
+- `<HOST>`
+- `<LDAP_HOST>`
+- `<DB_SERVER>`
+- `<SECRET_FILE>`
+- `<THUMBPRINT>`
 
-## Deployment package structure
+## Release flow
 
-The release package contains the runtime files required for the application and excludes source, tests, developer configuration, private keys, DPAPI files, and PDBs. Validation is performed against a fixed expected runtime-file count and a hash parity check.
+1. Restore and build the solution in Release mode.
+2. Run the unit and integration suites.
+3. Publish the API to a clean release directory.
+4. Validate the package contents and hashes.
+5. Stage the package and preserve the current deployment for rollback.
+6. Replace the application only after staging validation passes.
+7. Start the approved app pool and verify health and anonymous protected-resource behavior.
 
-The safe deployment script uses the following workflow:
+The safe deployment procedure is an operational workflow, not a source-code feature. Use the separately controlled deployment script and do not copy secret-bearing files into a release package.
 
-1. stage a validated release package in `C:\Apps\LabAuthServer\Staging`
-2. validate file parity and configuration safety
-3. create a rollback backup of the existing `Current` directory
-4. stop `LabAuthServerAppPool`
-5. replace `Current` with the staged runtime files
-6. validate the replacement against the source package
-7. start the app pool
-8. run health and authorization smoke checks
-9. leave the backup in `Releases` for rollback if needed
+## Current validation boundary
 
-## Safe deployment script
+The repository proves that the publish profile and deployment procedure exist. It does not independently prove that a current target IIS deployment, real AD identity, certificate private key, or DPAPI secret is available. See [Validation Status](Validation_Status.md).
 
-The implemented procedure is defined in:
-
-- `C:\Apps\LabAuthServer\Scripts\Deploy-LabAuthServerSafe.ps1`
-
-This script is designed to prevent the partial-copy problem by:
-
-- copying the release package into a staging directory first
-- checking expected runtime count and expected file hashes before production replacement
-- ensuring no development configuration or secret-bearing artifacts are present
-- stopping the app pool before replacing files
-- automatically restoring the previous `Current` directory if replacement validation fails
-- verifying the health endpoint and protected endpoint response codes after deployment
-
-## Rollback approach
-
-Rollback is performed by restoring the last valid `Current` backup from the `Releases` folder. The script explicitly verifies the backup before replacing the live directory and will restore the previous copy if the deployment validation fails.
-
-## Post-deployment validation
-
-The script checks:
-
-- IIS site state is `Started`
-- app pool state is `Started`
-- health endpoint returns `200`
-- anonymous access to `/api/v1/protected` returns `401`
-
-This confirms the site is serving the application and that the default authorization protection is active.
+Historical IIS and release evidence is preserved under `docs/archive/deployment-evidence/` and is not current deployment proof.

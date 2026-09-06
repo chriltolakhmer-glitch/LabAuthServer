@@ -188,7 +188,7 @@ dotnet build .\LabAuthServer.slnx -c Release --no-restore --nologo
 dotnet test .\LabAuthServer.slnx -c Release --no-build --nologo
 ```
 
-The unit suite isolates application and infrastructure seams. The integration suite exercises the ASP.NET Core request pipeline with the test host. Live AD credentials, private keys, and DPAPI contents are environment-bound and are not required to be placed in the repository.
+The unit suite isolates application and infrastructure seams. The integration suite exercises the ASP.NET Core request pipeline and selected infrastructure boundaries, including SQL audit behavior. Live AD credentials, private keys, and DPAPI contents are environment-bound and are not required to be placed in the repository.
 
 ### Run locally
 
@@ -239,11 +239,15 @@ LabAuthServer/
 │   ├── Authorization.md
 │   ├── AuditLogging.md
 │   ├── Configuration.md
+│   ├── Database.md
 │   ├── Deployment.md
 │   ├── JWT.md
 │   ├── Operations.md
+│   ├── Security.md
+│   ├── Testing.md
 │   ├── Troubleshooting.md
-│   └── Phase*.md
+│   ├── Validation_Status.md
+│   └── archive/
 ├── src/
 │   ├── LabAuthServer.Api/
 │   ├── LabAuthServer.Application/
@@ -267,11 +271,16 @@ LabAuthServer/
 - [JWT](docs/JWT.md)
 - [Audit logging](docs/AuditLogging.md)
 - [Configuration](docs/Configuration.md)
+- [Database](docs/Database.md)
 - [Deployment](docs/Deployment.md)
+- [Safe deployment procedure](docs/Safe_Deployment_Procedure.md)
 - [Operations](docs/Operations.md)
+- [Security](docs/Security.md)
+- [Testing](docs/Testing.md)
 - [Troubleshooting](docs/Troubleshooting.md)
-- [Phase 17 validation limitations](docs/Phase17_End_to_End_Validation.md)
+- [Validation status](docs/Validation_Status.md)
+- [Historical documentation archive](docs/archive/README.md)
 
 ## Security and validation notes
 
-No passwords, access tokens, private keys, or DPAPI secret contents belong in source control. The repository includes security-focused tests and documentation, but live directory authentication and certificate/DPAPI behavior depend on protected infrastructure. Review [docs/Phase17_End_to_End_Validation.md](docs/Phase17_End_to_End_Validation.md) and [docs/Phase18_FinalAcceptance.md](docs/Phase18_FinalAcceptance.md) for the recorded validation scope rather than assuming every deployment-bound scenario was exercised by the automated tests.
+No passwords, access tokens, private keys, or DPAPI secret contents belong in source control. The repository includes security-focused tests and documentation, but live directory authentication and certificate/DPAPI behavior depend on protected infrastructure. Review [Validation Status](docs/Validation_Status.md) for the authoritative evidence boundary; historical phase records are preserved under `docs/archive/`.

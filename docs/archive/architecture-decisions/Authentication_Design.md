@@ -1,4 +1,8 @@
-# Authentication Design — Phase 3
+# Historical Design Document
+
+> This document records the Phase 3 design and implementation history. It is preserved for traceability and is not authoritative for current behavior. See `docs/Authentication.md` and `docs/Validation_Status.md` for current documentation.
+
+# Authentication Design â€” Phase 3
 
 **Status:** Approved and implemented  
 **Date:** 2026-08-30  
@@ -16,11 +20,11 @@ This document defines the approved authentication architecture for LabAuthServer
 
 ### Current Foundation
 
-- ✅ LDAPS RootDSE connectivity verified (DC01.lab.local:636)
-- ✅ LdapOptions configuration in place
-- ✅ ILdapService infrastructure abstraction established
-- ✅ Certificate validation: platform default (Windows certificate store, no bypass)
-- ✅ Authentication requires LDAPS over TCP 636
+- âœ… LDAPS RootDSE connectivity verified (<LDAP_HOST>:636)
+- âœ… LdapOptions configuration in place
+- âœ… ILdapService infrastructure abstraction established
+- âœ… Certificate validation: platform default (Windows certificate store, no bypass)
+- âœ… Authentication requires LDAPS over TCP 636
 
 ### Constraints from Project Governance
 
@@ -36,12 +40,12 @@ From `AGENTS.md`:
 
 ### What This Phase Will NOT Include
 
-- ❌ Authorization (access control, role-based access, scope validation)
-- ❌ Password hashing/storage (authentication only, not persistence)
-- ❌ Multi-factor authentication (MFA)
-- ❌ Single sign-on (SSO) or federation
-- ❌ Session management or token persistence
-- ❌ Account lockout or brute-force protection
+- âŒ Authorization (access control, role-based access, scope validation)
+- âŒ Password hashing/storage (authentication only, not persistence)
+- âŒ Multi-factor authentication (MFA)
+- âŒ Single sign-on (SSO) or federation
+- âŒ Session management or token persistence
+- âŒ Account lockout or brute-force protection
 
 ---
 
@@ -50,17 +54,17 @@ From `AGENTS.md`:
 ### 2.1 High-Level Flow
 
 ```
-User → [Credentials] → API /api/v1/auth/login (POST)
-                         ↓
+User â†’ [Credentials] â†’ API /api/v1/auth/login (POST)
+                         â†“
                     Application Layer
                     (IAuthenticationService)
-                         ↓
+                         â†“
                     Infrastructure Layer
                     (LdapAuthenticationService)
-                         ↓
+                         â†“
                     LDAP over LDAPS
                     (Bind with user credentials)
-                         ↓
+                         â†“
                     Success: Return authentication result
                     Failure: Return error response
 ```
@@ -80,7 +84,7 @@ User → [Credentials] → API /api/v1/auth/login (POST)
 
 ```
 1. Client POST /api/v1/auth/login
-   Request: { "username": "user@lab.local", "password": "..." }
+   Request: { "username": "user@<DOMAIN>", "password": "..." }
    
 2. Api.Controllers.AuthController.Login()
    - Validate request (built-in model validation)
@@ -93,7 +97,7 @@ User → [Credentials] → API /api/v1/auth/login (POST)
    - Return AuthenticationResult (success or failure)
    
 4. Infrastructure.Services.LdapAuthenticationService (via ILdapService extension)
-   - Create LDAP connection to DC01.lab.local:636
+   - Create LDAP connection to <LDAP_HOST>:636
    - Attempt bind with provided credentials
    - Return success/failure to Application layer
    - Log result (no passwords in logs)
@@ -160,7 +164,7 @@ public sealed record AuthenticationResult
 public sealed record LoginRequest
 {
     /// <summary>
-    /// Username or email (e.g., "user@lab.local" or "CN=User,OU=People,DC=lab,DC=local")
+    /// Username or email (e.g., "user@<DOMAIN>" or "CN=User,OU=People,<BASE_DN>")
     /// </summary>
     [Required(ErrorMessage = "Username is required.")]
     [StringLength(
@@ -196,10 +200,10 @@ public sealed record LoginRequest
 
 **Error handling:**
 
-- Invalid credentials → "Authentication failed" (no "user not found" message)
-- LDAP server unavailable → "Authentication service unavailable"
-- Connection timeout → "Authentication request timed out"
-- LDAP protocol error → "Authentication error"
+- Invalid credentials â†’ "Authentication failed" (no "user not found" message)
+- LDAP server unavailable â†’ "Authentication service unavailable"
+- Connection timeout â†’ "Authentication request timed out"
+- LDAP protocol error â†’ "Authentication error"
 
 ### 3.4 Api Layer: AuthController
 
@@ -215,7 +219,7 @@ Content-Type: application/json
 
 Request:
 {
-  "username": "user@lab.local",
+  "username": "user@<DOMAIN>",
   "password": "password123"
 }
 
@@ -264,7 +268,7 @@ The alternatives below are deferred and are not part of Phase 3:
 - **Implementation:** Add method to `ILdapService` for user lookup
 
 **Option B: Assume UPN format (user@domain)**
-- User provides: `user@lab.local`
+- User provides: `user@<DOMAIN>`
 - System uses the UserPrincipalName directly
 - Performs bind
 - **Pro:** Simpler; no additional queries
@@ -272,13 +276,13 @@ The alternatives below are deferred and are not part of Phase 3:
 - **Implementation:** Parse and validate UPN in authentication service
 
 **Option C: Accept distinguished name directly**
-- User provides: `CN=User,OU=People,DC=lab,DC=local`
+- User provides: `CN=User,OU=People,<BASE_DN>`
 - System performs bind with provided DN
 - **Pro:** Most flexible
 - **Con:** Least user-friendly
 - **Implementation:** Minimal parsing
 
-**Approved:** Use Option B with a UPN in the configured domain (`user@lab.local`) and pass that UPN directly to the LDAP bind. No DN is fabricated and no DN lookup is performed.
+**Approved:** Use Option B with a UPN in the configured domain (`user@<DOMAIN>`) and pass that UPN directly to the LDAP bind. No DN is fabricated and no DN lookup is performed.
 
 ### 4.4 LDAP Bind Method
 
@@ -321,7 +325,7 @@ Typed failure categories are retained through the Application contract so the AP
 **Example log entry:**
 ```
 info: LabAuthServer.Infrastructure.Services.LdapAuthenticationService[0]
-      Authentication attempt for user@lab.local completed in 250ms: Success
+      Authentication attempt for user@<DOMAIN> completed in 250ms: Success
 ```
 
 ---
@@ -334,7 +338,7 @@ info: LabAuthServer.Infrastructure.Services.LdapAuthenticationService[0]
 
 **Approved tests:**
 - Authentication service tests use an Infrastructure LDAP client seam and do not contact a live DC.
-- Tests cover valid `lab.local` UPNs, invalid domains, credential forwarding, failure mapping, strict LDAPS configuration, and cancellation.
+- Tests cover valid `<DOMAIN>` UPNs, invalid domains, credential forwarding, failure mapping, strict LDAPS configuration, and cancellation.
 - Controller tests use a fake `IAuthenticationService` and cover typed HTTP status mapping and HTTPS enforcement.
 
 ### 6.2 Integration Tests
@@ -354,10 +358,10 @@ info: LabAuthServer.Infrastructure.Services.LdapAuthenticationService[0]
 From `appsettings.json`:
 ```json
 "ActiveDirectory": {
-  "Domain": "lab.local",
-  "Host": "DC01.lab.local",
+  "Domain": "<DOMAIN>",
+  "Host": "<LDAP_HOST>",
   "Port": 636,
-  "BaseDn": "DC=lab,DC=local",
+  "BaseDn": "<BASE_DN>",
   "UseLdaps": true,
   "ConnectionTimeout": "00:00:10"
 }
@@ -365,7 +369,7 @@ From `appsettings.json`:
 
 ### 7.2 Additional Configuration
 
-⚠️ **REQUIRES ARCHITECT APPROVAL:**
+âš ï¸ **REQUIRES ARCHITECT APPROVAL:**
 
 **Option A: No additional configuration**
 - Use existing `LdapOptions`
@@ -400,7 +404,7 @@ Environment-variable equivalents use the standard double-underscore form:
 ActiveDirectory__ServiceAccountUsername
 ```
 
-The LDAP service-account username remains a normal configuration value. The service-account password is not stored in appsettings, IIS environment variables, or source control. It is loaded by a Windows-only DPAPI-backed credential provider from the protected file at `C:\ProgramData\LabAuthServer\Secrets\ldap-service-account-password.dpapi` and used only for the authenticated Root DSE bind. The password is never logged or returned, and the application fails closed if the secret file is missing or unreadable. Anonymous bind is not used for Root DSE.
+The LDAP service-account username remains a normal configuration value. The service-account password is not stored in appsettings, IIS environment variables, or source control. It is loaded by a Windows-only DPAPI-backed credential provider from the protected file at `<SECRET_FILE>` and used only for the authenticated Root DSE bind. The password is never logged or returned, and the application fails closed if the secret file is missing or unreadable. Anonymous bind is not used for Root DSE.
 
 Authentication continues to use the end-user credentials for the direct LDAPS bind and does not use the service account.
 
@@ -417,8 +421,8 @@ Authentication continues to use the end-user credentials for the direct LDAPS bi
 
 | Package | Version | Purpose | Required? | Status |
 |---------|---------|---------|-----------|--------|
-| `System.ComponentModel.Annotations` | 10.0.0 | `[Required]`, `[StringLength]` attributes | ✅ Yes | Likely bundled with ASP.NET Core |
-| `System.DirectoryServices` | 10.0.0 | (Alternative to Protocols) | ❌ No | Using Protocols instead |
+| `System.ComponentModel.Annotations` | 10.0.0 | `[Required]`, `[StringLength]` attributes | âœ… Yes | Likely bundled with ASP.NET Core |
+| `System.DirectoryServices` | 10.0.0 | (Alternative to Protocols) | âŒ No | Using Protocols instead |
 
 **Approved:** No new packages beyond the three already approved for Infrastructure.
 
@@ -430,11 +434,11 @@ Authentication continues to use the end-user credentials for the direct LDAPS bi
 
 ```
 Domain
-  ↑
+  â†‘
 Application (adds IAuthenticationService)
-  ↑
+  â†‘
 Infrastructure (adds LdapAuthenticationService)
-  ↑
+  â†‘
 Api (adds AuthController)
 ```
 
@@ -457,7 +461,7 @@ services.AddScoped<IAuthenticationService, LdapAuthenticationService>();
 
 The following decisions were approved for Phase 3 and are implemented:
 
-1. **UPN authentication:** Direct UPN bind for the configured `lab.local` domain. No fabricated DN and no lookup.
+1. **UPN authentication:** Direct UPN bind for the configured `<DOMAIN>` domain. No fabricated DN and no lookup.
 
 2. **LDAP bind approach:** Direct user bind over LDAPS/TCP 636.
 
@@ -475,7 +479,7 @@ The following decisions were approved for Phase 3 and are implemented:
 
 ### Known Risks
 
-- **DC Availability:** The application requires DC01.lab.local:636 at runtime; authentication tests do not.
+- **DC Availability:** The application requires <LDAP_HOST>:636 at runtime; authentication tests do not.
 - **User Account:** Live authentication verification requires an externally managed test account; no credentials are stored in the repository.
 - **TLS Certificate:** DC certificate must be valid; Windows certificate store must include CA
 - **Network:** Firewall rules must allow LDAPS (port 636)
@@ -513,25 +517,25 @@ Phase 3 implementation completed:
 
 Before implementation, verify:
 
-- ✅ Architecture follows four-layer model
-- ✅ No secrets in source code
-- ✅ No passwords logged
-- ✅ LDAPS with certificate validation (not bypassed)
-- ✅ Async/await pattern used
-- ✅ DTOs for input/output
-- ✅ Dependency injection for all services
-- ✅ ILogger<T> for structured logging
-- ✅ No unapproved NuGet packages
-- ✅ Tests added (unit + integration)
-- ✅ Build succeeds with zero errors/warnings
-- ✅ docs/Project_Status.md updated
+- âœ… Architecture follows four-layer model
+- âœ… No secrets in source code
+- âœ… No passwords logged
+- âœ… LDAPS with certificate validation (not bypassed)
+- âœ… Async/await pattern used
+- âœ… DTOs for input/output
+- âœ… Dependency injection for all services
+- âœ… ILogger<T> for structured logging
+- âœ… No unapproved NuGet packages
+- âœ… Tests added (unit + integration)
+- âœ… Build succeeds with zero errors/warnings
+- âœ… docs/Project_Status.md updated
 
 ---
 
 ## Appendix: Terminology
 
-- **Distinguished Name (DN):** LDAP unique identifier (e.g., `CN=User,OU=People,DC=lab,DC=local`)
-- **User Principal Name (UPN):** Email-like identifier (e.g., `user@lab.local`)
+- **Distinguished Name (DN):** LDAP unique identifier (e.g., `CN=User,OU=People,<BASE_DN>`)
+- **User Principal Name (UPN):** Email-like identifier (e.g., `user@<DOMAIN>`)
 - **sAMAccountName:** Legacy username (e.g., `user`)
 - **LDAP Bind:** Authentication operation (credentials validation)
 - **LDAPS:** LDAP over SSL/TLS (encrypted)

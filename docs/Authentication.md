@@ -1,93 +1,29 @@
 # Authentication
 
-## Overview
+## Flow
 
-LabAuthServer authenticates users through Microsoft Active Directory using LDAP over TLS/SSL on TCP port 636. The service binds using a dedicated AD service account for directory queries and uses the user-supplied principal name and password for the end-user bind.
+1. The client sends `POST /api/v1/auth/login` over HTTPS.
+2. The username must be a UPN matching the configured `<DOMAIN>`.
+3. The service binds with the supplied user credentials over LDAPv3/LDAPS on TCP 636.
+4. After authentication, the service resolves the user’s AD groups through the configured search boundary.
+5. Approved groups are mapped to one application role.
+6. The token service issues an RSA-signed JWT and returns the token response.
+7. The outcome is sent to the audit service when audit persistence is available.
 
-## Trust boundaries
+Passwords are used for the bind operation only. They are not returned, logged, placed in JWT claims, or written to SQL audit records.
 
-The application is designed to fail closed when configuration or connectivity is not valid:
+## LDAP and service account
 
-- LDAPS must be enabled.
-- Port 636 is required.
-- LDAP protocol version 3 is required.
-- The configured AD domain must match the supplied UPN domain.
-- The service account credential file must exist and decrypt successfully.
+The `ActiveDirectory` configuration contains `<DOMAIN>`, `<LDAP_HOST>`, base/search distinguished names, service-account username, an approved `<SECRET_FILE>` path, LDAPS settings, and a connection timeout. The service-account password is loaded by the Windows DPAPI LocalMachine provider. Missing, unreadable, empty, or undecryptable protected credentials fail closed; there is no anonymous-bind fallback.
 
-If these conditions are not met, the login endpoint returns a safe failure result rather than exposing directory details.
+Platform certificate validation remains enabled. The implementation rejects non-LDAPS authentication and non-636 configuration. LDAP filter values are escaped before group searches.
 
-## AD service account requirements
+## Failure behavior
 
-The operational environment must provide:
+Invalid UPN or request input produces a safe client error. Invalid credentials produce `401`; directory unavailability produces `503`; timeouts produce `504`; unexpected/configuration failures produce `500`. Login requests sent over HTTP produce `400` before authentication is attempted. Responses do not expose LDAP exception details.
 
-- AD domain: `lab.local`
-- AD host: `DC01.lab.local`
-- service account username configured in `ActiveDirectory:ServiceAccountUsername`
-- service account password stored in the DPAPI-backed file `C:\ProgramData\LabAuthServer\Secrets\ldap-service-account-password.dpapi`
-- Windows LocalMachine DPAPI access for the runtime identity
+## Authorization handoff
 
-The application requires the service account password to be available on the server. It does not accept anonymous bind fallback for Root DSE and group lookup operations.
+A successful user bind does not by itself grant a token. The resolved groups must produce exactly one approved role through the configured mapping and precedence rules. If no approved role is available, token issuance fails closed.
 
-## User authentication flow
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant A as LabAuthServer API
-    participant S as Authentication Service
-    participant L as LDAP Client
-    participant D as Active Directory
-
-    C->>A: POST /api/v1/auth/login
-    A->>S: AuthenticateAsync(username, password)
-    S->>L: Validate UPN and LDAPS configuration
-    L->>D: Bind as user UPN with password over LDAPS:636
-    D-->>L: Success or failure
-    L-->>S: AuthenticationResult
-    S-->>A: IsAuthenticated / FailureCategory
-    alt Success
-        A->>L: Resolve user groups
-        L->>D: Search approved groups
-        D-->>A: Group identifiers
-        A->>A: Map groups to roles and issue JWT
-        A-->>C: 200 with access token
-    else Failure
-        A-->>C: 401/400/503/504/500 with ProblemDetails
-    end
-```
-
-## LDAP configuration
-
-The implemented configuration values are:
-
-- `ActiveDirectory:Domain` = `lab.local`
-- `ActiveDirectory:Host` = `DC01.lab.local`
-- `ActiveDirectory:Port` = `636`
-- `ActiveDirectory:BaseDn` = `DC=lab,DC=local`
-- `ActiveDirectory:UserSearchBaseDn` = `DC=lab,DC=local`
-- `ActiveDirectory:UseLdaps` = `true`
-- `ActiveDirectory:ConnectionTimeout` = `00:00:10`
-
-The runtime uses `System.DirectoryServices.Protocols` and requires LDAP v3 with a secure socket layer.
-
-## UPN bind behavior
-
-The implementation validates the submitted username as a UPN in the configured domain:
-
-- format must contain exactly one `@`
-- domain suffix must match `lab.local`
-- empty, malformed, or non-domain UPN values fail without directory probing
-
-This prevents the app from generating or accepting a directory-specific distinguished name and keeps the authentication contract aligned with the configured domain.
-
-## Known operational caveats
-
-The project history includes several real-world authentication problems:
-
-- stale DPAPI-backed credential file
-- incorrect search base or domain mismatch
-- UPN bind mismatch against the configured domain
-- incorrect `UseLdaps` or port-636 configuration
-- LDAP service-account account not available or password file unreadable
-
-When these occur, the service returns a generic login failure and logs a safe operational event; it does not reveal the directory error details.
+See [Authorization](Authorization.md), [JWT](JWT.md), and [Validation Status](Validation_Status.md) for the current boundaries and evidence.

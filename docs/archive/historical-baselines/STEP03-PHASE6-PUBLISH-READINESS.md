@@ -2,8 +2,8 @@
 
 ## 1. Source project
 - Project: LabAuthServer
-- Solution: C:\0001\Project\Lab\LabAuthServer\LabAuthServer.slnx
-- API project: C:\0001\Project\Lab\LabAuthServer\src\LabAuthServer.Api\LabAuthServer.Api.csproj
+- Solution: <REPOSITORY_PATH>\LabAuthServer.slnx
+- API project: <REPOSITORY_PATH>\src\LabAuthServer.Api\LabAuthServer.Api.csproj
 
 ## 2. Target framework
 - Target framework: net10.0
@@ -13,7 +13,7 @@
 
 ## 3. Publish command
 ```powershell
-cd C:\0001\Project\Lab\LabAuthServer
+cd <REPOSITORY_PATH>
  dotnet publish .\src\LabAuthServer.Api\LabAuthServer.Api.csproj `
    --configuration Release `
    --framework net10.0 `
@@ -23,7 +23,7 @@ cd C:\0001\Project\Lab\LabAuthServer
 ```
 
 ## 4. Publish directory
-- Local publish directory: C:\0001\Project\Lab\LabAuthServer\publish
+- Local publish directory: <REPOSITORY_PATH>\publish
 - Directory was created fresh and inspected before publishing.
 - No stale output was reused.
 
@@ -49,7 +49,7 @@ Verified on the development PC:
 
 ## 9. Certificate verification
 - JWT signing certificate requirement: LocalMachine\My
-- Configured thumbprint: BD545BA289EBFC645C8C3DC424311975579D7E09
+- Configured thumbprint: <THUMBPRINT>
 - Local development certificate lookup on this PC: certificate not found in LocalMachine\My
 - This is a local environment limitation, not a publish artifact issue.
 - The published output does not include any certificate file or certificate export.
@@ -69,15 +69,15 @@ Publish output security review:
 - The certificate remains in LocalMachine\My and is not published into the package
 
 ## 11. Deployment blockers
-Current blockers for deployment to target server 56.138:
+Current blockers for deployment to target server <HOST>:
 1. The approved certificate is not available on this development PC in LocalMachine\My.
-2. The target server 56.138 was not accessed or modified, as required.
+2. The target server <HOST> was not accessed or modified, as required.
 3. Phase 6 is intentionally a development-PC-only readiness check; actual production deployment remains outside this phase.
 
 ## 12. Recommendation for Phase 7
 - Phase 6 is READY FOR DEPLOYMENT on the project side of the local publish process.
-- Phase 7 should proceed only after the Windows Server target environment is confirmed to have the approved certificate in LocalMachine\My for thumbprint BD545BA289EBFC645C8C3DC424311975579D7E09.
-- Deployment to 56.138 must still be explicitly authorized and performed only after a target-server validation step.
+- Phase 7 should proceed only after the Windows Server target environment is confirmed to have the approved certificate in LocalMachine\My for thumbprint <THUMBPRINT>.
+- Deployment to <HOST> must still be explicitly authorized and performed only after a target-server validation step.
 
 ## Final status
 PHASE 6 = READY FOR DEPLOYMENT

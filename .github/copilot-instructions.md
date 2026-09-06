@@ -80,31 +80,30 @@ Never:
 
 Production Active Directory communication must use LDAPS.
 
-## Current Development Phase
+## Current implementation status
 
-The current project phase must always be determined from:
+The current implementation status must be determined from:
 
-docs/Project_Status.md
+- `docs/Project_Status.md`
+- `docs/Validation_Status.md`
 
-Do not assume that a future phase has been approved.
+The repository implements LDAPS authentication, certificate-backed RSA JWT
+issuance and validation, AD group-to-role mapping, named authorization
+policies, SQL audit persistence, correlation middleware, and safe exception
+handling. Historical phase records are preserved under `docs/archive/` and may
+describe earlier designs or incomplete milestones.
 
-Phase 3 authentication remediation is complete.
+The following remain outside the implemented scope:
 
-Phase 4 Token and Authorization design is architect-approved according to
-docs/Phase4_Architect_Approval_Record.md. Phase 4 implementation is authorized
-but has not yet been completed. The next activity is Phase 4 implementation
-planning and design decomposition.
+- refresh tokens and token persistence
+- stateful token revocation
+- MFA, SSO, and federation
+- rate limiting and brute-force protection
+- audit retention, archival, purge, and SQL Agent scheduling
 
-For Phase 4 implementation:
-
-- JWT/token implementation is approved but not yet implemented.
-- Authorization implementation is approved but not yet implemented.
-- The approved Phase 4 design and its 49 decisions are authoritative.
-- System.DirectoryServices.Protocols remains approved for Infrastructure.
-- Existing LDAPS security requirements remain mandatory.
-- Phase 3 LDAP authentication behavior must not be changed.
-- Database integration, refresh tokens, MFA, SSO/federation, rate limiting,
-  brute-force protection, and unrelated scope expansion remain unapproved.
+Existing LDAPS certificate-validation and secret-handling requirements remain
+mandatory. The current API behavior must be verified against source and tests
+before documentation or implementation changes are made.
 
 ## Implementation Workflow
 

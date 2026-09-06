@@ -5,8 +5,8 @@
 
 ## Package
 
-- Location: `C:\Apps\LabAuthServer\Releases\2026-09-04_114744_Release`
-- Hash report: `C:\Apps\LabAuthServer\Releases\2026-09-04_114744_SHA256.txt`
+- Location: `<RELEASE_PATH>\2026-09-04_114744_Release`
+- Hash report: `<RELEASE_PATH>\2026-09-04_114744_SHA256.txt`
 - Contents: 52 runtime files required by the published API, dependencies, `web.config`, and externalized `appsettings.json`.
 - Excluded: source, tests, `appsettings.Development.json`, PDB files, private keys, DPAPI files, and unrelated documentation.
 - Manifest: `release-manifest.txt`.

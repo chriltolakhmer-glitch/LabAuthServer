@@ -1,18 +1,18 @@
-# STEP 3 — EXISTING LABAUTHSERVER PROJECT BASELINE
+# STEP 3 â€” EXISTING LABAUTHSERVER PROJECT BASELINE
 
 ## Development Environment
-- Development PC: 192.168.56.1
-- Target Server: 56.138
-- Target Domain: lab.local
-- Target AD/DC FQDN: DC01.lab.local
+- Development PC: <DEVELOPMENT_HOST>
+- Target Server: <HOST>
+- Target Domain: <DOMAIN>
+- Target AD/DC FQDN: <LDAP_HOST>
 - Target IIS Site: LabAuthServer
-- Target App Pool: LabAuthServerAppPool
+- Target App Pool: <IIS_APP_POOL>
 
 ## Existing Project
 - Solution: `LabAuthServer.slnx`
-- Solution path: `c:\0001\Project\Lab\LabAuthServer\LabAuthServer.slnx`
+- Solution path: `<REPOSITORY_PATH>\LabAuthServer.slnx`
 - Project: `LabAuthServer.Api`
-- Project path: `c:\0001\Project\Lab\LabAuthServer\src\LabAuthServer.Api\LabAuthServer.Api.csproj`
+- Project path: `<REPOSITORY_PATH>\src\LabAuthServer.Api\LabAuthServer.Api.csproj`
 - Framework: `net10.0`
 - ASP.NET Core: ASP.NET Core Web SDK / .NET 10 Web project
 - SDK: `10.0.400` via `global.json`
@@ -50,10 +50,10 @@ Observed implementation:
 
 ## Existing LDAP/LDAPS
 Observed source values:
-- Domain: `lab.local`
-- Host: `DC01.lab.local`
+- Domain: `<DOMAIN>`
+- Host: `<LDAP_HOST>`
 - Port: `636`
-- BaseDn: `DC=lab,DC=local`
+- BaseDn: `<BASE_DN>`
 - UseLdaps: `true`
 - ConnectionTimeout: `00:00:10`
 
@@ -93,12 +93,12 @@ Observed current values:
 - Clock skew: `00:05:00`
 - Signing algorithm: `RS256`
 - Active key id: `development-key-1`
-- Signing key store reference: `environment://LabAuthServer/SigningKey`
+- Signing key store reference: `<KEY_STORE_REFERENCE>`
 - Maximum claim size: `4096`
 - Maximum token size: `16384`
 
 Approved Step 3 values:
-- D3.3 JWT issuer: `https://DC01.lab.local`
+- D3.3 JWT issuer: `https://<LDAP_HOST>`
 - D3.4 JWT audience: `LabAuthServer.API`
 
 Current implementation status:
@@ -147,9 +147,9 @@ CRITICAL:
 - No hard-coded password, secret, private key, or certificate material was observed in the checked-in source.
 
 HIGH:
-- JWT issuer value differs from the approved Step 3 environment value (`https://labauthserver.local` vs `https://DC01.lab.local`).
+- JWT issuer value differs from the approved Step 3 environment value (`https://labauthserver.local` vs `https://<LDAP_HOST>`).
 - JWT audience differs from the approved Step 3 value (`labauthserver-api` vs `LabAuthServer.API`).
-- Signing key store configuration does not match the approved Windows Certificate Store value; source currently has `environment://LabAuthServer/SigningKey` rather than the approved certificate thumbprint or Store/My binding.
+- Signing key store configuration does not match the approved Windows Certificate Store value; source currently has `<KEY_STORE_REFERENCE>` rather than the approved certificate thumbprint or Store/My binding.
 - AD group mapping values are not populated with the approved Step 3 group map in the checked-in config.
 
 MEDIUM:
@@ -168,17 +168,17 @@ This is a development-PC discovery and readiness assessment only; no deployment 
 
 Recommended publish flow:
 1. On the development PC, run `dotnet publish LabAuthServer.slnx -c Release -o .\publish` or publish the API project specifically.
-2. Copy the published output to the target IIS host `56.138`.
-3. Configure the IIS site `LabAuthServer` and app pool `LabAuthServerAppPool` on the target server, using the approved HTTPS certificate and environment-specific configuration.
+2. Copy the published output to the target IIS host `<HOST>`.
+3. Configure the IIS site `LabAuthServer` and app pool `<IIS_APP_POOL>` on the target server, using the approved HTTPS certificate and environment-specific configuration.
 4. Ensure the environment is configured for the target AD/DC values.
 
-Required deployment prerequisites on 56.138:
+Required deployment prerequisites on <HOST>:
 - ASP.NET Core Hosting Bundle / runtime for .NET 10
 - IIS site and app pool configured for `LabAuthServer`
 - HTTPS binding on port 443
-- Certificate matching the approved thumbprint `BD545BA289EBFC645C8C3DC424311975579D7E09`
+- Certificate matching the approved thumbprint `<THUMBPRINT>`
 - App service identity with rights to read the certificate and application files
-- Access to `DC01.lab.local:636` over LDAPS
+- Access to `<LDAP_HOST>:636` over LDAPS
 - Environment variables or configuration values aligned with the approved deployment settings
 
 ## Gaps
@@ -190,8 +190,8 @@ Required deployment prerequisites on 56.138:
 - The project is build-ready but not yet deployment-ready against the approved Step 3 values.
 
 ## Required Changes Before Deployment
-The following must be aligned before deployment to target server `56.138`:
-- JWT issuer to `https://DC01.lab.local`
+The following must be aligned before deployment to target server `<HOST>`:
+- JWT issuer to `https://<LDAP_HOST>`
 - JWT audience to `LabAuthServer.API`
 - AD group mapping entries to the approved list
 - Signing key reference to the approved Windows Certificate Store / certificate thumbprint
@@ -199,18 +199,18 @@ The following must be aligned before deployment to target server `56.138`:
 - Appsettings or environment variables for production deployment values
 
 ## Deployment Plan
-Development PC (192.168.56.1)
+Development PC (<DEVELOPMENT_HOST>)
 - `dotnet publish` the existing application in Release mode
 - Publish output to a dedicated folder such as `publish/`
 - Transfer the published files to the target server
 
-Target Server (56.138)
+Target Server (<HOST>)
 - Configure IIS site `LabAuthServer`
-- Configure app pool `LabAuthServerAppPool`
-- Bind HTTPS on port 443 using the existing certificate thumbprint `BD545BA289EBFC645C8C3DC424311975579D7E09`
+- Configure app pool `<IIS_APP_POOL>`
+- Bind HTTPS on port 443 using the existing certificate thumbprint `<THUMBPRINT>`
 - Place the published app under the site root
 - Configure environment variables or appsettings overrides for the approved values
-- Validate connectivity to `DC01.lab.local:636` via LDAPS
+- Validate connectivity to `<LDAP_HOST>:636` via LDAPS
 
 ## Safety
 Confirmed read-only phase:
@@ -223,9 +223,9 @@ Confirmed read-only phase:
 - No publish/deploy action performed
 
 ## Summary
-The existing LabAuthServer source on the development PC is valid, builds successfully, and already contains the expected ASP.NET Core, LDAPS, JWT, and authorization infrastructure. However, the current checked-in config does not match the approved Step 3 deployment values for issuer, audience, AD group mappings, and signing-key configuration. The app is therefore build-ready but not yet aligned with the approved deployment baseline for 56.138.
+The existing LabAuthServer source on the development PC is valid, builds successfully, and already contains the expected ASP.NET Core, LDAPS, JWT, and authorization infrastructure. However, the current checked-in config does not match the approved Step 3 deployment values for issuer, audience, AD group mappings, and signing-key configuration. The app is therefore build-ready but not yet aligned with the approved deployment baseline for <HOST>.
 
-# PHASE 4 — CONFIGURATION ALIGNMENT
+# PHASE 4 â€” CONFIGURATION ALIGNMENT
 
 ## Changes Made
 
@@ -235,7 +235,7 @@ The existing LabAuthServer source on the development PC is valid, builds success
   - `Token.Audience`: `labauthserver-api`
   - `Authorization.GroupToRoleMappings`: `{}`
 - After:
-  - `Token.Issuer`: `https://DC01.lab.local`
+  - `Token.Issuer`: `https://<LDAP_HOST>`
   - `Token.Audience`: `LabAuthServer.API`
   - `Authorization.GroupToRoleMappings`:
     - `GG-APP-ADMIN` -> `Administrator`
@@ -250,16 +250,16 @@ The existing LabAuthServer source on the development PC is valid, builds success
   - D3.5 AD group-to-role mapping
 
 ## JWT Configuration
-- Issuer: `https://DC01.lab.local`
+- Issuer: `https://<LDAP_HOST>`
 - Audience: `LabAuthServer.API`
 - Lifetime: `00:15:00` (unchanged; no explicit D3.9/3600-second approval was found in the approval record, so no automatic lifetime change was made)
 - Algorithm: `RS256`
-- Signing key mechanism: existing abstraction remains `environment://LabAuthServer/SigningKey`, but this does not yet satisfy the approved `Windows Certificate Store` requirement.
+- Signing key mechanism: existing abstraction remains `<KEY_STORE_REFERENCE>`, but this does not yet satisfy the approved `Windows Certificate Store` requirement.
 
 ## LDAP/LDAPS
-- Host: `DC01.lab.local`
+- Host: `<LDAP_HOST>`
 - Port: `636`
-- Base DN: `DC=lab,DC=local`
+- Base DN: `<BASE_DN>`
 - LDAPS enabled: `true`
 
 ## AD Group Mapping
@@ -288,26 +288,26 @@ The existing LabAuthServer source on the development PC is valid, builds success
 - Remaining blocker: the approval record does not explicitly define a one-hour lifetime decision (`D3.9`), so the existing 15-minute lifetime remains unchanged pending explicit approval.
 
 ## Remaining Gaps
-- The signing abstraction must be updated to obtain the X509 certificate from `Cert:\LocalMachine\My` using thumbprint `BD545BA289EBFC645C8C3DC424311975579D7E09`.
+- The signing abstraction must be updated to obtain the X509 certificate from `Cert:\LocalMachine\My` using thumbprint `<THUMBPRINT>`.
 - The current code does not yet support certificate-store lookup cleanly and therefore cannot satisfy Step 5 without redesigning the existing signing abstraction.
 - No explicit one-hour lifetime decision was found in the authoring set; the lifetime remains a pending approval item.
 
 ## Deployment Prerequisites
 - ASP.NET Core Hosting Bundle for .NET 10 on target IIS server
-- IIS site and app pool `LabAuthServer` / `LabAuthServerAppPool`
-- HTTPS binding on port 443 with certificate thumbprint `BD545BA289EBFC645C8C3DC424311975579D7E09`
-- LDAPS connectivity to `DC01.lab.local:636`
+- IIS site and app pool `LabAuthServer` / `<IIS_APP_POOL>`
+- HTTPS binding on port 443 with certificate thumbprint `<THUMBPRINT>`
+- LDAPS connectivity to `<LDAP_HOST>:636`
 - Environment-based configuration for deployment-specific values to avoid source-controlled secrets
 
 ## Target Server Deployment Plan
 - Use the development PC to publish the existing API project in Release mode to a local folder.
-- Transfer the published files securely to the target server `56.138`.
+- Transfer the published files securely to the target server `<HOST>`.
 - Configure the IIS site and application pool only after approval.
 - Bind HTTPS using the approved certificate thumbprint.
 - Configure deployment-specific settings through environment variables or machine-level configuration rather than source-controlled appsettings.
 
 ## Safety Verification
-- Target server 56.138 unchanged: confirmed
+- Target server <HOST> unchanged: confirmed
 - AD unchanged: confirmed
 - DNS unchanged: confirmed
 - Firewall unchanged: confirmed

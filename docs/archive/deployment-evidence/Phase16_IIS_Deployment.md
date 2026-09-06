@@ -6,10 +6,10 @@
 ## Deployment target
 
 - Site: `LabAuthServer`
-- Application pool: `LabAuthServerAppPool`
+- Application pool: `<IIS_APP_POOL>`
 - Identity: `ApplicationPoolIdentity`
-- Physical path: `C:\Apps\LabAuthServer\Current`
-- HTTPS: `https://DC01.lab.local:443`
+- Physical path: `<DEPLOYMENT_PATH>`
+- HTTPS: `https://<LDAP_HOST>:443`
 - Package: `Releases\2026-09-04_114744_Release`
 - Rollback backup: `Releases\2026-09-04_114832_Current_Backup`
 

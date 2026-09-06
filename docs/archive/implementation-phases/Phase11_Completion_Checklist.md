@@ -34,7 +34,7 @@
 | Operational documentation | COMPLETE | Phase 11 design and operations/deployment-readiness record document ownership, monitoring, rollback, and boundaries. |
 | Deployment readiness | COMPLETE | Scripts and runbook are prepared; deployment itself is not performed. |
 | IIS invariant | COMPLETE | IIS bindings/site/pool configuration unchanged; only the already-approved database user mapping was added in SQL. |
-| `Current` invariant | COMPLETE | `C:\Apps\LabAuthServer\Current` not modified. |
+| `Current` invariant | COMPLETE | `<DEPLOYMENT_PATH>` not modified. |
 | DPAPI invariant | COMPLETE | DPAPI contents not accessed or decrypted. |
 | Certificate invariant | COMPLETE | Certificate private keys not accessed or exported. |
 | Phase 0-10 regression | COMPLETE | Full solution tests pass with zero failures/skips. |

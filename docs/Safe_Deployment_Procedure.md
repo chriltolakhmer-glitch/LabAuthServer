@@ -1,40 +1,34 @@
-# Safe LabAuthServer Deployment Procedure
+# Safe Deployment Procedure
 
-Use `C:\Apps\LabAuthServer\Scripts\Deploy-LabAuthServerSafe.ps1` for future application deployments. The script is not a release builder and must receive an immutable, already-approved release directory.
+This document describes the repository’s intended staged deployment workflow. It is not proof that a current target environment is deployed or healthy.
 
-## Safety model
+## Inputs
 
-1. Copy the complete release runtime, excluding only `release-manifest.txt`, into a unique directory under `C:\Apps\LabAuthServer\Staging`.
-2. Copy files individually with `-LiteralPath` and `-ErrorAction Stop`; every copy error is collected and reported. A failed staging copy leaves `Current` untouched.
-3. Validate staging before production replacement:
-   - exactly 52 runtime files;
-   - no missing, unexpected, or SHA-256-mismatched files;
-   - `UserSearchBaseDn` is `DC=lab,DC=local`;
-   - Audit connection string is present and timeout is 5 seconds;
-   - no development settings, PDBs, or private-key artifacts.
-4. Create a timestamped complete backup of `Current` under `C:\Apps\LabAuthServer\Releases`.
-5. Stop only `LabAuthServerAppPool` and wait for `Stopped`.
-6. Replace `Current` from the validated staging directory.
-7. Validate `Current` against staging again. If replacement or validation fails, restore the complete rollback backup, validate rollback parity, and leave the pool stopped.
-8. Start only `LabAuthServerAppPool` after validation passes. The IIS site and bindings are not changed.
-9. Verify the site and pool state, HTTPS health `200`, and anonymous protected endpoint `401`.
-10. Remove the temporary staging directory only after successful completion.
+The procedure requires an immutable, approved release directory at `<RELEASE_PATH>` and deployment-specific values for `<DEPLOYMENT_PATH>`, `<IIS_APP_POOL>`, `<HOST>`, `<SECRET_FILE>`, `<THUMBPRINT>`, and `<CONNECTION_STRING>`.
 
-## Invocation
+The deployment script is maintained in the separately controlled operational environment. It must receive an approved release directory and must not be used to build a release.
 
-Run from an elevated PowerShell session:
+## Safety sequence
 
-```powershell
-& 'C:\Apps\LabAuthServer\Scripts\Deploy-LabAuthServerSafe.ps1' `
-    -ReleasePath 'C:\Apps\LabAuthServer\Releases\<approved-release>'
-```
+1. Copy the release into a unique staging directory.
+2. Validate expected file count, hashes, configuration safety, and absence of development settings, PDBs, secret files, and private-key artifacts.
+3. Create a complete timestamped backup of the current deployment.
+4. Stop only the approved application pool.
+5. Replace the deployment directory from the validated staging directory.
+6. Validate deployment parity against the release.
+7. Restore the backup and leave the pool stopped if replacement or validation fails.
+8. Start the application pool only after validation passes.
+9. Verify the site state, HTTPS health response, correlation header, and anonymous protected-resource `401` behavior.
+10. Remove staging content only after successful completion.
 
-Preview staging and all pre-replacement validation without touching production:
+## Operational requirements
 
-```powershell
-& 'C:\Apps\LabAuthServer\Scripts\Deploy-LabAuthServerSafe.ps1' `
-    -ReleasePath 'C:\Apps\LabAuthServer\Releases\<approved-release>' `
-    -WhatIf
-```
+- Run deployment through authorized change control.
+- Preserve server-specific configuration outside the release package.
+- Do not copy passwords, DPAPI files, private keys, tokens, PDBs, or development configuration into the release.
+- Do not change AD, LDAP, certificate, database, firewall, or IIS bindings as an incidental deployment action.
+- Keep rollback backups until release verification is complete.
 
-The output reports the source release, staging path, expected/copied counts, copy errors, missing/unexpected/mismatched files, backup path, rollback status, IIS state, and smoke-test statuses. Do not use a piped `Copy-Item` deployment command and do not clear `Current` before staging validation passes.
+## Validation boundary
+
+The repository contains the publish profile and the documented workflow. Current target deployment status, valid AD identity behavior, certificate access, DPAPI decryption, and SQL permission behavior require protected environment validation. See [Validation Status](Validation_Status.md).

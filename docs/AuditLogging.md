@@ -1,21 +1,12 @@
 # Audit Logging
 
-## Overview
+## Implementation
 
-LabAuthServer persists approved operational events to SQL Server through a repository layer and a stored procedure. The audit architecture is:
+The API publishes approved authentication, authorization, security, validation, and exception events through `IAuditEventService`. `SqlAuditEventService` validates the event, binds typed SQL parameters, and calls `Audit.usp_WriteAuditEvent`. It does not construct dynamic SQL or write directly to audit tables.
 
-- ASP.NET Core application service
-- infrastructure SQL repository
-- `Audit.usp_WriteAuditEvent`
-- SQL Server `LabAuthServer` database
+## Event categories
 
-This is the durable event path used for authentication, authorization, and unhandled-exception records.
-
-## Audit event model
-
-The application audit contract is represented by `AuditEvent` and uses the approved event codes in `AuditEventTypes`.
-
-Implemented event types:
+The database reference catalog contains:
 
 - `AUTH_LOGIN_SUCCESS`
 - `AUTH_LOGIN_FAILURE`
@@ -31,53 +22,14 @@ Implemented event types:
 - `APP_UNHANDLED_EXCEPTION`
 - `APP_VALIDATION_ERROR`
 
-The event model includes the fields required for minimal operational records:
+Events can contain bounded correlation/request identifiers, normalized username or subject, approved role, endpoint, HTTP method, status, outcome, client address, server/version metadata, and allowlisted JSON details. Passwords, tokens, authorization headers, private keys, DPAPI contents, raw LDAP responses, and exception dumps are prohibited.
 
-- correlation ID
-- request ID
-- username / subject
-- role
-- endpoint
-- HTTP method
-- status code
-- success flag
-- client IP
-- server name
-- application version
-- JSON details payload when appropriate
+## Correlation and middleware
 
-## Stored procedure path
+`CorrelationMiddleware` accepts a canonical `X-Correlation-ID` when supplied or creates a new GUID. The response includes the canonical correlation header, and the value is passed into audit records. `AuthorizationAuditMiddleware` records post-policy `403` outcomes. JWT bearer failures are classified without persisting token contents. Global exception handling returns generic correlated ProblemDetails and records a minimized unhandled-exception event.
 
-The SQL repository writes audit rows through the supported procedure:
+## Database boundary and failure behavior
 
-- `Audit.usp_WriteAuditEvent`
+The writer procedure validates event codes, roles, status codes, JSON, lengths, and prohibited sensitive properties before an atomic insert. The application identity is intended to receive only procedure execution through `LabAuthServer_AuditWriter`.
 
-This procedure is invoked through `SqlAuditEventService` using the configured connection string and a short command timeout. The application does not issue direct table writes and does not construct dynamic SQL for audit events.
-
-## Database permissions
-
-The application database role is:
-
-- `LabAuthServer_AuditWriter`
-
-The principal used by the application is granted only the minimum required execute permission for the stored procedure. The application is not granted broad table-level write access and does not perform direct table modifications outside the approved procedure.
-
-## Audit flow
-
-```mermaid
-flowchart LR
-    A[API / Middleware] --> B[AuditEventService]
-    B --> C[SqlAuditEventService]
-    C --> D[Audit.usp_WriteAuditEvent]
-    D --> E[(LabAuthServer database)]
-```
-
-## Operational notes
-
-- correlation IDs are generated and propagated through the request pipeline
-- access denied events are recorded when the protected endpoint returns `403`
-- failed JWT validation events are recorded via the bearer authentication failure pipeline
-- global exception middleware records unhandled-server errors with correlation context
-- audit payloads exclude raw secrets, tokens, DPAPI contents, and certificate private keys
-
-No retention policy, purge job, or SQL Agent scheduling is documented in the implementation because those operational controls were intentionally deferred beyond the implemented service.
+Audit persistence failure is logged as an operational warning/error and does not replace the primary response. Retention, archival, purge procedures, and SQL Agent scheduling are not implemented.
