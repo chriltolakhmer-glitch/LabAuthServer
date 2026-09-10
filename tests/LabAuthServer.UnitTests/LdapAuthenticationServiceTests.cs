@@ -1,3 +1,5 @@
+using LabAuthServer.Application.Services;
+using LabAuthServer.Application.DTOs;
 using LabAuthServer.Application.Enums;
 using LabAuthServer.Application.Interfaces;
 using LabAuthServer.Infrastructure.ActiveDirectory;
@@ -14,7 +16,7 @@ public sealed class LdapAuthenticationServiceTests
     {
         var client = new FakeLdapAuthenticationClient
         {
-            Result = new LdapBindResult { IsSuccess = true }
+            Result = AuthenticationResult.Succeeded("alice@lab.local")
         };
         var service = CreateService(client);
 
@@ -47,11 +49,7 @@ public sealed class LdapAuthenticationServiceTests
     {
         var client = new FakeLdapAuthenticationClient
         {
-            Result = new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.InvalidCredentials
-            }
+            Result = AuthenticationResult.Failed(new DirectoryFailure(AuthenticationFailureCategory.InvalidCredentials, DirectoryFailureStage.UserBind, DirectoryFailureReason.UnexpectedFailure))
         };
         var service = CreateService(client);
 
@@ -63,22 +61,18 @@ public sealed class LdapAuthenticationServiceTests
     }
 
     [Theory]
-    [InlineData(LdapBindFailureCategory.DirectoryUnavailable, AuthenticationFailureCategory.DirectoryUnavailable, "Authentication service unavailable.")]
-    [InlineData(LdapBindFailureCategory.Timeout, AuthenticationFailureCategory.Timeout, "Authentication request timed out.")]
-    [InlineData(LdapBindFailureCategory.Cancelled, AuthenticationFailureCategory.Cancelled, "Authentication request was cancelled.")]
-    [InlineData(LdapBindFailureCategory.Unexpected, AuthenticationFailureCategory.Unexpected, "Authentication error.")]
+    [InlineData(AuthenticationFailureCategory.DirectoryUnavailable, AuthenticationFailureCategory.DirectoryUnavailable, "Authentication service unavailable.")]
+    [InlineData(AuthenticationFailureCategory.Timeout, AuthenticationFailureCategory.Timeout, "Authentication request timed out.")]
+    [InlineData(AuthenticationFailureCategory.Cancelled, AuthenticationFailureCategory.Cancelled, "Authentication request was cancelled.")]
+    [InlineData(AuthenticationFailureCategory.Unexpected, AuthenticationFailureCategory.Unexpected, "Authentication error.")]
     public async Task AuthenticateAsync_MapsInfrastructureFailures(
-        LdapBindFailureCategory bindFailure,
+        AuthenticationFailureCategory bindFailure,
         AuthenticationFailureCategory expectedFailure,
         string expectedMessage)
     {
         var client = new FakeLdapAuthenticationClient
         {
-            Result = new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = bindFailure
-            }
+            Result = AuthenticationResult.Failed(new DirectoryFailure(bindFailure, DirectoryFailureStage.UserBind, DirectoryFailureReason.UnexpectedFailure))
         };
         var service = CreateService(client);
 
@@ -173,39 +167,30 @@ public sealed class LdapAuthenticationServiceTests
 
     private sealed class FakeLdapAuthenticationClient : ILdapAuthenticationClient
     {
-        public LdapBindResult Result { get; init; } = new()
-        {
-            IsSuccess = false,
-            FailureCategory = LdapBindFailureCategory.DirectoryUnavailable
-        };
+        public AuthenticationResult Result { get; init; } = AuthenticationResult.Failed(new DirectoryFailure(AuthenticationFailureCategory.DirectoryUnavailable, DirectoryFailureStage.ConnectionSetup, DirectoryFailureReason.TransportFailure));
 
         public string? Username { get; private set; }
 
         public string? Password { get; private set; }
 
-        public async Task<LdapAuthenticationResult> AuthenticateAsync(
+        public async Task<AuthenticationResult> AuthenticateAsync(
             string username,
             string password,
             LdapOptions options,
             ILdapServiceAccountCredentialProvider credentialProvider,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, AuthenticationOperation? operation = null)
         {
             await credentialProvider.GetPasswordAsync(cancellationToken);
             Username = username;
             Password = password;
-            return new LdapAuthenticationResult
-            {
-                IsSuccess = Result.IsSuccess,
-                FailureCategory = Result.FailureCategory,
-                Username = username
-            };
+            return Result.IsAuthenticated ? AuthenticationResult.Succeeded(username) : AuthenticationResult.Failed(Result.Failure!);
         }
 
-        public Task<LdapBindResult> BindAsync(
+        public Task<AuthenticationResult> BindAsync(
             string username,
             string password,
             LdapOptions options,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, AuthenticationOperation? operation = null)
         {
             Username = username;
             Password = password;

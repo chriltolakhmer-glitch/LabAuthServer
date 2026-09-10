@@ -7,8 +7,6 @@ namespace LabAuthServer.Infrastructure.Security;
 
 public sealed class CertificateSigningKeyProvider : IProtectedSigningKeyProvider
 {
-    internal const int MinimumRsaKeySize = 2048;
-
     private readonly IOptions<TokenOptions> _tokenOptions;
     private readonly Func<TokenOptions, string, X509Certificate2> _certificateResolver;
     private readonly ILogger<CertificateSigningKeyProvider>? _logger;
@@ -60,7 +58,7 @@ public sealed class CertificateSigningKeyProvider : IProtectedSigningKeyProvider
         cancellationToken.ThrowIfCancellationRequested();
         var options = _tokenOptions.Value;
 
-        var failures = TokenOptionsValidator.Validate(options);
+        var failures = TokenOptionsValidator.ValidateForRuntime(options);
         if (failures.Count > 0)
         {
             if (failures.Any(failure => failure.Contains("certificate", StringComparison.OrdinalIgnoreCase)))
@@ -84,7 +82,7 @@ public sealed class CertificateSigningKeyProvider : IProtectedSigningKeyProvider
         }
 
         var options = _tokenOptions.Value;
-        var failures = TokenOptionsValidator.Validate(options);
+        var failures = TokenOptionsValidator.ValidateForRuntime(options);
         if (failures.Count > 0)
         {
             if (failures.Any(failure => failure.Contains("certificate", StringComparison.OrdinalIgnoreCase)))
@@ -138,7 +136,7 @@ public sealed class CertificateSigningKeyProvider : IProtectedSigningKeyProvider
         }
 
         var options = _tokenOptions.Value;
-        var failures = TokenOptionsValidator.Validate(options);
+        var failures = TokenOptionsValidator.ValidateForRuntime(options);
         if (failures.Count > 0)
         {
             throw new InvalidOperationException("Signing-key configuration is invalid.");
@@ -244,10 +242,7 @@ public sealed class CertificateSigningKeyProvider : IProtectedSigningKeyProvider
             throw new InvalidOperationException("The signing certificate does not contain an RSA key.");
         }
 
-        if (publicKey.KeySize < MinimumRsaKeySize)
-        {
-            throw new InvalidOperationException("The signing certificate RSA key is too small.");
-        }
+        RsaKeySizePolicy.Validate(publicKey);
 
         var keyUsage = certificate.Extensions.OfType<X509KeyUsageExtension>().SingleOrDefault();
         if (keyUsage is not null && !keyUsage.KeyUsages.HasFlag(X509KeyUsageFlags.DigitalSignature))

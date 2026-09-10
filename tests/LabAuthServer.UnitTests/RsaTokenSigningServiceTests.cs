@@ -120,10 +120,58 @@ public sealed class RsaTokenSigningServiceTests
         Assert.False(provider.WasAccessed);
     }
 
+    [Theory]
+    [InlineData("issuer")]
+    [InlineData("audience")]
+    [InlineData("subject")]
+    public async Task SignAsync_PreservesUnicodeCharacterLimits(string field)
+    {
+        using var provider = new RuntimeSigningKeyProvider("test-key-1");
+        var service = CreateService(provider, maximumClaimSize: 64);
+        var value = field == "issuer" ? "https://" + new string('\u00e9', 56) : new string('\u00e9', 64);
+        var claims = field switch
+        {
+            "issuer" => CreateClaims() with { Issuer = value },
+            "audience" => CreateClaims() with { Audience = value },
+            _ => CreateClaims() with { Subject = value }
+        };
+        var signed = await service.SignAsync(claims);
+        using var payload = JsonDocument.Parse(DecodeBase64Url(signed.AccessToken.Split('.')[1]));
+        var claimName = field switch { "issuer" => "iss", "audience" => "aud", _ => "sub" };
+        Assert.Equal(value, payload.RootElement.GetProperty(claimName).GetString());
+        var excessive = field switch
+        {
+            "issuer" => claims with { Issuer = value + "x" },
+            "audience" => claims with { Audience = value + "x" },
+            _ => claims with { Subject = value + "x" }
+        };
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SignAsync(excessive));
+    }
+
+    [Fact]
+    public async Task SignAsync_PreservesExactSerializedPayloadBudget()
+    {
+        using var provider = new RuntimeSigningKeyProvider("test-key-1");
+        var service = CreateService(provider);
+        var input = CreateClaims() with { Scopes = [new string('a', 4096), "b"] };
+        var initial = await service.SignAsync(input);
+        var size = Base64UrlDecode(initial.AccessToken.Split('.')[1]).Length;
+        var lastScope = new string('b', 1 + 7680 - size);
+        var maximal = input with { Scopes = [new string('a', 4096), lastScope] };
+        var signed = await service.SignAsync(maximal);
+        Assert.Equal(7680, Base64UrlDecode(signed.AccessToken.Split('.')[1]).Length);
+        Assert.InRange(signed.AccessToken.Length, 7681, 12288);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SignAsync(maximal with
+        {
+            Scopes = [new string('a', 4096), lastScope + "x"]
+        }));
+    }
+
     private static RsaTokenSigningService CreateService(
         IProtectedSigningKeyProvider provider,
         string signingAlgorithm = "RS256",
-        string audience = "labauthserver-api")
+        string audience = "labauthserver-api",
+        int maximumClaimSize = 4096)
     {
         var options = Options.Create(new TokenOptions
         {
@@ -134,8 +182,8 @@ public sealed class RsaTokenSigningServiceTests
             SigningAlgorithm = signingAlgorithm,
             ActiveKeyId = "test-key-1",
             SigningKeyStoreReference = "runtime-test-only",
-            MaximumClaimSize = 4096,
-            MaximumTokenSize = 16384
+            MaximumClaimSize = maximumClaimSize,
+            MaximumTokenSize = 7680
         });
 
         return new RsaTokenSigningService(

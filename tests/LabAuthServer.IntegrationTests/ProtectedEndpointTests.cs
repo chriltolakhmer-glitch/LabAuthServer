@@ -293,6 +293,7 @@ public sealed class ProtectedEndpointTests : IClassFixture<TestApiFactory>
 
 public sealed class TestApiFactory : WebApplicationFactory<Program>
 {
+    public TestApiFactory() => ClientOptions.BaseAddress = new Uri("https://DC01.lab.local");
     public const string ActiveKeyId = "integration-test-key";
     public const string Issuer = "https://integration-test.example";
     public const string Audience = "LabAuthServer.API";

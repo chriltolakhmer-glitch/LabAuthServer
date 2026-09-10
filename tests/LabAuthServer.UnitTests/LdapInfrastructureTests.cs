@@ -54,7 +54,7 @@ public sealed class LdapInfrastructureTests
         var service = new LdapService(
             Options.Create(CreateOptions()),
             new NullCredentialProvider(),
-            NullLogger<LdapService>.Instance);
+            NullLogger<LdapService>.Instance, new LdapConnectionFactory());
 
         var result = await service.QueryRootDseAsync();
 

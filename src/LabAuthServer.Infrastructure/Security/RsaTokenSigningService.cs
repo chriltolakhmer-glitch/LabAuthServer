@@ -31,7 +31,7 @@ public sealed class RsaTokenSigningService : ITokenSigningService
         cancellationToken.ThrowIfCancellationRequested();
 
         var options = _tokenOptions.Value;
-        var failures = TokenOptionsValidator.Validate(options);
+        var failures = TokenOptionsValidator.ValidateForRuntime(options);
         if (failures.Count > 0)
         {
             throw new InvalidOperationException("Signing configuration is invalid.");
@@ -39,6 +39,7 @@ public sealed class RsaTokenSigningService : ITokenSigningService
 
         var signingParameters = GetSigningParameters(options.SigningAlgorithm);
         using var keyMaterial = await _keyProvider.GetActiveKeyAsync(cancellationToken).ConfigureAwait(false);
+        RsaKeySizePolicy.Validate(keyMaterial.PrivateKey);
 
         if (!string.Equals(keyMaterial.KeyIdentifier, options.ActiveKeyId, StringComparison.Ordinal))
         {

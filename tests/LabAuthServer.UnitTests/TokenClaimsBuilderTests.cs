@@ -147,6 +147,32 @@ public sealed class TokenClaimsBuilderTests
         Assert.Throws<ArgumentOutOfRangeException>(() => CreateBuilder(lifetime: TimeSpan.Zero));
     }
 
+    [Theory]
+    [InlineData(32, true)]
+    [InlineData(33, false)]
+    public void Build_PreservesUtf8ScopeLimit(int characters, bool accepted)
+    {
+        var builder = new TokenClaimsBuilder("https://issuer.example", "api", TimeSpan.FromMinutes(1), 64, 16384);
+        var input = new TokenIssuanceRequest { Subject = "reader", Roles = ["Reader"], Scopes = [new string('\u00e9', characters)] };
+        if (accepted)
+            Assert.Equal(input.Scopes, builder.Build(input, DateTimeOffset.UtcNow).Scopes);
+        else
+            Assert.Throws<ArgumentException>(() => builder.Build(input, DateTimeOffset.UtcNow));
+    }
+
+    [Theory]
+    [InlineData(5, false)]
+    [InlineData(6, true)]
+    public void Build_PreservesApprovedRoleByteLimit(int maximumClaimSize, bool accepted)
+    {
+        var builder = new TokenClaimsBuilder("https://issuer.example", "api", TimeSpan.FromMinutes(1), maximumClaimSize, 16384);
+        var input = new TokenIssuanceRequest { Subject = "reader", Roles = ["Reader"] };
+        if (accepted)
+            Assert.Equal(input.Roles, builder.Build(input, DateTimeOffset.UtcNow).Roles);
+        else
+            Assert.Throws<ArgumentException>(() => builder.Build(input, DateTimeOffset.UtcNow));
+    }
+
     private static TokenClaimsBuilder CreateBuilder(
         string issuer = "https://issuer.example",
         string audience = "labauthserver-api",

@@ -3,6 +3,14 @@ namespace LabAuthServer.Infrastructure.Security;
 public static class TokenOptionsValidator
 {
     public static IReadOnlyList<string> Validate(TokenOptions options)
+        => Validate(options, requireFutureOverlap: true);
+
+    // Expiration retires the previous key, not the active key of an already-started host.
+    // Providers separately enforce the previous key's deadline on every resolution.
+    public static IReadOnlyList<string> ValidateForRuntime(TokenOptions options)
+        => Validate(options, requireFutureOverlap: false);
+
+    private static IReadOnlyList<string> Validate(TokenOptions options, bool requireFutureOverlap)
     {
         ArgumentNullException.ThrowIfNull(options);
 
@@ -20,9 +28,9 @@ public static class TokenOptionsValidator
             failures.Add("Token audience is required and must not contain whitespace.");
         }
 
-        if (options.AccessTokenLifetime <= TimeSpan.Zero || options.AccessTokenLifetime > TimeSpan.FromDays(1))
+        if (options.AccessTokenLifetime < TimeSpan.FromSeconds(1) || options.AccessTokenLifetime > TimeSpan.FromDays(1))
         {
-            failures.Add("Access-token lifetime must be greater than zero and no more than one day.");
+            failures.Add("Access-token lifetime must be at least one second and no more than one day.");
         }
 
         if (options.ClockSkew < TimeSpan.Zero || options.ClockSkew > TimeSpan.FromMinutes(5))
@@ -30,11 +38,9 @@ public static class TokenOptionsValidator
             failures.Add("Token clock skew must be between zero and five minutes.");
         }
 
-        if (string.IsNullOrWhiteSpace(options.SigningAlgorithm) ||
-            (!options.SigningAlgorithm.StartsWith("RS", StringComparison.Ordinal) &&
-             !options.SigningAlgorithm.StartsWith("PS", StringComparison.Ordinal)))
+        if (options.SigningAlgorithm is not ("RS256" or "RS384" or "RS512" or "PS256" or "PS384" or "PS512"))
         {
-            failures.Add("Token signing algorithm must be an RSA-compatible RS or PS algorithm.");
+            failures.Add("Token signing algorithm must be a supported RSA algorithm: RS256, RS384, RS512, PS256, PS384 or PS512.");
         }
 
         ValidateIdentifier(options.ActiveKeyId, "active signing key identifier", failures);
@@ -48,7 +54,7 @@ public static class TokenOptionsValidator
                 failures.Add("The active and previous signing key identifiers must not be the same.");
             }
 
-            if (options.PreviousKeyExpiresAt.HasValue &&
+            if (requireFutureOverlap && options.PreviousKeyExpiresAt.HasValue &&
                 options.PreviousKeyExpiresAt.Value <= DateTimeOffset.UtcNow)
             {
                 failures.Add("The previous signing key overlap expiry must be in the future.");

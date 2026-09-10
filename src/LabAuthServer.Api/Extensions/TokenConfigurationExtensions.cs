@@ -6,6 +6,7 @@ using LabAuthServer.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using LabAuthServer.Api.Requests;
 
 namespace LabAuthServer.Api.Extensions;
 
@@ -24,6 +25,9 @@ public static class TokenConfigurationExtensions
             .Validate(
                 options => TokenOptionsValidator.Validate(options).Count == 0,
                 "The token configuration is invalid.")
+            .Validate(
+                options => JwtRequestSizePolicy.SupportsPayloadSize(options.MaximumTokenSize),
+                "The issuance payload budget exceeds the fixed encoded JWT transport budget.")
             .ValidateOnStart();
 
         services

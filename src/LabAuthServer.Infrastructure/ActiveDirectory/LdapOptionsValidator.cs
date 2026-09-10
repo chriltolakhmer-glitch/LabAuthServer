@@ -54,6 +54,26 @@ public static class LdapOptionsValidator
             failures.Add("Active Directory connection timeout must be greater than zero.");
         }
 
+        if (!LabAuthServer.Application.Services.AuthenticationOperation.IsValidTimeout(options.AuthenticationTimeout))
+        {
+            failures.Add("Active Directory authentication timeout must be between 1 and 60 seconds.");
+        }
+
+        if (options.MaxConcurrentLdapOperations is < 1 or > 32)
+        {
+            failures.Add("Active Directory maximum concurrent LDAP operations must be between 1 and 32.");
+        }
+
+        if (options.MaxPendingLdapWaiters is < 1 or > 128)
+        {
+            failures.Add("Active Directory maximum pending LDAP waiters must be between 1 and 128.");
+        }
+
+        if (options.MaximumGroupMemberships is < 1 or > 1000)
+        {
+            failures.Add("Active Directory maximum group memberships must be between 1 and 1000.");
+        }
+
         if (options.UseLdaps && options.Port != 636)
         {
             failures.Add("Active Directory port must be 636 when LDAPS is enabled.");

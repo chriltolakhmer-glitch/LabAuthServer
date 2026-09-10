@@ -26,7 +26,7 @@ public sealed class ProtectedSigningKeyProvider : IProtectedSigningKeyProvider
         cancellationToken.ThrowIfCancellationRequested();
 
         var options = _tokenOptions.Value;
-        var failures = TokenOptionsValidator.Validate(options);
+        var failures = TokenOptionsValidator.ValidateForRuntime(options);
         if (failures.Count > 0)
         {
             throw new InvalidOperationException("Signing-key configuration is invalid.");
@@ -45,14 +45,21 @@ public sealed class ProtectedSigningKeyProvider : IProtectedSigningKeyProvider
         }
 
         var options = _tokenOptions.Value;
-        var failures = TokenOptionsValidator.Validate(options);
+        var failures = TokenOptionsValidator.ValidateForRuntime(options);
         if (failures.Count > 0)
         {
             throw new InvalidOperationException("Signing-key configuration is invalid.");
         }
 
+        if (string.Equals(options.PreviousKeyId, keyIdentifier, StringComparison.Ordinal) &&
+            (!options.PreviousKeyExpiresAt.HasValue || options.PreviousKeyExpiresAt.Value <= DateTimeOffset.UtcNow))
+        {
+            throw new InvalidOperationException("Signing-key configuration is invalid: the previous signing key overlap is missing or expired.");
+        }
+
         if (_configuredKeys.TryGetValue(keyIdentifier, out var key))
         {
+            RsaKeySizePolicy.Validate(key);
             return ValueTask.FromResult(new SigningKeyMaterial(keyIdentifier, RSA.Create(key.ExportParameters(true))));
         }
 
@@ -90,7 +97,7 @@ public sealed class ProtectedSigningKeyProvider : IProtectedSigningKeyProvider
         }
 
         var options = _tokenOptions.Value;
-        var failures = TokenOptionsValidator.Validate(options);
+        var failures = TokenOptionsValidator.ValidateForRuntime(options);
         if (failures.Count > 0)
         {
             throw new InvalidOperationException("Signing-key configuration is invalid.");
@@ -119,6 +126,7 @@ public sealed class ProtectedSigningKeyProvider : IProtectedSigningKeyProvider
             throw new InvalidOperationException("The configured previous signing key is unavailable during the overlap window.");
         }
 
+        RsaKeySizePolicy.Validate(key);
         return ValueTask.FromResult(
             new ValidationKeyMaterial(keyIdentifier, RSA.Create(key.ExportParameters(false))));
     }

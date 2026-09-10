@@ -16,7 +16,7 @@ public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
     [Fact]
     public async Task GetHealth_ReturnsHealthyResponse()
     {
-        var client = factory.CreateClient();
+        var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://DC01.lab.local") });
 
         var response = await client.GetAsync("/api/v1/health");
         var healthResponse = await response.Content.ReadFromJsonAsync<HealthResponse>();
@@ -33,7 +33,7 @@ public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
     [Fact]
     public async Task GetHealth_WithValidCorrelationId_PropagatesSameValue()
     {
-        var client = factory.CreateClient();
+        var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://DC01.lab.local") });
         const string correlationId = "dddddddd-dddd-dddd-dddd-dddddddddddd";
         using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/health");
         request.Headers.Add("X-Correlation-ID", correlationId);
@@ -47,7 +47,7 @@ public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
     [Fact]
     public async Task GetHealth_ConcurrentRequestsReceiveDistinctCorrelationIds()
     {
-        var client = factory.CreateClient();
+        var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://DC01.lab.local") });
 
         var responses = await Task.WhenAll(
             Enumerable.Range(0, 8).Select(_ => client.GetAsync("/api/v1/health")));
@@ -63,7 +63,7 @@ public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
     [Fact]
     public async Task GetProtected_WithoutToken_ReturnsUnauthorized()
     {
-        var client = factory.CreateClient();
+        var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://DC01.lab.local") });
 
         var response = await client.GetAsync("/api/v1/protected");
 
@@ -75,7 +75,7 @@ public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
     {
         var client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
-            BaseAddress = new Uri("https://localhost")
+            BaseAddress = new Uri("https://DC01.lab.local")
         });
 
         for (var attempt = 0; attempt < 10; attempt++)

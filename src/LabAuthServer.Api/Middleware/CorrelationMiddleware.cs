@@ -18,6 +18,7 @@ public sealed class CorrelationMiddleware
     {
         var supplied = context.Request.Headers[HeaderName].ToString();
         var correlationId = Guid.TryParseExact(supplied, "D", out var parsed) &&
+                            parsed != Guid.Empty &&
                             string.Equals(supplied, parsed.ToString("D"), StringComparison.OrdinalIgnoreCase)
             ? parsed
             : Guid.NewGuid();

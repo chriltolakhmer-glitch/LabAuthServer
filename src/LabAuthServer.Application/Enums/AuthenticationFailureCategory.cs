@@ -9,5 +9,7 @@ public enum AuthenticationFailureCategory
     InvalidRequest = 4,
     Configuration = 5,
     Cancelled = 6,
-    Unexpected = 7
+    Unexpected = 7,
+    ProtocolFailure = 8,
+    ResourceExhausted = 9
 }

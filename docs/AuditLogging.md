@@ -26,10 +26,14 @@ Events can contain bounded correlation/request identifiers, normalized username 
 
 ## Correlation and middleware
 
-`CorrelationMiddleware` accepts a canonical `X-Correlation-ID` when supplied or creates a new GUID. The response includes the canonical correlation header, and the value is passed into audit records. `AuthorizationAuditMiddleware` records post-policy `403` outcomes. JWT bearer failures are classified without persisting token contents. Global exception handling returns generic correlated ProblemDetails and records a minimized unhandled-exception event.
+`CorrelationMiddleware` accepts a canonical, nonempty `X-Correlation-ID` when supplied or creates a new GUID. An all-zero GUID is replaced because audit requires a nonempty correlation. The response includes the canonical correlation header, and the value is passed into audit records. `AuthorizationAuditMiddleware` records post-policy `403` outcomes. JWT bearer failures are classified without persisting token contents. Global exception handling returns generic correlated ProblemDetails and records a minimized unhandled-exception event.
+
+Login and denied-request audit identities are limited to 256 UTF-16 code units by the existing storage contract. Longer identities are omitted from both Username and Subject and marked with `identityOmitted: true` in bounded DetailsJson, preserving the event rather than failing its validation. Identities are never truncated or copied into diagnostics. Login, directory and JWT identity values remain unchanged. This explicitly loses the oversized identity in the audit record, while retaining event type, outcome and correlation. See [the regression and fix](plans/Phase-2/Phase-2A-Final-Application-Code-Review.md).
 
 ## Database boundary and failure behavior
 
 The writer procedure validates event codes, roles, status codes, JSON, lengths, and prohibited sensitive properties before an atomic insert. The application identity is intended to receive only procedure execution through `LabAuthServer_AuditWriter`.
 
 Audit persistence failure is logged as an operational warning/error and does not replace the primary response. Retention, archival, purge procedures, and SQL Agent scheduling are not implemented.
+
+Persistence remains best effort and uses RequestAborted. Cancellation can prevent durable audit persistence or delivery of the primary response; no detached queue or durable-after-disconnect guarantee is provided.

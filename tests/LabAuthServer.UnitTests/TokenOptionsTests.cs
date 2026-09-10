@@ -4,6 +4,39 @@ namespace LabAuthServer.UnitTests;
 
 public sealed class TokenOptionsTests
 {
+    [Theory]
+    [InlineData("RS")]
+    [InlineData("RS999")]
+    [InlineData("PSgarbage")]
+    public void Validate_RejectsUnsupportedRsaAlgorithmAtStartup(string algorithm)
+    {
+        var options = CreateValidOptions();
+        options.SigningAlgorithm = algorithm;
+        Assert.Contains(TokenOptionsValidator.Validate(options), value => value.Contains("algorithm"));
+    }
+
+    [Theory]
+    [InlineData("RS256")]
+    [InlineData("RS384")]
+    [InlineData("RS512")]
+    [InlineData("PS256")]
+    [InlineData("PS384")]
+    [InlineData("PS512")]
+    public void Validate_AcceptsEverySupportedRsaAlgorithm(string algorithm)
+    {
+        var options = CreateValidOptions();
+        options.SigningAlgorithm = algorithm;
+        Assert.Empty(TokenOptionsValidator.Validate(options));
+    }
+
+    [Fact]
+    public void Validate_RejectsSubsecondLifetimeBeforeClaimsBuilder()
+    {
+        var options = CreateValidOptions();
+        options.AccessTokenLifetime = TimeSpan.FromMilliseconds(500);
+        Assert.Contains(TokenOptionsValidator.Validate(options), value => value.Contains("lifetime"));
+    }
+
     [Fact]
     public void Validate_WithValidOptions_ReturnsNoFailures()
     {

@@ -28,6 +28,8 @@ public static class ActiveDirectoryOptionsExtensions
             services.AddSingleton<ILdapServiceAccountCredentialProvider, DpapiLdapServiceAccountCredentialProvider>();
         }
 
+        services.AddSingleton<ILdapConnectionFactory, LdapConnectionFactory>();
+        services.AddSingleton<ILdapConcurrencyLimiter, LdapConcurrencyLimiter>();
         services.AddScoped<ILdapService, LdapService>();
         services.AddScoped<ILdapAuthenticationClient, LdapAuthenticationClient>();
         services.AddScoped<IAuthenticationService, LdapAuthenticationService>();

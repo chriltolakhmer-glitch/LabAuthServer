@@ -1,3 +1,4 @@
+using LabAuthServer.Application.Services;
 using LabAuthServer.Api.Controllers;
 using LabAuthServer.Application.DTOs;
 using LabAuthServer.Application.Enums;
@@ -22,12 +23,7 @@ public sealed class AuthenticationTests
     {
         var controller = CreateController(new FakeAuthenticationService
         {
-            Result = new AuthenticationResult
-            {
-                IsAuthenticated = false,
-                FailureCategory = failureCategory,
-                ErrorMessage = GetMessage(failureCategory)
-            }
+            Result = AuthenticationResult.Failed(new DirectoryFailure(failureCategory, LabAuthServer.Application.Enums.DirectoryFailureStage.UserBind, LabAuthServer.Application.Enums.DirectoryFailureReason.UnexpectedFailure))
         });
 
         var result = await controller.Login(
@@ -45,11 +41,7 @@ public sealed class AuthenticationTests
     {
         var authService = new FakeAuthenticationService
         {
-            Result = new AuthenticationResult
-            {
-                IsAuthenticated = true,
-                FailureCategory = AuthenticationFailureCategory.None
-            }
+            Result = AuthenticationResult.Succeeded("alice@lab.local")
         };
         var mappingService = new FakeAuthorizationMappingService
         {
@@ -83,11 +75,7 @@ public sealed class AuthenticationTests
     {
         var authService = new FakeAuthenticationService
         {
-            Result = new AuthenticationResult
-            {
-                IsAuthenticated = true,
-                FailureCategory = AuthenticationFailureCategory.None
-            }
+            Result = AuthenticationResult.Succeeded("alice@lab.local")
         };
         var ldapService = new FakeLdapService
         {
@@ -150,7 +138,9 @@ public sealed class AuthenticationTests
             service,
             ldapService ?? new FakeLdapService(),
             authorizationMappingService ?? new FakeAuthorizationMappingService(),
-            tokenService ?? new FakeTokenService())
+            tokenService ?? new FakeTokenService(),
+            new LabAuthServer.Infrastructure.Services.LdapConcurrencyLimiter(
+                Microsoft.Extensions.Options.Options.Create(new LabAuthServer.Infrastructure.ActiveDirectory.LdapOptions())))
         {
             ControllerContext = new ControllerContext
             {
@@ -175,19 +165,14 @@ public sealed class AuthenticationTests
 
     private sealed class FakeAuthenticationService : IAuthenticationService
     {
-        public AuthenticationResult Result { get; init; } = new()
-        {
-            IsAuthenticated = false,
-            FailureCategory = AuthenticationFailureCategory.InvalidCredentials,
-            ErrorMessage = "Authentication failed."
-        };
+        public AuthenticationResult Result { get; init; } = AuthenticationResult.Failed(new DirectoryFailure(AuthenticationFailureCategory.InvalidCredentials, DirectoryFailureStage.UserBind, DirectoryFailureReason.UserBindRejected));
 
         public bool WasCalled { get; private set; }
 
         public Task<AuthenticationResult> AuthenticateAsync(
             string username,
             string password,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, AuthenticationOperation? operation = null)
         {
             WasCalled = true;
             return Task.FromResult(Result);
@@ -205,14 +190,14 @@ public sealed class AuthenticationTests
             throw new NotSupportedException();
         }
 
-        public Task<IReadOnlyList<string>> GetUserGroupsAsync(
+        public Task<GroupLookupResult> GetUserGroupsAsync(
             string userPrincipalName,
             string password,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, AuthenticationOperation? operation = null)
         {
             CapturedUserPrincipalName = userPrincipalName;
             CapturedPassword = password;
-            return Task.FromResult(Groups);
+            return Task.FromResult(GroupLookupResult.Succeeded(Groups));
         }
     }
 

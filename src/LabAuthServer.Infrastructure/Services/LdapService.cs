@@ -1,3 +1,6 @@
+using LabAuthServer.Application.Services;
+using LabAuthServer.Application.DTOs;
+using LabAuthServer.Application.Enums;
 using System.DirectoryServices.Protocols;
 using System.Net;
 using LabAuthServer.Application.Interfaces;
@@ -15,6 +18,7 @@ public sealed class LdapService : ILdapService
     private readonly IOptions<LdapOptions> _ldapOptions;
     private readonly ILdapServiceAccountCredentialProvider _credentialProvider;
     private readonly ILogger<LdapService> _logger;
+    private readonly ILdapConnectionFactory _connectionFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LdapService"/> class.
@@ -25,7 +29,7 @@ public sealed class LdapService : ILdapService
     public LdapService(
         IOptions<LdapOptions> ldapOptions,
         ILdapServiceAccountCredentialProvider credentialProvider,
-        ILogger<LdapService> logger)
+        ILogger<LdapService> logger, ILdapConnectionFactory connectionFactory)
     {
         ArgumentNullException.ThrowIfNull(ldapOptions);
         ArgumentNullException.ThrowIfNull(credentialProvider);
@@ -34,6 +38,7 @@ public sealed class LdapService : ILdapService
         _ldapOptions = ldapOptions;
         _credentialProvider = credentialProvider;
         _logger = logger;
+        _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
     }
 
     /// <summary>
@@ -45,9 +50,28 @@ public sealed class LdapService : ILdapService
     {
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             _logger.LogInformation("Starting Root DSE query to {Host}:{Port}", _ldapOptions.Value.Host, _ldapOptions.Value.Port);
 
-            var result = await Task.Run(() => PerformRootDseQuery(), cancellationToken).ConfigureAwait(false);
+            // Credential acquisition is awaited with the caller token before entering the
+            // blocking provider call, so cancellation is not discarded by a synchronous wait.
+            var serviceAccountUsername = _ldapOptions.Value.ServiceAccountUsername?.Trim();
+            if (string.IsNullOrWhiteSpace(serviceAccountUsername))
+            {
+                throw new InvalidOperationException(
+                    "An LDAP service account is required for the Root DSE query. Configure ActiveDirectory:ServiceAccountUsername through secure configuration.");
+            }
+
+            var serviceAccountPassword = await _credentialProvider.GetPasswordAsync(cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(serviceAccountPassword))
+            {
+                throw new InvalidOperationException("LDAP service-account password is not configured.");
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await Task.Run(
+                () => PerformRootDseQuery(serviceAccountUsername, serviceAccountPassword, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
 
             _logger.LogInformation("Root DSE query succeeded for {Host}:{Port}", _ldapOptions.Value.Host, _ldapOptions.Value.Port);
 
@@ -82,50 +106,38 @@ public sealed class LdapService : ILdapService
         }
     }
 
-    public async Task<IReadOnlyList<string>> GetUserGroupsAsync(
-        string userPrincipalName,
-        string password,
-        CancellationToken cancellationToken = default)
+    public async Task<GroupLookupResult> GetUserGroupsAsync(string userPrincipalName, string password,
+        CancellationToken cancellationToken = default, AuthenticationOperation? operation = null)
     {
-        if (string.IsNullOrWhiteSpace(userPrincipalName) || string.IsNullOrWhiteSpace(password))
-        {
-            return Array.Empty<string>();
-        }
-
+        using var ownedOperation = operation is null ? new AuthenticationOperation(_ldapOptions.Value.AuthenticationTimeout, cancellationToken) : null;
+        operation ??= ownedOperation!;
+        GroupLookupResult result;
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            _logger.LogInformation("Querying AD group memberships for {UserPrincipalName}", userPrincipalName);
-
-            var groups = await Task.Run(
-                () => PerformUserGroupQuery(userPrincipalName, cancellationToken),
-                cancellationToken).ConfigureAwait(false);
-
-            _logger.LogInformation("Resolved {GroupCount} AD group memberships for {UserPrincipalName}", groups.Count, userPrincipalName);
-            return groups;
+            operation.EnterStage(DirectoryFailureStage.ConnectionSetup);
+            result = string.IsNullOrWhiteSpace(userPrincipalName) || string.IsNullOrWhiteSpace(password)
+                ? GroupFailure(new(AuthenticationFailureCategory.InvalidRequest, DirectoryFailureStage.GroupSearch, DirectoryFailureReason.InvalidInput))
+                : await Task.Run(() => PerformUserGroupQuery(userPrincipalName, operation), operation.Token).ConfigureAwait(false);
+            operation.ThrowIfCancellationRequested();
         }
-        catch (OperationCanceledException)
+        catch (Exception exception) when (LdapFailureClassifier.IsExpected(exception, DirectoryFailureStage.GroupSearch))
         {
-            _logger.LogWarning("AD group membership query was cancelled for {UserPrincipalName}", userPrincipalName);
-            return Array.Empty<string>();
-        }
-        catch (LdapException ex)
-        {
-            _logger.LogError("LDAP error while resolving AD group memberships for {UserPrincipalName}: {ErrorCode}", userPrincipalName, ex.ErrorCode);
-            return Array.Empty<string>();
+            result = GroupFailure(operation.Failure ?? LdapFailureClassifier.Classify(exception, DirectoryFailureStage.GroupSearch, operation.Token));
         }
         catch (Exception)
         {
-            _logger.LogError("Unexpected error while resolving AD group memberships for {UserPrincipalName}", userPrincipalName);
-            return Array.Empty<string>();
+            result = GroupFailure(operation.Failure ?? LdapFailureClassifier.Unexpected(DirectoryFailureStage.GroupSearch));
         }
+        if (result.Failure is not null) LdapFailureLogging.Write(_logger, result.Failure);
+        return result;
     }
-
     /// <summary>
     /// Performs the Root DSE query (blocking operation).
     /// </summary>
-    private RootDseResult PerformRootDseQuery()
+    private RootDseResult PerformRootDseQuery(string serviceAccountUsername, string serviceAccountPassword,
+        CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var options = _ldapOptions.Value;
 
         // Create LDAP directory identifier
@@ -143,19 +155,7 @@ public sealed class LdapService : ILdapService
             connection.SessionOptions.ProtocolVersion = 3; // LDAP v3
             connection.SessionOptions.SecureSocketLayer = options.UseLdaps;
 
-            var serviceAccountUsername = options.ServiceAccountUsername?.Trim();
-            if (string.IsNullOrWhiteSpace(serviceAccountUsername))
-            {
-                throw new InvalidOperationException(
-                    "An LDAP service account is required for the Root DSE query. Configure ActiveDirectory:ServiceAccountUsername through secure configuration.");
-            }
-
-            var serviceAccountPassword = _credentialProvider.GetPasswordAsync().GetAwaiter().GetResult();
-            if (string.IsNullOrWhiteSpace(serviceAccountPassword))
-            {
-                throw new InvalidOperationException("LDAP service-account password is not configured.");
-            }
-
+            cancellationToken.ThrowIfCancellationRequested();
             connection.Bind(new NetworkCredential(serviceAccountUsername, serviceAccountPassword));
 
             // Query RootDSE (empty DN and scope = Base)
@@ -210,94 +210,79 @@ public sealed class LdapService : ILdapService
         }
     }
 
-    private IReadOnlyList<string> PerformUserGroupQuery(
-        string userPrincipalName,
-        CancellationToken cancellationToken)
+    private GroupLookupResult PerformUserGroupQuery(string userPrincipalName, AuthenticationOperation operation)
     {
-        var options = _ldapOptions.Value;
-        if (!options.UseLdaps || options.Port != 636)
+        var stage = DirectoryFailureStage.ConnectionSetup;
+        try
         {
-            return Array.Empty<string>();
-        }
-
-        var directoryIdentifier = new LdapDirectoryIdentifier(options.Host, options.Port);
-
-        using var connection = new LdapConnection(directoryIdentifier)
-        {
-            Timeout = options.ConnectionTimeout
-        };
-        using var cancellationRegistration = cancellationToken.Register(connection.Dispose);
-
-        connection.SessionOptions.ProtocolVersion = 3;
-        connection.SessionOptions.SecureSocketLayer = true;
-
-        var serviceAccountUsername = options.ServiceAccountUsername?.Trim();
-        if (string.IsNullOrWhiteSpace(serviceAccountUsername))
-        {
-            return Array.Empty<string>();
-        }
-
-        var serviceAccountPassword = _credentialProvider.GetPasswordAsync(cancellationToken).GetAwaiter().GetResult();
-        if (string.IsNullOrWhiteSpace(serviceAccountPassword))
-        {
-            return Array.Empty<string>();
-        }
-
-        connection.Bind(new NetworkCredential(serviceAccountUsername, serviceAccountPassword));
-
-        var searchRequest = new SearchRequest(
-            options.UserSearchBaseDn,
-            $"(&(objectClass=user)(userPrincipalName={LdapFilterEscaper.Escape(userPrincipalName)}))",
-            SearchScope.Subtree,
-            new[] { "memberOf" });
-
-        var searchResponse = connection.SendRequest(searchRequest) as SearchResponse;
-        if (searchResponse is null || searchResponse.ResultCode != ResultCode.Success)
-        {
-            return Array.Empty<string>();
-        }
-
-        var groupNames = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (SearchResultEntry entry in searchResponse.Entries)
-        {
-            if (!entry.Attributes.Contains("memberOf"))
+            var options = _ldapOptions.Value;
+            if (!options.UseLdaps || options.Port != 636)
+                return GroupFailure(new(AuthenticationFailureCategory.Configuration, stage, DirectoryFailureReason.InvalidConfiguration));
+            operation.ThrowIfCancellationRequested();
+            using var connection = _connectionFactory.Create(options);
+            operation.ThrowIfCancellationRequested();
+            connection.ConfigureSession(true);
+            operation.ThrowIfCancellationRequested();
+            stage = DirectoryFailureStage.CredentialLoading;
+            operation.EnterStage(stage);
+            var serviceUsername = options.ServiceAccountUsername?.Trim();
+            if (string.IsNullOrWhiteSpace(serviceUsername))
+                return GroupFailure(new(AuthenticationFailureCategory.Configuration, stage, DirectoryFailureReason.InvalidConfiguration));
+            var servicePassword = _credentialProvider.GetPasswordAsync(operation.Token).GetAwaiter().GetResult();
+            operation.ThrowIfCancellationRequested();
+            if (string.IsNullOrWhiteSpace(servicePassword))
+                return GroupFailure(new(AuthenticationFailureCategory.Configuration, stage, DirectoryFailureReason.CredentialStoreUnavailable));
+            stage = DirectoryFailureStage.ServiceBind;
+            operation.EnterStage(stage);
+            connection.Bind(new NetworkCredential(serviceUsername, servicePassword));
+            operation.ThrowIfCancellationRequested();
+            stage = DirectoryFailureStage.GroupSearch;
+            operation.EnterStage(stage);
+            var response = connection.Search(new SearchRequest(options.UserSearchBaseDn,
+                $"(&(objectClass=user)(userPrincipalName={LdapFilterEscaper.Escape(userPrincipalName)}))",
+                SearchScope.Subtree, ["memberOf"]));
+            operation.ThrowIfCancellationRequested();
+            var failure = LdapResponseValidator.ValidateSearch(response, stage);
+            if (failure is not null) return GroupFailure(failure);
+            stage = DirectoryFailureStage.ResponseValidation;
+            operation.EnterStage(stage);
+            var entry = response!.Entries[0];
+            if (!LdapDistinguishedNameParser.TryParse(entry.DistinguishedName, out _))
+                return GroupFailure(LdapResponseValidator.Invalid(DirectoryFailureReason.InvalidGroupData));
+            // Ranged attributes cannot be interpreted as a complete membership set.
+            if (entry.Attributes.Keys.Any(name => name.StartsWith("memberOf;", StringComparison.OrdinalIgnoreCase)))
+                return GroupFailure(LdapResponseValidator.Invalid(DirectoryFailureReason.IncompleteMembership));
+            var groups = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (entry.Attributes.TryGetValue("memberOf", out var memberships))
             {
-                continue;
-            }
-
-            foreach (var attribute in entry.Attributes["memberOf"].GetValues(typeof(string)))
-            {
-                var groupName = GetGroupNameFromDistinguishedName(attribute?.ToString());
-                if (!string.IsNullOrWhiteSpace(groupName))
+                // Fail closed instead of truncating: an excess membership set must never be
+                // silently shortened into a different authorization result.
+                if (memberships.Count > options.MaximumGroupMemberships)
+                    return GroupFailure(LdapResponseValidator.Invalid(DirectoryFailureReason.MembershipLimitExceeded));
+                foreach (var membership in memberships)
                 {
-                    groupNames.Add(groupName.Trim());
+                    operation.ThrowIfCancellationRequested();
+                    if (!LdapDistinguishedNameParser.TryParse(membership, out var name))
+                        return GroupFailure(LdapResponseValidator.Invalid(DirectoryFailureReason.InvalidGroupData));
+                    groups.Add(name);
                 }
             }
+            operation.ThrowIfCancellationRequested();
+            return GroupLookupResult.Succeeded(groups.ToArray());
         }
-
-        return groupNames.ToArray();
+        catch (Exception exception) when (LdapFailureClassifier.IsExpected(exception, stage))
+        {
+            return GroupFailure(operation.Failure ?? LdapFailureClassifier.Classify(exception, stage, operation.Token));
+        }
+        catch (Exception)
+        {
+            return GroupFailure(operation.Failure ?? LdapFailureClassifier.Unexpected(stage));
+        }
     }
 
-    private static string? GetGroupNameFromDistinguishedName(string? distinguishedName)
-    {
-        if (string.IsNullOrWhiteSpace(distinguishedName))
-        {
-            return null;
-        }
-
-        foreach (var segment in distinguishedName.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            var trimmedValue = segment.Trim();
-            if (trimmedValue.StartsWith("CN=", StringComparison.OrdinalIgnoreCase))
-            {
-                return trimmedValue[3..].Trim();
-            }
-        }
-
-        return null;
-    }
-
+    private static GroupLookupResult GroupFailure(DirectoryFailure failure)
+        => GroupLookupResult.Failed(failure.AtStage(failure.Reason is DirectoryFailureReason.CallerCancelled or DirectoryFailureReason.AuthenticationDeadlineExceeded ? failure.Stage : failure.Stage == DirectoryFailureStage.ResponseValidation
+            ? DirectoryFailureStage.ResponseValidation : DirectoryFailureStage.GroupSearch));
     /// <summary>
     /// Extracts attributes from a directory entry into a read-only dictionary.
     /// </summary>

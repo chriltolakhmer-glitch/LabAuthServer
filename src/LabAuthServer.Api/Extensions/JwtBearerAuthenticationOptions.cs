@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
+using LabAuthServer.Api.Requests;
+
 using JwtClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 
 namespace LabAuthServer.Api.Extensions;
@@ -29,7 +31,7 @@ public sealed class JwtBearerAuthenticationOptions : IConfigureNamedOptions<JwtB
     public void Configure(string? name, JwtBearerOptions options)
     {
         var tokenOptions = _tokenOptions.Value;
-        var failures = TokenOptionsValidator.Validate(tokenOptions);
+        var failures = TokenOptionsValidator.ValidateForRuntime(tokenOptions);
         if (failures.Count > 0)
         {
             throw new InvalidOperationException($"JWT validation configuration is invalid: {string.Join("; ", failures)}");
@@ -38,6 +40,8 @@ public sealed class JwtBearerAuthenticationOptions : IConfigureNamedOptions<JwtB
         options.RequireHttpsMetadata = true;
         options.MapInboundClaims = false;
         options.SaveToken = false;
+        foreach (var handler in options.TokenHandlers)
+            handler.MaximumTokenSizeInBytes = JwtRequestSizePolicy.MaximumEncodedJwtSize;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -63,6 +67,7 @@ public sealed class JwtBearerAuthenticationOptions : IConfigureNamedOptions<JwtB
 
                 var keyMaterial = _keyProvider.GetValidationKeyAsync(kid).GetAwaiter().GetResult();
                 using var _ = keyMaterial;
+                RsaKeySizePolicy.Validate(keyMaterial.PublicKey);
                 var publicKey = RSA.Create(keyMaterial.PublicKey.ExportParameters(includePrivateParameters: false));
                 return new[] { new RsaSecurityKey(publicKey) };
             }

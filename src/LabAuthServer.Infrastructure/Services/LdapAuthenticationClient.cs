@@ -1,248 +1,149 @@
+using LabAuthServer.Application.Services;
 using System.DirectoryServices.Protocols;
 using System.Net;
+using LabAuthServer.Application.DTOs;
+using LabAuthServer.Application.Enums;
 using LabAuthServer.Application.Interfaces;
 using LabAuthServer.Infrastructure.ActiveDirectory;
 
 namespace LabAuthServer.Infrastructure.Services;
 
-public sealed class LdapAuthenticationClient : ILdapAuthenticationClient
+public sealed class LdapAuthenticationClient(ILdapConnectionFactory connectionFactory) : ILdapAuthenticationClient
 {
-    public async Task<LdapAuthenticationResult> AuthenticateAsync(
-        string username,
-        string password,
-        LdapOptions options,
-        ILdapServiceAccountCredentialProvider credentialProvider,
-        CancellationToken cancellationToken = default)
+    public async Task<AuthenticationResult> AuthenticateAsync(string username, string password, LdapOptions options,
+        ILdapServiceAccountCredentialProvider credentialProvider, CancellationToken cancellationToken = default, AuthenticationOperation? operation = null)
     {
         ArgumentNullException.ThrowIfNull(options);
+        using var ownedOperation = operation is null ? new AuthenticationOperation(options.AuthenticationTimeout, cancellationToken) : null;
+        operation ??= ownedOperation!;
         ArgumentNullException.ThrowIfNull(credentialProvider);
-
-        if (!options.UseLdaps || options.Port != 636)
+        var stage = DirectoryFailureStage.CredentialLoading;
+        try
         {
-            throw new InvalidOperationException("LDAP authentication requires LDAPS on TCP port 636.");
+            operation.ThrowIfCancellationRequested();
+            if (!options.UseLdaps || options.Port != 636 || string.IsNullOrWhiteSpace(options.ServiceAccountUsername))
+                return AuthenticationResult.Failed(new(AuthenticationFailureCategory.Configuration, stage, DirectoryFailureReason.InvalidConfiguration));
+            var servicePassword = await credentialProvider.GetPasswordAsync(operation.Token).ConfigureAwait(false);
+            operation.ThrowIfCancellationRequested();
+            if (string.IsNullOrWhiteSpace(servicePassword))
+                return AuthenticationResult.Failed(new(AuthenticationFailureCategory.Configuration, stage, DirectoryFailureReason.CredentialStoreUnavailable));
+            stage = DirectoryFailureStage.ConnectionSetup;
+            operation.EnterStage(stage);
+            var result = await Task.Run(() => LookupAndBind(username, password, servicePassword, options, operation), operation.Token).ConfigureAwait(false);
+            operation.ThrowIfCancellationRequested();
+            return result;
         }
-
-        var serviceAccountPassword = await credentialProvider.GetPasswordAsync(cancellationToken).ConfigureAwait(false);
-        if (string.IsNullOrWhiteSpace(serviceAccountPassword))
+        catch (Exception exception) when (LdapFailureClassifier.IsExpected(exception, stage))
         {
-            return new LdapAuthenticationResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.DirectoryUnavailable
-            };
+            return AuthenticationResult.Failed(operation.Failure ?? LdapFailureClassifier.Classify(exception, stage, operation.Token));
         }
-
-        return await Task.Run(
-            () => LookupAndBind(username, password, serviceAccountPassword, options, cancellationToken),
-            cancellationToken).ConfigureAwait(false);
+        catch (Exception)
+        {
+            return AuthenticationResult.Failed(operation.Failure ?? LdapFailureClassifier.Unexpected(stage));
+        }
     }
 
-    public async Task<LdapBindResult> BindAsync(
-        string username,
-        string password,
-        LdapOptions options,
-        CancellationToken cancellationToken = default)
+    public async Task<AuthenticationResult> BindAsync(string username, string password, LdapOptions options,
+        CancellationToken cancellationToken = default, AuthenticationOperation? operation = null)
     {
         ArgumentNullException.ThrowIfNull(options);
-
-        if (!options.UseLdaps || options.Port != 636)
-        {
-            throw new InvalidOperationException("LDAP authentication requires LDAPS on TCP port 636.");
-        }
-
-        return await Task.Run(
-            () => Bind(username, password, options, cancellationToken),
-            cancellationToken).ConfigureAwait(false);
-    }
-
-    private static LdapBindResult Bind(
-        string username,
-        string password,
-        LdapOptions options,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        using var connection = new LdapConnection(new LdapDirectoryIdentifier(options.Host, 636))
-        {
-            Timeout = options.ConnectionTimeout
-        };
-        using var cancellationRegistration = cancellationToken.Register(connection.Dispose);
-
+        using var ownedOperation = operation is null ? new AuthenticationOperation(options.AuthenticationTimeout, cancellationToken) : null;
+        operation ??= ownedOperation!;
         try
         {
-            connection.SessionOptions.ProtocolVersion = 3;
-            connection.SessionOptions.SecureSocketLayer = true;
+            operation.EnterStage(DirectoryFailureStage.ConnectionSetup);
+            if (!options.UseLdaps || options.Port != 636)
+                return AuthenticationResult.Failed(new(AuthenticationFailureCategory.Configuration, DirectoryFailureStage.ConnectionSetup, DirectoryFailureReason.InvalidConfiguration));
+            var result = await Task.Run(() => Bind(username, password, options, operation), operation.Token).ConfigureAwait(false);
+            operation.ThrowIfCancellationRequested();
+            return result;
+        }
+        catch (Exception exception) when (LdapFailureClassifier.IsExpected(exception, DirectoryFailureStage.ConnectionSetup))
+        {
+            return AuthenticationResult.Failed(operation.Failure ?? LdapFailureClassifier.Classify(exception, DirectoryFailureStage.ConnectionSetup, operation.Token));
+        }
+        catch (Exception)
+        {
+            return AuthenticationResult.Failed(operation.Failure ?? LdapFailureClassifier.Unexpected(DirectoryFailureStage.ConnectionSetup));
+        }
+    }
+
+    private AuthenticationResult Bind(string username, string password, LdapOptions options, AuthenticationOperation operation)
+    {
+        var stage = DirectoryFailureStage.ConnectionSetup;
+        try
+        {
+            operation.ThrowIfCancellationRequested();
+            using var connection = connectionFactory.Create(options);
+            operation.ThrowIfCancellationRequested();
+            connection.ConfigureSession(true);
+            operation.ThrowIfCancellationRequested();
+            stage = DirectoryFailureStage.UserBind;
+            operation.EnterStage(stage);
             connection.Bind(new NetworkCredential(username, password));
-
-            return new LdapBindResult
-            {
-                IsSuccess = true,
-                FailureCategory = LdapBindFailureCategory.None
-            };
+            operation.ThrowIfCancellationRequested();
+            return AuthenticationResult.Succeeded(username);
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (Exception exception) when (LdapFailureClassifier.IsExpected(exception, stage))
         {
-            return new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.Cancelled
-            };
+            return AuthenticationResult.Failed(operation.Failure ?? LdapFailureClassifier.Classify(exception, stage, operation.Token));
         }
-        catch (LdapException) when (cancellationToken.IsCancellationRequested)
+        catch (Exception)
         {
-            return new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.Cancelled
-            };
-        }
-        catch (LdapException ex) when (ex.ErrorCode == 49)
-        {
-            return new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.InvalidCredentials
-            };
-        }
-        catch (LdapException ex) when (ex.ErrorCode == 81)
-        {
-            return new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.DirectoryUnavailable
-            };
-        }
-        catch (LdapException ex) when (ex.ErrorCode == 85)
-        {
-            return new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.Timeout
-            };
-        }
-        catch (TimeoutException)
-        {
-            return new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.Timeout
-            };
-        }
-        catch (LdapException)
-        {
-            return new LdapBindResult
-            {
-                IsSuccess = false,
-                FailureCategory = LdapBindFailureCategory.Unexpected
-            };
+            return AuthenticationResult.Failed(operation.Failure ?? LdapFailureClassifier.Unexpected(stage));
         }
     }
 
-    private static LdapAuthenticationResult LookupAndBind(
-        string username,
-        string password,
-        string serviceAccountPassword,
-        LdapOptions options,
-        CancellationToken cancellationToken)
+    private AuthenticationResult LookupAndBind(string username, string password, string servicePassword,
+        LdapOptions options, AuthenticationOperation operation)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        using var connection = new LdapConnection(new LdapDirectoryIdentifier(options.Host, options.Port))
-        {
-            Timeout = options.ConnectionTimeout
-        };
-        using var cancellationRegistration = cancellationToken.Register(connection.Dispose);
-
+        var stage = DirectoryFailureStage.ConnectionSetup;
         try
         {
-            connection.SessionOptions.ProtocolVersion = 3;
-            connection.SessionOptions.SecureSocketLayer = true;
-            connection.Bind(new NetworkCredential(options.ServiceAccountUsername, serviceAccountPassword));
-
-            var searchRequest = new SearchRequest(
-                options.UserSearchBaseDn,
+            operation.ThrowIfCancellationRequested();
+            using var connection = connectionFactory.Create(options);
+            operation.ThrowIfCancellationRequested();
+            connection.ConfigureSession(true);
+            operation.ThrowIfCancellationRequested();
+            stage = DirectoryFailureStage.ServiceBind;
+            operation.EnterStage(stage);
+            connection.Bind(new NetworkCredential(options.ServiceAccountUsername, servicePassword));
+            operation.ThrowIfCancellationRequested();
+            stage = DirectoryFailureStage.UserSearch;
+            operation.EnterStage(stage);
+            var response = connection.Search(new SearchRequest(options.UserSearchBaseDn,
                 $"(&(objectCategory=person)(objectClass=user)(userPrincipalName={LdapFilterEscaper.Escape(username)}))",
-                SearchScope.Subtree,
-                new[] { "distinguishedName", "displayName", "userPrincipalName", "userAccountControl" });
-            var searchResponse = connection.SendRequest(searchRequest) as SearchResponse;
-
-            if (searchResponse is null || searchResponse.ResultCode != ResultCode.Success || searchResponse.Entries.Count != 1)
-            {
-                return InvalidCredentials();
-            }
-
-            var entry = searchResponse.Entries[0];
-            if (IsDisabled(entry))
-            {
-                return InvalidCredentials();
-            }
-
-            var distinguishedName = entry.DistinguishedName;
-            connection.Bind(new NetworkCredential(GetUserBindUsername(username, distinguishedName), password));
-
-            return new LdapAuthenticationResult
-            {
-                IsSuccess = true,
-                FailureCategory = LdapBindFailureCategory.None,
-                Username = username,
-                DistinguishedName = distinguishedName,
-                DisplayName = GetAttribute(entry, "displayName"),
-                UserPrincipalName = GetAttribute(entry, "userPrincipalName") ?? username
-            };
+                SearchScope.Subtree, ["distinguishedName", "displayName", "userPrincipalName", "userAccountControl"]));
+            operation.ThrowIfCancellationRequested();
+            var failure = LdapResponseValidator.ValidateSearch(response, stage);
+            if (failure is not null) return AuthenticationResult.Failed(failure);
+            stage = DirectoryFailureStage.ResponseValidation;
+            operation.EnterStage(stage);
+            var entry = response!.Entries[0];
+            var validIdentity = LdapResponseValidator.TryIdentity(entry, username, out var accountControl);
+            operation.ThrowIfCancellationRequested();
+            if (!validIdentity)
+                return AuthenticationResult.Failed(new(AuthenticationFailureCategory.ProtocolFailure, stage, DirectoryFailureReason.InvalidIdentityData));
+            if ((accountControl & 2) != 0)
+                return AuthenticationResult.Failed(new(AuthenticationFailureCategory.InvalidCredentials, stage, DirectoryFailureReason.AccountDisabled));
+            stage = DirectoryFailureStage.UserBind;
+            operation.EnterStage(stage);
+            connection.Bind(new NetworkCredential(GetUserBindUsername(username, entry.DistinguishedName), password));
+            operation.ThrowIfCancellationRequested();
+            var result = AuthenticationResult.Succeeded(username, entry.DistinguishedName,
+                LdapResponseValidator.SingleAttribute(entry, "displayName"), LdapResponseValidator.SingleAttribute(entry, "userPrincipalName"));
+            operation.ThrowIfCancellationRequested();
+            return result;
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (Exception exception) when (LdapFailureClassifier.IsExpected(exception, stage))
         {
-            return new LdapAuthenticationResult { IsSuccess = false, FailureCategory = LdapBindFailureCategory.Cancelled };
+            return AuthenticationResult.Failed(operation.Failure ?? LdapFailureClassifier.Classify(exception, stage, operation.Token));
         }
-        catch (LdapException) when (cancellationToken.IsCancellationRequested)
+        catch (Exception)
         {
-            return new LdapAuthenticationResult { IsSuccess = false, FailureCategory = LdapBindFailureCategory.Cancelled };
-        }
-        catch (LdapException ex) when (ex.ErrorCode == 49)
-        {
-            return InvalidCredentials();
-        }
-        catch (LdapException ex) when (ex.ErrorCode == 81)
-        {
-            return new LdapAuthenticationResult { IsSuccess = false, FailureCategory = LdapBindFailureCategory.DirectoryUnavailable };
-        }
-        catch (LdapException ex) when (ex.ErrorCode == 85)
-        {
-            return new LdapAuthenticationResult { IsSuccess = false, FailureCategory = LdapBindFailureCategory.Timeout };
-        }
-        catch (TimeoutException)
-        {
-            return new LdapAuthenticationResult { IsSuccess = false, FailureCategory = LdapBindFailureCategory.Timeout };
-        }
-        catch (LdapException)
-        {
-            return new LdapAuthenticationResult { IsSuccess = false, FailureCategory = LdapBindFailureCategory.Unexpected };
+            return AuthenticationResult.Failed(operation.Failure ?? LdapFailureClassifier.Unexpected(stage));
         }
     }
 
-    private static bool IsDisabled(SearchResultEntry entry)
-    {
-        var value = GetAttribute(entry, "userAccountControl");
-        return int.TryParse(value, out var accountControl) && (accountControl & 0x2) != 0;
-    }
-
-    internal static string GetUserBindUsername(string username, string distinguishedName)
-        => username;
-
-    private static string? GetAttribute(SearchResultEntry entry, string name)
-    {
-        return entry.Attributes.Contains(name) && entry.Attributes[name].Count > 0
-            ? entry.Attributes[name][0]?.ToString()
-            : null;
-    }
-
-    private static LdapAuthenticationResult InvalidCredentials()
-    {
-        return new LdapAuthenticationResult
-        {
-            IsSuccess = false,
-            FailureCategory = LdapBindFailureCategory.InvalidCredentials
-        };
-    }
+    internal static string GetUserBindUsername(string username, string distinguishedName) => username;
 }

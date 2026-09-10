@@ -1,3 +1,4 @@
+using LabAuthServer.Application.Services;
 namespace LabAuthServer.Application.Interfaces;
 
 /// <summary>
@@ -13,16 +14,17 @@ public interface ILdapService
     Task<RootDseResult> QueryRootDseAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Resolves the AD groups for the supplied user principal name using the user's supplied LDAP credentials.
+    /// Resolves the AD groups for the supplied user principal name using service-account credentials.
     /// </summary>
     /// <param name="userPrincipalName">User principal name to resolve.</param>
-    /// <param name="password">Password used to bind and scope the lookup.</param>
+    /// <param name="password">Compatibility parameter; validated for presence, not used for the group bind.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name="operation">Optional shared login budget; must be the same operation used for identity verification. The caller owns its lifetime.</param>
     /// <returns>The approved AD group names for the user.</returns>
-    Task<IReadOnlyList<string>> GetUserGroupsAsync(
+    Task<LabAuthServer.Application.DTOs.GroupLookupResult> GetUserGroupsAsync(
         string userPrincipalName,
         string password,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default, AuthenticationOperation? operation = null);
 }
 
 /// <summary>

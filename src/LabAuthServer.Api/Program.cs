@@ -13,6 +13,15 @@ builder.Logging.AddDebug();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
+builder.Services.AddHsts(options =>
+{
+    // Approved Phase 3 configuration: one year, no includeSubDomains, no preload.
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.IncludeSubDomains = false;
+    options.Preload = false;
+});
+builder.Services.Configure<Microsoft.AspNetCore.HostFiltering.HostFilteringOptions>(options =>
+    options.AllowEmptyHosts = false);
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -37,11 +46,16 @@ builder.Services.AddScoped<AuthorizationAuditMiddleware>();
 
 var app = builder.Build();
 
+app.UseMiddleware<ApiResponseHeadersMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<CorrelationMiddleware>();
+app.UseHsts();
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseMiddleware<GeneralHeaderSizeMiddleware>();
+app.UseMiddleware<RequestBodySizeMiddleware>();
 app.UseRateLimiter();
+app.UseMiddleware<AuthorizationSizeMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<AuthorizationAuditMiddleware>();
 app.UseAuthorization();

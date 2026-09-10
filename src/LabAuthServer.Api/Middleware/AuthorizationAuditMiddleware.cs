@@ -27,13 +27,15 @@ public sealed class AuthorizationAuditMiddleware : IMiddleware
         try
         {
             var correlation = CorrelationContext.Get(context);
+            var subject = context.User.FindFirst("sub")?.Value;
+            var identityOmitted = subject is { Length: > 256 };
             await _auditEventService.WriteAsync(new AuditEvent
             {
                 EventTypeCode = AuditEventTypes.AccessDenied,
                 CorrelationId = correlation.CorrelationId,
                 RequestId = correlation.RequestId,
-                Username = context.User.FindFirst("sub")?.Value,
-                Subject = context.User.FindFirst("sub")?.Value,
+                Username = identityOmitted ? null : subject,
+                Subject = identityOmitted ? null : subject,
                 Endpoint = context.GetEndpoint()?.DisplayName ?? context.Request.Path.Value,
                 HttpMethod = context.Request.Method,
                 StatusCode = StatusCodes.Status403Forbidden,
@@ -41,7 +43,9 @@ public sealed class AuthorizationAuditMiddleware : IMiddleware
                 ClientIp = context.Connection.RemoteIpAddress?.ToString(),
                 ServerName = Environment.MachineName,
                 ApplicationVersion = typeof(Program).Assembly.GetName().Version?.ToString(),
-                DetailsJson = "{\"policy\":\"authorization\"}"
+                DetailsJson = identityOmitted
+                    ? "{\"policy\":\"authorization\",\"identityOmitted\":true}"
+                    : "{\"policy\":\"authorization\"}"
             }, context.RequestAborted).ConfigureAwait(false);
         }
         catch (Exception)

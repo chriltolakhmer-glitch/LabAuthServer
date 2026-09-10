@@ -1,7 +1,15 @@
 # Project Status
 
-**Last reviewed:** 2026-09-06
+## Latest required slice: hard pending-waiter cap
+
+2026-09-10: **IMPLEMENTED; PHASE 2A APPLICATION CODING = CLOSED.** The explicitly approved hard pending LDAP waiter cap defaults to 16, validates 1-128 and returns typed ResourceExhausted/503 before semaphore waiting when full. Existing active concurrency and cancellation/deadline contracts remain intact. Full suite: 700 passed, zero failures/skips; Release zero warnings/errors. [Final implementation, file inventory and closure](plans/Phase-2/Phase-2A-Hard-Pending-Waiter-Cap.md). No deployment, infrastructure, restart, commit or push occurred.
+
+**Last reviewed:** 2026-09-10
 **Status:** Current implementation summary
+
+## Current coding-only scope
+
+Application coding, automated unit/integration tests and directly relevant source documentation remain in scope. Proxy/forwarding infrastructure validation, HSTS deployment, real IIS Security Slice 2 acceptance, HTTP.sys tuning, network/WAF/load-balancer validation, infrastructure capacity testing and operational release review are **DEFERRED**, with reasons in [Coding-only scope](plans/Phase-2/Coding-Only-Scope.md). These are not blockers to coding-only completion. HSTS remains disabled; forwarding trust is unchanged. Do not implement application workarounds for deferred infrastructure controls.
 
 ## Implementation state
 
@@ -15,6 +23,7 @@ Implemented production code includes:
 - Windows DPAPI-backed service-account credential loading for directory queries.
 - LDAP filter escaping and safe typed authentication failures.
 - JWT issuance and bearer validation with RSA signing, certificate-store key resolution, `kid`, previous-key overlap, bounded claims, and required identity/time claims.
+- Phase 2A size boundaries: fixed RSA 2048–4096-bit policy, 12288-byte encoded JWT ceiling and 12352-byte Authorization-value ceiling before authentication; reduced 7680-byte issuance payload, unchanged 4096 claim limit and field semantics. The JWT transport-budget reduction is deployed and production-validated. Login bodies are limited to 8192 bytes and the decoded general request envelope to 16128 bytes before authentication.
 - AD group-to-role mapping with Reader, Operator, and Administrator roles and deterministic precedence.
 - Default authenticated-user authorization plus named role policies.
 - Public health and login endpoints plus a Reader-protected resource.
@@ -30,11 +39,13 @@ Implemented production code includes:
 ## Verification status
 
 - **Build:** VERIFIED; current Release build completed with zero errors and zero warnings.
-- **Automated tests:** VERIFIED; current full solution run completed with 173 passed, 0 failed, and 0 skipped.
+- **Automated tests:** VERIFIED; current full solution run completed with 729 passed (487 unit, 242 integration), 0 failed, and 0 skipped; implementation baseline was 188 passing tests at `6793324`.
 - **Security boundaries:** VERIFIED by automated tests for configuration, token, authorization, LDAP-input, audit, correlation, and safe-error behavior.
 - **Live AD identity:** NOT VERIFIED from independently reproducible repository evidence.
-- **Current IIS deployment:** NOT VERIFIED as current from repository evidence; deployment records are historical.
-- **Certificate private-key and DPAPI behavior:** NOT VERIFIED against a target environment.
+- **Existing local IIS application:** The 2026-09-08 JWT transport-budget reduction was deployed and production-validated. The 8192-byte login-body and 16128-byte general-header policies are also deployed and accepted through HTTP/1.1 and HTTP/2. Security Slice 2 host/response-header controls are deployed and live-verified as of 2026-09-10.
+- **JWT/header transport through IIS/proxies:** JWT/Authorization and login-body/aggregate-header limits are COMPLETED on direct IIS HTTP/1.1 and HTTP/2. The HTTP/2 19-byte discrepancy was resolved as test methodology (IIS Connection: close), with no production fix. Uninspected proxy paths remain unverified.
+- **Local SQL TLS remediation:** VERIFIED on the inspected host with a trusted CA-issued certificate, matching DNS names, encrypted TCP and `TrustServerCertificate=False`; application audit persistence and the IIS identity's encrypted SQL session were confirmed. Existing application HTTPS health passes. See Validation Status for the limited environment evidence.
+- **JWT signing private-key and DPAPI behavior:** NOT VERIFIED against a target environment; the local SQL TLS private-key access check is recorded separately.
 - **Audit retention/purge:** NOT IMPLEMENTED.
 
 The authoritative details and evidence boundary are documented in [Validation_Status.md](Validation_Status.md).
@@ -56,3 +67,34 @@ The authoritative details and evidence boundary are documented in [Validation_St
 - [Troubleshooting](Troubleshooting.md)
 
 Historical phase records are preserved in [archive](archive/README.md) and are not current implementation guidance.
+
+## Approved transport budget reduction
+Current deployment status: Option A and the 8192-byte login-body / 16128-byte general-header policies are deployed and validated. Security Slice 2 is deployed and live-verified as of 2026-09-10.
+
+The original measurement wording below is retained for traceability; the current deployment status above supersedes its rollout wording.
+
+Option A is implemented with no host, TLS, key, AllowedHosts, HSTS or LDAP changes. The actual deployed issuer produced a maximum 10664-byte token from 7680 payload bytes with its active key; the full supported key/header upper bound is 11997 bytes. The new 12288 encoded and 12352 Authorization budgets passed direct-route reachability probes. Configuration must be merged with preserved live settings at a separately authorized deployment. See [the measured decision](plans/Phase-2/JWT-Transport-Budget-Reduction.md). No commit or push was performed.
+
+## Security Slice 2 checkpoint (2026-09-10)
+
+Explicit source AllowedHosts (`DC01.lab.local`) and centralized `/api` no-store, nosniff and DENY framing headers are implemented and tested, including fresh health responses and early application errors. HSTS and forwarded-header/proxy trust configuration remain unchanged and disabled/unconfigured. This slice is now DEPLOYED and live-verified: an anonymous `GET /api/v1/protected` returns `401` with `WWW-Authenticate: Bearer`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Cache-Control: no-store`; the `200` health response and the `307` HTTP→HTTPS redirect carry the same headers. The prior JWT, Authorization, login-body and aggregate-header controls are COMPLETED AND DEPLOYED. See [Security Slice 2 decisions and acceptance boundary](plans/Phase-2/Phase-2A-Security-Slice-2.md).
+
+Deployment note (2026-09-10): the deployed binary had been built before `ApiResponseHeadersMiddleware.cs` existed, so the header policy was absent from all live responses. A fresh Release publish was deployed via the safe deployment procedure (backup taken; server-specific `appsettings.json` preserved; app pool stopped/started). Validation: 487 unit + 242 integration tests passed, 0 failed, 0 skipped. Backup retained at `C:\Apps\LabAuthServer\Backups\current-20260910-222656`. No commit or push was performed.
+
+## LDAP classification checkpoint (2026-09-10)
+
+IMPLEMENTED AND SOURCE-TESTED: immutable authentication/group results; operation-stage and bounded-reason failures; service/user bind distinction; LDAP exception/result-code mapping; complete identity/group validation; fixed client errors; deterministic existing-event audit mapping. Failed group lookup cannot reach mapping/signing. Successful empty membership and the current no-role 500 policy remain separate.
+
+Full suite: 391 passed (260 unit, 131 integration), no failures/skips. Release: zero warnings/errors. No deployment or infrastructure change. Deadlines, cancellation redesign, concurrency and audit resource/persistence work remain separate coding tasks. [Implementation and evidence](plans/Phase-2/Phase-2A-LDAP-Failure-Classification.md).
+
+## LDAP cancellation/deadline design gate (2026-09-10)
+
+RESOLVED BY APPROVED COOPERATIVE CONTRACT; IMPLEMENTED AND SOURCE-TESTED. One validated 30-second default decision budget spans identity, membership, mapping and token issuance. Recorded caller cancellation/deadline origin and active stage determine safe 499/504 outcomes; late success is rejected and cleanup remains awaited. Existing synchronous native work can finish after the deadline. Native hard cancellation remains deferred. Full suite: 582 passed (399 unit, 183 integration), zero failures/skips; Release: zero warnings/errors. Source settings gained AuthenticationTimeout (1-60 seconds); live settings are untouched. See [LDAP cancellation and deadlines](plans/Phase-2/Phase-2A-LDAP-Cancellation-Deadlines.md). No deployment, infrastructure, commit or push change.
+
+## LDAP concurrency/resource checkpoint (2026-09-10)
+
+IMPLEMENTED AND SOURCE-TESTED: one DI singleton gate protects the public login's complete identity/group LDAP phase, including awaited cleanup. Default 4 concurrent phases; source setting MaxConcurrentLdapOperations validates 1-32. Waits consume the existing authentication budget; caller/deadline origin and late-result rejection are unchanged. Permits remain held for native work after interruption and are returned before mapping/signing/audit. Current suite: 646 passed (424 unit, 222 integration), zero failures/skips; Release: zero warnings/errors. See [scope, waiting-resource limitations and evidence](plans/Phase-2/Phase-2A-LDAP-Concurrency-Resource-Protection.md). Current public ingress rate limiting is retained; a hard pending-waiter cap/overflow policy and new LDAP entry-point admission require separate work. No deployment, infrastructure, commit or push changes.
+
+## Final Phase 2A application-code review (2026-09-10)
+
+COMPLETE; READY TO CLOSE application coding after four targeted fixes: previous-key retirement no longer disables the active key, token configuration rejects unsupported algorithms/subsecond lifetimes, oversized audit identities are explicitly omitted without dropping the event, and empty client correlation GUIDs are replaced. Final suite: 665 passed (436 unit, 229 integration), 0 failures/skips; 19 new regression cases. Targeted LDAP/cooperative: 389; concurrency: 64; changed-behavior/configuration: 30. Release: 0 warnings/errors. No existing tests weakened. See [findings, exact inventory and evidence](plans/Phase-2/Phase-2A-Final-Application-Code-Review.md). All infrastructure/release work and the documented hard-waiter-cap decision remain deferred. No deployment, live configuration, commit or push change.
