@@ -148,11 +148,19 @@ Nothing below is complete except the documentation rows already produced by this
 - [x] Test matrix documented
 - [x] Cross-cutting tests documented
 - [x] Test data strategy documented
-- [ ] Test project identified
-- [ ] Fixture helper implemented
-- [ ] Matrix implemented and passing
-- [ ] Cross-cutting tests implemented and passing
-- [ ] Baseline test count confirmed at or above 733
+- [x] Test project identified (`tests/LabAuthServer.UnitTests/Licensing/`)
+- [x] Fixture helper implemented (`LicenseTestFixture`)
+- [x] Matrix implemented and passing (per-phase suites 4.2–4.9)
+- [x] Cross-cutting tests implemented and passing (`Phase410TestingStrategyTests`)
+- [x] Assembly-separation guarantee verified
+- [x] Private-key absence and production private-parameter guard verified
+- [x] Network independence verified
+- [x] Deterministic-clock guarantee verified
+- [x] Public-safe status/reason separation verified
+- [x] Baseline test count confirmed above 733 (991 total)
+- [ ] Fuzz testing of the parser (deferred)
+- [ ] Property-based testing of canonicalization (deferred)
+- [ ] Load testing of per-request enforcement (deferred)
 
 ## Phase 4.11 — GitHub CI integration
 

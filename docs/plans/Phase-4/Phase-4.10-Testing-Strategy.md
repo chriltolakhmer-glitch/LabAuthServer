@@ -1,6 +1,8 @@
 # Phase 4.10 — Testing Strategy
 
-Status: PLANNING ONLY. [Phase 4 README](Phase-4-README.md) | Previous: [4.9](Phase-4.9-Tamper-and-Abuse-Resistance.md).
+Status: COMPLETE — REVIEW REQUIRED; NOT COMMITTED; NOT PUSHED. [Phase 4 README](Phase-4-README.md) | Previous: [4.9](Phase-4.9-Tamper-and-Abuse-Resistance.md).
+
+Implementation note (2026-09-11): the licensing matrix defined here was already implemented incrementally across Phases 4.1–4.9. Phase 4.10 closed the remaining gaps by adding a shared reusable fixture (`LicenseTestFixture`), a cross-cutting guarantee suite (`Phase410TestingStrategyTests`), and this verification record. No production runtime feature was added, no license format changed, and no security semantics were weakened. See the implementation record below.
 
 ## Objective
 
@@ -180,3 +182,50 @@ Test additions are additive. Reverting the test commit removes the licensing tes
 - Fuzz testing of the parser.
 - Property-based testing of canonicalization.
 - Load testing of per-request enforcement.
+
+## Implementation record (Phase 4.10 verification, 2026-09-11)
+
+Scope decision: Phase 4.10 is a verification phase. The per-rule matrix below was already implemented by the earlier phases; this phase added only the missing shared test infrastructure and cross-cutting guarantees, and recorded the result. No production code was added.
+
+Test category coverage (mapping the plan's matrix to the implementing suite):
+
+| Category | Implementing suite |
+| --- | --- |
+| License document syntax, duplicate properties, unknown properties, invalid UTF-8, BOM, invalid/whitespace Base64, JSON depth | `JsonLicenseDocumentParserTests`, `Phase45LicenseValidatorTests`, `Phase49TamperAndAbuseResistanceTests` |
+| Signature / payload / keyId / algorithm tampering | `Phase43CryptographicVerificationTests`, `Phase49TamperAndAbuseResistanceTests` |
+| Unknown trusted key, key rotation, RSA key-size boundaries, PKCS#1 rejection | `Phase43CryptographicVerificationTests`, `RsaPssLicenseSignatureVerifierTests` |
+| Wrong product, unknown edition, unknown feature, invalid limits | `Phase45LicenseValidatorTests`, `Phase46FeatureAndEditionEnforcementTests` |
+| Maximum-user enforcement, negative usage, missing-limit boundary | `Phase46FeatureAndEditionEnforcementTests` |
+| Perpetual licenses, not-yet-valid, expiration boundary, clock skew, expired | `Phase47ExpirationAndGracePeriodTests` |
+| Restricted Community behavior, fail-closed exception paths | `Phase46FeatureAndEditionEnforcementTests`, `Phase47ExpirationAndGracePeriodTests`, `Phase49TamperAndAbuseResistanceTests` |
+| Issuer → parser → verifier round trip, deterministic issuer serialization | `Phase44LicenseIssuerTests`, `Phase410TestingStrategyTests` |
+| Absence of private keys from server/test assets | `Phase410TestingStrategyTests` |
+| Absence of network dependencies | `Phase410TestingStrategyTests` |
+| Assembly separation and public-safe status separation | `Phase410TestingStrategyTests` |
+
+Cross-cutting guarantees added by this phase (`Phase410TestingStrategyTests`):
+
+- **Assembly separation.** No server assembly (Domain, Application, Infrastructure, Api) references `LabAuthServer.LicenseIssuer`; the issuer references only Domain.
+- **Private-key absence.** A source scan of the licensing source and test trees finds no PEM private-key headers, no private-key export calls, and no `.pfx`/`.p12`/`.pem` files.
+- **Production private-parameter guard.** Production licensing code contains no `ExportParameters(true)`.
+- **Network independence.** Licensing source and tests contain no `HttpClient`, `HttpListener`, `TcpListener`, `WebApplication` or `Socket` usage.
+- **Deterministic time.** Licensing production code contains no `DateTime.Now`; `DateTimeOffset.UtcNow` appears only in the clock implementation.
+- **Public-safe result model.** The internal `LicenseValidationReason` enum is more granular than the public `LicenseValidationStatus`; every non-valid result carries a null policy; a valid result always carries a policy and `Reason = None`.
+- **Security independence.** No invalid input grants a commercial feature, and restricted policy exposes no limit or minimum-edition satisfaction.
+- **Round trip and determinism.** Issuer output parses and verifies over the exact signed payload bytes, and identical issuance input produces identical signed payload bytes.
+
+Test infrastructure added: `LicenseTestFixture` centralises ephemeral key generation, public-only trusted-key construction, license issuance through the Phase 4.4 issuer, validator construction over one or several trusted keys, and repository-root resolution. Every key is generated in memory at run time and disposed with the fixture; the fixture never writes or logs key material. This removes duplicated key-generation and signing logic from the per-phase suites without weakening their assertions.
+
+Unit/integration separation: all licensing tests live in the unit-test project and use no network, database or directory service. Integration tests are unaffected by this phase.
+
+Test-key strategy: ephemeral in-memory RSA-3072 keys per fixture. No committed test key, no PFX/P12/PEM, no CI secret.
+
+Known limitations:
+
+- The static source scans assert on the licensing trees only; they are not a whole-repository secret scan.
+- The scanner suite excludes its own file, which legitimately contains the forbidden patterns as regex literals.
+- Fuzz testing, property-based canonicalization testing and per-request load testing remain deferred.
+
+Final result: Release build 0 warnings / 0 errors; unit 745, integration 246, total 991, 0 failed, 0 skipped. Baseline increased from 947 (no test removed or skipped).
+
+Findings: none at HIGH or above. The static-scan tests initially matched their own source; corrected by excluding the scanner file. One integration test failed transiently under full-suite load and passed in isolation and on the following full run (timing-sensitive LDAP deadline paths, unrelated to licensing).
