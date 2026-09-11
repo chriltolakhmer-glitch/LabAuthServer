@@ -37,6 +37,7 @@ builder.Services.AddRateLimiter(options =>
 });
 builder.Services.AddActiveDirectoryOptions(builder.Configuration, builder.Environment);
 builder.Services.AddTokenConfiguration(builder.Configuration);
+builder.Services.AddLicenseConfiguration(builder.Configuration);
 builder.Services.AddOptions<AuditOptions>()
     .Bind(builder.Configuration.GetSection(AuditOptions.SectionName))
     .Validate(options => !string.IsNullOrWhiteSpace(options.ConnectionString) && options.CommandTimeoutSeconds is > 0 and <= 60)
@@ -45,6 +46,17 @@ builder.Services.AddScoped<IAuditEventService, SqlAuditEventService>();
 builder.Services.AddScoped<AuthorizationAuditMiddleware>();
 
 var app = builder.Build();
+
+// Load and validate the license once at startup. A missing, unreadable or invalid license
+// yields restricted Community mode; it never crashes startup and never weakens security.
+try
+{
+    _ = app.Services.GetRequiredService<LabAuthServer.Application.Licensing.ILicensePolicyProvider>();
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "License subsystem could not be initialized; entering restricted Community mode.");
+}
 
 app.UseMiddleware<ApiResponseHeadersMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
