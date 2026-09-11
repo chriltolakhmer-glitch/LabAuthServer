@@ -103,12 +103,17 @@ Nothing below is complete except the documentation rows already produced by this
 
 - [x] Timeline semantics documented
 - [x] Clock handling rules documented
-- [ ] Grace length and carrier decided (O-11)
-- [ ] Post-grace behavior decided (O-12)
-- [ ] Clock-skew allowance decided (O-13)
-- [ ] Clock abstraction implemented
-- [ ] Expiry and grace implemented
-- [ ] Boundary tests added
+- [x] Clock abstraction implemented (`ILicenseClock`, `SystemLicenseClock`, Phase 4.5)
+- [x] Expiry implemented in a single evaluator (`ILicenseExpirationEvaluator`, `LicenseExpirationEvaluator`)
+- [x] Typed timeline state and outcome (`LicenseExpirationState`, `LicenseExpirationStatus`)
+- [x] Grace explicitly default-disabled and bounded (`LicenseGracePeriod`; `MaximumGracePeriod` 90 days)
+- [x] Invalid grace configuration rejected, never treated as unlimited
+- [x] Boundary tests added (`Phase47ExpirationAndGracePeriodTests`, 28 tests)
+- [x] Perpetual regression covered
+- [x] Clock-skew boundary covered on both sides
+- [ ] Grace length and carrier decided (O-11, TO BE CONFIRMED DURING IMPLEMENTATION)
+- [ ] Clock-skew allowance confirmed (O-13, TO BE CONFIRMED DURING IMPLEMENTATION)
+- [ ] Operator-visible warning logging implemented (no logging surface yet)
 
 ## Phase 4.8 — Machine binding
 

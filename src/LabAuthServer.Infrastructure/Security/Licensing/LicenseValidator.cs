@@ -14,16 +14,19 @@ public sealed class LicenseValidator : ILicenseValidator
 {
     private readonly ILicenseDocumentParser _parser;
     private readonly ILicenseSignatureVerifier _signatureVerifier;
-    private readonly ILicenseClock _clock;
+    private readonly ILicenseExpirationEvaluator _expirationEvaluator;
 
     public LicenseValidator(
         ILicenseDocumentParser parser,
         ILicenseSignatureVerifier signatureVerifier,
-        ILicenseClock clock)
+        ILicenseClock clock,
+        ILicenseExpirationEvaluator? expirationEvaluator = null)
     {
+        ArgumentNullException.ThrowIfNull(clock);
+
         _parser = parser ?? throw new ArgumentNullException(nameof(parser));
         _signatureVerifier = signatureVerifier ?? throw new ArgumentNullException(nameof(signatureVerifier));
-        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
+        _expirationEvaluator = expirationEvaluator ?? new LicenseExpirationEvaluator(clock);
     }
 
     /// <inheritdoc />
@@ -146,16 +149,18 @@ public sealed class LicenseValidator : ILicenseValidator
                 LicenseValidationStatus.InvalidContent, LicenseValidationReason.LimitOutOfRange);
         }
 
-        // Rule 15 (time): expiry enforcement with a bounded skew allowance. No grace period.
-        var now = _clock.UtcNow;
+        // Rules 11-13 (time window): delegated to the single expiration evaluator so the licensed
+        // timeline is defined in exactly one place. No grace period is configured (D-08), so a
+        // license at or past expiresAt is expired with no continued capability.
+        var expiration = _expirationEvaluator.Evaluate(document, LicenseGracePeriod.None);
 
-        if (document.IssuedAt - LicenseValidationPolicy.ClockSkewAllowance > now)
+        if (expiration.IsNotYetValid)
         {
             return LicenseValidationResult.Failed(
                 LicenseValidationStatus.NotYetValid, LicenseValidationReason.NotYetValid);
         }
 
-        if (document.ExpiresAt is { } expiry && now >= expiry)
+        if (expiration.IsExpired)
         {
             return LicenseValidationResult.Failed(
                 LicenseValidationStatus.Expired, LicenseValidationReason.Expired);

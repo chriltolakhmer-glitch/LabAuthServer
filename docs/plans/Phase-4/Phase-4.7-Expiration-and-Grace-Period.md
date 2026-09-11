@@ -1,8 +1,10 @@
 # Phase 4.7 — Expiration and Grace-Period Rules
 
-Status: APPROVED — PLANNING COMPLETE. Implementation NOT STARTED. [Phase 4 README](Phase-4-README.md) | Previous: [4.6](Phase-4.6-Feature-and-Edition-Enforcement.md).
+Status: IMPLEMENTED — REVIEW REQUIRED; NOT COMMITTED; NOT PUSHED. [Phase 4 README](Phase-4-README.md) | Previous: [4.6](Phase-4.6-Feature-and-Edition-Enforcement.md).
 
 Approved initial implementation: UTC timestamps; time-limited licenses supported; perpetual licenses supported; NO grace period; an expired license enters restricted mode.
+
+Implementation note (2026-09-11): the licensed time window is decided in exactly one place by `ILicenseExpirationEvaluator` / `LicenseExpirationEvaluator`. Grace is explicitly default-disabled (`LicenseGracePeriod.None`); a bounded, validated representation exists for a future approved decision but never grants capability in this phase.
 
 ## Objective
 
@@ -162,3 +164,30 @@ Reverting this phase returns expiry to the previous behavior, which for a first 
 - Online renewal reminders (4.13).
 - Time-source attestation.
 - Per-feature expiry.
+
+## Implementation record (Phase 4.7 expiration and grace, 2026-09-11)
+
+| Concern | Implementation |
+| --- | --- |
+| Time window | `ILicenseExpirationEvaluator` / `LicenseExpirationEvaluator` — the single place the licensed window is decided |
+| Timeline state | `LicenseExpirationState` — `Perpetual`, `Active`, `NotYetValid`, `Expired` |
+| Typed outcome | `LicenseExpirationStatus` — state, issued/expiry instants, remaining time, `IsWithinGrace`, `IsApproachingExpiry` |
+| Grace representation | `LicenseGracePeriod` — `None` by default; `TryCreate` rejects negative durations and durations above `MaximumGracePeriod` (90 days) |
+| Expiration bounds | `LicenseExpirationPolicy` — `MaximumGracePeriod` (90 days), `WarningThreshold` (30 days) |
+| Clock | Reuses `ILicenseClock`; no `DateTime.Now` and no new ambient time call |
+
+Expiration behavior: `expiresAt` remains exclusive (D4.7-2). Before `expiresAt` the state is `Active`. At or after `expiresAt` the state is `Expired`, and the validator returns `LicenseValidationStatus.Expired` with `LicenseValidationReason.Expired`.
+
+Perpetual behavior: an absent `expiresAt` yields `LicenseExpirationState.Perpetual` at any clock value. A perpetual license never expires, never enters a grace state, is never treated as the Unix epoch or zero, and never becomes restricted merely because expiry is absent.
+
+Clock-skew behavior: the skew allowance applies to `issuedAt` only. Beyond the allowance the state is `NotYetValid`; within it the license is `Active`. Skew never widens the expiry side of the window, so it cannot become a grace period.
+
+Grace-period behavior: grace is explicitly disabled (D-08). `LicenseGracePeriod.None` is the only value used by the validator. When a future approved decision configures a bounded grace period, the evaluator reports `IsWithinGrace` for diagnostics only — the license remains `Expired`, remains unusable, and never gains a commercial capability. No configuration path can enable grace implicitly, and an invalid duration is rejected rather than treated as unlimited.
+
+Restricted-mode behavior: the validator reports `Expired`, and `LicensePolicy.FromValidationResult` maps it to `LicensePolicy.Restricted` — Community edition, no features, no limits, no minimum-edition satisfaction. Restricted mode affects only licensing capability; it does not touch authentication, authorization, TLS, request limits, rate limiting, audit or LDAP.
+
+Validator change: `LicenseValidator` delegates the time checks to the evaluator. The three-argument constructor still works (the evaluator is constructed from the supplied clock when not provided), so existing callers and tests are unaffected.
+
+Tests added: `tests/LabAuthServer.UnitTests/Licensing/Phase47ExpirationAndGracePeriodTests.cs` (28 tests) covering perpetual licenses at several future instants, the `expiresAt` boundary (one tick before, exactly at, one second after, ten years after), the skew boundary on both sides, grace disabled/configured/expired/after-window, invalid and maximum grace durations, the warning signal, expired and not-yet-valid mapping to restricted policy, expiry-before-issuance rejection, and the guarantee that no evaluator path yields a usable status.
+
+Still deferred: configurable grace duration (O-11), the clock-skew value (O-13), online renewal reminders (4.13), time-source attestation, per-feature expiry, machine binding (4.8) and online activation (4.13).
