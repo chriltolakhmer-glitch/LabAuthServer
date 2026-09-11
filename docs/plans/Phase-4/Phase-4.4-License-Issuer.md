@@ -164,3 +164,40 @@ Reverting the issuer commit removes the tool; no runtime impact on the server.
 - HSM integration.
 - Automated issuance workflow.
 - Customer self-service portal (4.13).
+
+## Implementation record (Phase 4.4 issuer, 2026-09-11)
+
+Issuer project/location: `tools/LabAuthServer.LicenseIssuer/` (resolves the 4.4 DECISION REQUIRED). It references only `LabAuthServer.Domain` and is **not** listed in `LabAuthServer.slnx`, so no production project can pull it into the server build graph. Only `tests/LabAuthServer.UnitTests` references it, so the issuer can be exercised by tests while staying outside the runtime build.
+
+Dependency direction: `LabAuthServer.Domain` <- `LabAuthServer.LicenseIssuer` <- `LabAuthServer.UnitTests`. No server project references the issuer, and the issuer is not reachable from the request pipeline.
+
+Runtime separation: no REST endpoint, no HTTP listener, no web dashboard, no server startup wiring. The issuer is an offline library plus its abstractions; production key acquisition remains deferred (O-07).
+
+| Concern | Implementation |
+| --- | --- |
+| Algorithm | RSA-PSS only (`RSASignaturePadding.Pss`) |
+| Hash | SHA-256 only |
+| Padding | PKCS#1 v1.5 is never selected |
+| Algorithm identifier | `LicenseConstants.RsaPssSha256Algorithm` = `RSA-PSS-SHA256` |
+| RSA key policy | Minimum 2048 enforced before signing (`SigningKeyPolicyViolation`); RSA-3072 is the initial signing size; a weak key is rejected, never downgraded |
+| Payload serialization | `LicensePayloadSerializer` (O-03 current implementation): fixed property order, camelCase names, no whitespace, UTF-8 without BOM, UTC timestamps at second precision with `Z` suffix, limits in ordinal key order. Deterministic and asserted by `Serializer_IsDeterministicForTheSameDocument` |
+| Exact bytes | One serialization step; the signed bytes are the bytes embedded as the container payload, asserted by `ExactPayloadBytes_AreEmbeddedInContainer` |
+| Signature encoding | Base64 of the raw RSA-PSS signature bytes (D4.3-4) |
+| keyId handling | Explicit, non-secret `ILicenseSigningKeyProvider.KeyId`; the request keyId must match it (`KeyIdMismatch` otherwise); recorded in the envelope |
+| Output format | `LicenseContainerSerializer` produces `payload` / `algorithm` / `keyId` / `signature`, matching `JsonLicenseDocumentParser` |
+
+Key-source abstraction: `ILicenseSigningKeyProvider` is the only issuer type that touches private key material. It returns an `RSA` (or `null`) and the caller does not own the instance. Production sources (certificate store, HSM, vault) remain deferred (O-07); tests supply an ephemeral in-memory key via `InMemorySigningKeyProvider`.
+
+Signing abstraction: `ILicenseSigner` isolates the low-level operation; `RsaPssLicenseSigner` is the only implementation and never logs the payload or signature.
+
+Structured results: `LicenseIssuanceResult` plus the internal `LicenseIssuanceReason` enum replace boolean outcomes, consistent with D-21.
+
+F-2 status: unchanged and explicitly documented. `algorithm` and `keyId` are container metadata outside the signed payload; the issuer writes them as selection metadata and makes no claim that they are cryptographically authenticated.
+
+O-03 status: CURRENT IMPLEMENTATION. The issuer profile above is the current signing serialization and the server verifier is byte-agnostic over the decoded payload, so no permanent canonicalization standard is claimed; a future license format version may replace it.
+
+Issuance input validation: product must equal `LabAuthServer`; edition must be known; `issuedAt` must be usable; `expiresAt` is either null (perpetual) or a usable UTC instant strictly after `issuedAt`; feature identifiers must be lowercase dot/dash/underscore tokens starting with a lowercase letter; limits must be positive integers; keyId must be present and match the provider. A perpetual license is represented by `null` and never by an epoch, sentinel or fake date.
+
+Tests added: `tests/LabAuthServer.UnitTests/Licensing/Phase44LicenseIssuerTests.cs` (35 tests) covering issuance (perpetual, time-limited, field preservation), validation (missing/invalid identifiers, unknown edition, invalid timestamps, expiry before issuance, key mismatch, unavailable key, weak key, public-only key, invalid feature and limit), cryptography (Phase 4.3 verifier acceptance, tamper, wrong keyId, wrong key, PKCS#1 rejection, exact embedded payload bytes, serializer determinism), key rotation (independent keys and keyId identification), private-key safety (no private material in the container, only public information, failure results carry no license) and a full issue-to-parse-to-verify round trip.
+
+Still deferred: production key storage (O-07), a CLI command surface, non-sensitive issuance audit logging, and the HSM/vault targets. Phase 4.5 is NOT started.

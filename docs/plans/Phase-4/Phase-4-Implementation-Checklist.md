@@ -51,13 +51,19 @@ Nothing below is complete except the documentation rows already produced by this
 ## Phase 4.4 — License issuer
 
 - [x] Issuer responsibilities and prohibitions documented
-- [ ] Private key source decided (O-07)
-- [ ] Issuer project created
-- [ ] Input validation implemented
-- [ ] Signing implemented
+- [x] Issuer project created (`tools/LabAuthServer.LicenseIssuer/`, outside `LabAuthServer.slnx`)
+- [x] Dependency direction confirmed (Domain only; no server project references it)
+- [x] Signing-key provider abstraction implemented (`ILicenseSigningKeyProvider`)
+- [x] Signing abstraction implemented (`ILicenseSigner`, `RsaPssLicenseSigner`)
+- [x] Input validation implemented (product, edition, timestamps, expiry, feature, limit, keyId, key policy)
+- [x] Signing implemented (RSA-PSS + SHA-256, Base64 signature)
+- [x] Deterministic payload serialization implemented and documented (O-03 current implementation)
+- [x] Container output compatible with `JsonLicenseDocumentParser`
+- [x] Issuer tests using an ephemeral key added (`Phase44LicenseIssuerTests`, 35 tests)
+- [x] Confirmed the server cannot invoke the issuer (issuer not in the server build graph)
+- [ ] Private key source decided (O-07, TO BE CONFIRMED DURING IMPLEMENTATION)
+- [ ] CLI command surface
 - [ ] Non-sensitive audit logging implemented
-- [ ] Issuer tests using an ephemeral key added
-- [ ] Confirmed the server cannot invoke the issuer
 
 ## Phase 4.5 — License validation
 

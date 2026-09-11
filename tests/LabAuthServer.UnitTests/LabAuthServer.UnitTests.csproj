@@ -27,6 +27,7 @@
     <ProjectReference Include="..\..\src\LabAuthServer.Application\LabAuthServer.Application.csproj" />
     <ProjectReference Include="..\..\src\LabAuthServer.Domain\LabAuthServer.Domain.csproj" />
     <ProjectReference Include="..\..\src\LabAuthServer.Infrastructure\LabAuthServer.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\tools\LabAuthServer.LicenseIssuer\LabAuthServer.LicenseIssuer.csproj" />
   </ItemGroup>
 
 </Project>
