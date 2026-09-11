@@ -177,3 +177,31 @@ Documentation-only. Reverting the commit has no runtime effect.
 - Revocation architecture (4.13).
 - Machine binding integration point (4.8).
 - Hardware-backed key storage for the issuer (4.4 and 4.12).
+
+## Implementation record (Phase 4.1 foundation, 2026-09-11)
+
+Architecture selected: the existing four-layer direction `Domain <- Application <- Infrastructure <- Api` is reused. No new project and no new NuGet package was introduced.
+
+| Concern | Location | Type |
+| --- | --- | --- |
+| License domain model | `src/LabAuthServer.Domain/Licensing/` | `LicenseDocument`, `SignedLicense`, `LicenseSignatureEnvelope`, `LicenseEdition`, `LicenseEditionExtensions`, `LicenseConstants` |
+| Validation abstractions and typed results | `src/LabAuthServer.Application/Licensing/` | `LicenseValidationStatus`, `LicenseValidationReason`, `LicenseValidationResult`, `ILicenseDocumentParser`, `LicenseParseOutcome`, `ILicenseSignatureVerifier`, `LicenseSignatureVerificationOutcome`, `LicenseValidationOptions` |
+| Cryptographic verification boundary | `src/LabAuthServer.Infrastructure/Security/Licensing/` | `ITrustedLicenseKeyProvider`, `InMemoryTrustedLicenseKeyProvider`, `RsaPssLicenseSignatureVerifier` |
+| Strict document parser | `src/LabAuthServer.Infrastructure/Security/Licensing/` | `JsonLicenseDocumentParser` |
+| Tests | `tests/LabAuthServer.UnitTests/Licensing/` | `LicenseDocumentModelTests`, `LicenseEditionTests`, `JsonLicenseDocumentParserTests`, `RsaPssLicenseSignatureVerifierTests` |
+
+Dependency flow: Domain (model) <- Application (interfaces and typed results) <- Infrastructure (RSA-PSS verifier and parser). The license subsystem is not referenced from any controller and is not wired into the request pipeline.
+
+Trusted key set: `ITrustedLicenseKeyProvider` resolves a public key by key identifier. `InMemoryTrustedLicenseKeyProvider` adds keys (never replaces them) so rotation does not invalidate earlier licenses. Only public keys are held; no private key is present anywhere in the application or tests.
+
+Confirmed during implementation:
+
+- RSA-PSS + SHA-256 verification lives behind `ILicenseSignatureVerifier` (decision D-11).
+- The trusted key set is additive (decision D-12).
+- The verifier requires no private key (decision D-16).
+
+Still deferred:
+
+- Public key set storage location (embedded vs configuration) remains TO BE CONFIRMED DURING IMPLEMENTATION (O-04 related).
+- Issuer project placement remains TO BE CONFIRMED DURING IMPLEMENTATION (O-08).
+- Machine binding and online activation remain deferred.

@@ -28,9 +28,11 @@ Nothing below is complete except the documentation rows already produced by this
 
 - [x] Required and optional fields documented
 - [x] Validation order documented
-- [ ] Canonicalization scheme chosen (O-03)
-- [ ] Signature envelope shape chosen (O-04)
-- [ ] Worked canonical example with exact bytes recorded
+- [x] License document model implemented (`LicenseDocument`, `SignedLicense`, `LicenseSignatureEnvelope`)
+- [x] Strict container parser implemented (`JsonLicenseDocumentParser`)
+- [x] Signature envelope shape selected for this model (O-04): `algorithm`, `keyId`, `signature`
+- [ ] Canonicalization scheme chosen (O-03, TO BE CONFIRMED DURING IMPLEMENTATION)
+- [ ] Worked canonical example with exact bytes recorded (TO BE CONFIRMED DURING IMPLEMENTATION)
 
 ## Phase 4.3 — Cryptographic signing and verification
 

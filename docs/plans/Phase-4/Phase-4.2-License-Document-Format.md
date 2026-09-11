@@ -198,3 +198,41 @@ Because the format is frozen before any license is issued, rollback in this phas
 - Online revocation list format (4.13).
 - Machine binding claim (4.8).
 - Multi-product licensing.
+
+## Implementation record (Phase 4.2 model, 2026-09-11)
+
+Model implemented in `src/LabAuthServer.Domain/Licensing/LicenseDocument.cs`.
+
+Required fields:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `licenseVersion` | integer | Supported range 1..1 (`LicenseConstants`) |
+| `licenseId` | string | Unique, opaque, vendor-generated |
+| `product` | string | Must equal `LabAuthServer` |
+| `edition` | string | Community / Professional / Enterprise; unknown is rejected |
+| `issuedAt` | string | UTC ISO 8601 with `Z` suffix |
+
+Optional fields:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `customer` | string or null | Display/record only; treated as sensitive |
+| `expiresAt` | string or null | `null` denotes a perpetual license |
+| `features` | array of string | Explicit feature identifiers |
+| `limits` | object | Integer values only; floats are rejected |
+
+Serialization approach: the container is parsed by `JsonLicenseDocumentParser`. The parser is strict. It rejects a UTF-8 BOM, invalid UTF-8, non-object roots, duplicate property names, missing required fields, unsupported versions, unknown editions, and non-integer limits. Each rejection returns a structured `LicenseParseOutcome` failure with an internal reason code; it never throws for malformed input and never returns a partially populated document.
+
+Signature boundary: the container carries the verbatim signed payload as base64 (`payload`) plus a `signature` envelope with `algorithm`, `keyId` and `signature`. The parser returns the exact decoded payload bytes in `SignedLicense.SignedPayload`; `JsonLicenseDocumentParser` never re-serializes the payload, so it makes no canonicalization decision. Canonicalization therefore remains an issuer-side concern and is still TO BE CONFIRMED DURING IMPLEMENTATION (decision O-03). The envelope shape in this model is the format decided here (decision O-04); any later change requires a format change.
+
+Confirmed during implementation:
+
+- Unknown editions and unsupported versions are rejected by the parser (default-deny, decision D-20).
+- Duplicate keys, BOM, trailing data and float limits are rejected so the signed bytes cannot be ambiguous.
+
+Still deferred:
+
+- Canonicalization scheme (O-03) is not fixed by this model and remains TO BE CONFIRMED DURING IMPLEMENTATION.
+- No worked canonical example with exact bytes is recorded yet.
+- No issuer, no production signing key and no production license exist.
