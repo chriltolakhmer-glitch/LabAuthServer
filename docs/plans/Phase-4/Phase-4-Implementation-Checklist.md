@@ -165,11 +165,14 @@ Nothing below is complete except the documentation rows already produced by this
 ## Phase 4.11 — GitHub CI integration
 
 - [x] Test-key strategy options documented
-- [ ] Test-key strategy approved (O-16)
-- [ ] CI change authorized and applied
-- [ ] CI green with no vendor private key
-- [ ] Test count report recorded
-- [ ] No new CI secret added
+- [x] Test-key strategy approved (O-16 resolved: ephemeral key per run, D-19)
+- [x] CI reviewed — no workflow change required; the existing job already runs restore, Release build and all tests
+- [x] CI green with no vendor private key (local Release run: 991 passed, 0 failed, 0 skipped)
+- [x] Test count report recorded (745 unit + 246 integration = 991)
+- [x] No new CI secret added
+- [x] No production private key, certificate or production configuration in CI
+- [x] CI permissions confirmed least-privilege (`contents: read`)
+- [x] Third-party actions reviewed (all first-party: `actions/checkout@v4`, `actions/setup-dotnet@v4`, `actions/cache@v4`)
 
 ## Phase 4.12 — Operational license management
 
