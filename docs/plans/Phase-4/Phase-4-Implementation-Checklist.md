@@ -85,12 +85,19 @@ Nothing below is complete except the documentation rows already produced by this
 - [x] Feature identifier scheme documented
 - [x] Edition hierarchy documented
 - [x] Default-deny documented
-- [ ] Edition and feature mapping approved (O-01)
-- [ ] Enforcement timing approved
-- [ ] Denied-feature API response approved
-- [ ] Policy service implemented
-- [ ] Enforcement added to licensed features only
-- [ ] Security-independence test added
+- [x] Known feature catalog implemented (`LicenseFeatureIds`)
+- [x] Known limit catalog implemented (`LicenseLimitKeys`)
+- [x] Policy boundary implemented (`ILicensePolicy`, `LicensePolicy`, `ILicensePolicyProvider`)
+- [x] Typed feature decision implemented (`LicenseFeatureDecision`)
+- [x] Default-deny verified for absent, unknown and null features
+- [x] Restricted policy implemented for every non-valid validation status
+- [x] Limits fail closed: missing/unknown key is never unlimited; `int.MaxValue` boundary and negative usage covered
+- [x] Security-independence test added
+- [x] Tests added (`Phase46FeatureAndEditionEnforcementTests`, 47 tests)
+- [ ] Edition and feature mapping approved (O-01, TO BE CONFIRMED DURING IMPLEMENTATION)
+- [ ] Enforcement timing approved (O-09, TO BE CONFIRMED DURING IMPLEMENTATION)
+- [ ] Denied-feature API response approved (TO BE CONFIRMED DURING IMPLEMENTATION)
+- [ ] Enforcement added to licensed features only (endpoint integration deferred)
 
 ## Phase 4.7 — Expiration and grace period
 

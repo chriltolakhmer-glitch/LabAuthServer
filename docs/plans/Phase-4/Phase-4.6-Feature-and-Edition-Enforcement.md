@@ -1,6 +1,8 @@
 # Phase 4.6 — Feature and Edition Enforcement
 
-Status: PLANNING ONLY. [Phase 4 README](Phase-4-README.md) | Previous: [4.5](Phase-4.5-License-Validation.md).
+Status: IMPLEMENTED — REVIEW REQUIRED; NOT COMMITTED; NOT PUSHED. [Phase 4 README](Phase-4-README.md) | Previous: [4.5](Phase-4.5-License-Validation.md).
+
+Implementation note (2026-09-11): the reusable enforcement boundary is implemented as `ILicensePolicy` / `LicensePolicy` with a typed `LicenseFeatureDecision`, a known-feature catalog (`LicenseFeatureIds`) and known limit keys (`LicenseLimitKeys`). Endpoint wiring, the commercial feature-to-edition matrix (O-01), enforcement timing (O-09) and the denied-feature API response remain TO BE CONFIRMED DURING IMPLEMENTATION.
 
 ## Objective
 
@@ -186,3 +188,28 @@ Enforcement is additive. Reverting the enforcement commit restores unrestricted 
 - Admin UI for license status.
 - Per-tenant editioning.
 - Usage metering.
+
+## Implementation record (Phase 4.6 enforcement boundary, 2026-09-11)
+
+| Concern | Implementation |
+| --- | --- |
+| Feature catalog | `LicenseFeatureIds` (`auth.basic`, `auth.jwt`, `auth.ldap`, `audit.logging`, `admin.console`) with `IsKnown` and `IsWellFormed` |
+| Limit catalog | `LicenseLimitKeys` (`max.users`) with `IsKnown` |
+| Typed decision | `LicenseFeatureDecision` (`IsAllowed`, internal `Reason`); a denial requires a non-None reason |
+| Policy boundary | `ILicensePolicy` — `Edition`, `IsRestricted`, `EvaluateFeature`, `IsFeatureEnabled`, `TryGetLimit`, `IsWithinLimit`, `MeetsMinimumEdition` |
+| Policy implementation | `LicensePolicy` — immutable; `FromDocument`, `FromValidationResult`, `Restricted` |
+| Provider boundary | `ILicensePolicyProvider` — never returns null; a missing valid license yields `LicensePolicy.Restricted` |
+
+Feature model: a feature is enabled only when it is a known catalog identifier **and** the validated license explicitly lists it. Edition alone never grants a feature; a syntactically valid but catalog-unknown identifier cannot be granted even if present in the license payload.
+
+Edition model: `Community < Professional < Enterprise` via the existing `LicenseEditionExtensions.Rank()`. `MeetsMinimumEdition` requires a non-restricted policy, a known minimum, and `Edition.Rank() >= minimum.Rank()`. Unknown editions rank `-1` and never satisfy a minimum.
+
+Restricted mode: `LicensePolicy.Restricted` reports Community edition, defines no features and no limits, and fails every minimum-edition check. `FromValidationResult` maps every non-valid `LicenseValidationResult` to restricted, so a missing, malformed, unsupported, wrong-product, signature-invalid, untrusted-key, expired, not-yet-valid, invalid-configuration or invalid-content result grants nothing.
+
+User limits: `max.users` is the only known limit. `TryGetLimit` returns `false` when the policy is restricted, the key is unknown, or the license does not define it — a missing limit is never unlimited. `IsWithinLimit` denies negative usage and uses `currentUsage <= limit` with no arithmetic that could overflow.
+
+Security independence (D4.6-6): the policy exposes only commercial capability and limits. No API exists by which licensing could alter authentication, authorization, TLS, request limits, rate limiting, audit or JWT behavior, and no endpoint, middleware or service consumes the policy yet.
+
+Tests added: `tests/LabAuthServer.UnitTests/Licensing/Phase46FeatureAndEditionEnforcementTests.cs` (47 tests) covering edition ranks, explicit/absent/unknown/null features, empty feature lists, multiple features, edition-plus-feature combinations, minimum-edition hierarchy, restricted policy behavior for every non-valid status, limit under/at/above/missing/unknown, `int.MaxValue` boundary, negative usage, and the security-independence property.
+
+Still deferred: endpoint integration, the commercial feature-to-edition matrix (O-01), enforcement timing (O-09), the denied-feature API response, the license file location (O-10) and the concrete policy provider. Phase 4.7 is NOT started.
