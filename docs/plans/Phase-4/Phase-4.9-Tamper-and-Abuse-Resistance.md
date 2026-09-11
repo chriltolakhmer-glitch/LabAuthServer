@@ -1,6 +1,8 @@
 # Phase 4.9 — Tamper and Abuse Resistance
 
-Status: PLANNING ONLY. [Phase 4 README](Phase-4-README.md) | Previous: [4.8](Phase-4.8-Machine-Binding.md).
+Status: VERIFIED — NO NEW PRODUCTION CODE; NOT COMMITTED; NOT PUSHED. [Phase 4 README](Phase-4-README.md) | Previous: [4.8](Phase-4.8-Machine-Binding.md).
+
+Implementation note (2026-09-11): this phase added no production code, consistent with the plan's own statements that "Files likely to change: None in this phase (planning only)" and "Documentation only in this phase". The protections it describes were already implemented in Phases 4.3-4.7; Phase 4.9 adds a verification suite that exercises them and records the threat model and limitations. See the implementation record below.
 
 ## Objective
 
@@ -149,3 +151,49 @@ Documentation only. Later integrity checks must be individually revertable witho
 - Online revocation (4.13).
 - Server-side feature execution for high-value features.
 - Code signing of the distributed binary as a separate integrity story.
+
+## Implementation record (Phase 4.9 verification, 2026-09-11)
+
+Scope: verification and documentation only. No production code was added, no license-format change was made, and no anti-debugging, obfuscation, hostile-environment or integrity-check mechanism was introduced.
+
+Threat model, classified by whether the current design protects against it:
+
+| ID | Threat | Protected? | Mechanism |
+| --- | --- | --- | --- |
+| A | Customer modifies the license file | Yes | RSA-PSS signature verification over the exact payload bytes |
+| B | Customer modifies the signature | Yes | Signature verification fails closed |
+| C | Customer changes keyId | Yes | `KeyUntrusted`; unknown identifiers are never trusted |
+| D | Customer changes algorithm | Yes | Only `RSA-PSS-SHA256` is accepted (`AlgorithmUnsupported`) |
+| E | Customer injects unknown JSON properties | Yes | Strict allow-list on container and payload (`FieldUnknown`) |
+| F | Customer modifies expiration/features/limits | Yes | Covered by the signature; semantic bounds re-checked after verification |
+| G | Customer supplies large or malformed input | Partly | Bounded parsing (`MaxDepth` 16), strict UTF-8, no BOM, strict Base64, documented feature/limit bounds |
+| H | Customer attempts repeated validation abuse | Partly | Validation is pure and allocation-bounded; no rate limiting exists because no network surface consumes it yet |
+| I | Customer modifies application source code | No | Documented limitation; out of technical scope |
+| J | Customer modifies compiled binaries | No | Documented limitation; out of technical scope |
+| K | Customer controls the host administrator account | No | Documented limitation; out of technical scope |
+| L | Customer obtains the vendor private signing key | Prevented by custody | The key is never distributed, committed, placed in CI or present in the server (D-16, D-17, D-18) |
+
+Protections verified, all pre-existing:
+
+| Control | Where |
+| --- | --- |
+| Signed license over exact bytes | `RsaPssLicenseSignatureVerifier` (Phase 4.3) |
+| Strict container/payload parsing, allow-list, duplicate rejection | `JsonLicenseDocumentParser` (Phases 4.2, 4.5) |
+| Bounded depth, strict UTF-8, no BOM, strict Base64 | `JsonLicenseDocumentParser` |
+| Structural bounds | `LicenseValidationPolicy` (Phase 4.5) |
+| Default-deny feature/edition decisions | `LicensePolicy` (Phase 4.6) |
+| Single expiration decision point | `LicenseExpirationEvaluator` (Phase 4.7) |
+
+Validator ordering: parsing and cryptographic verification complete before any semantic trust, so a payload edit is reported as `InvalidSignature` rather than as a field error. No tampered document reaches semantic validation.
+
+Source-available limitation (restated): a customer with full source and administrative control can modify feature checks, policy checks, validators, binaries, startup and configuration. Technical enforcement therefore cannot be made impossible to bypass. The objective is cryptographic authenticity and fail-closed behavior in the unmodified distributed application, not unbreakable DRM. This matches the required statement already recorded above and in [Phase 4.9's limitation clause](Phase-4.9-Tamper-and-Abuse-Resistance.md).
+
+Offline-copy limitation: offline-first licenses without machine binding or online revocation can be copied between compatible installations and will remain cryptographically valid. This is a property of the approved licensing model (D-02, D-09, D-10, D-22), not a defect. It is not classified as a vulnerability.
+
+Private-key security: no private key exists in server source, tests, CI, configuration or the license itself; the issuer obtains key material only through `ILicenseSigningKeyProvider`, and the server verifier requires public keys only.
+
+Key rotation: multiple trusted public keys remain supported, key IDs are explicit, unknown IDs fail closed, duplicate IDs are rejected, and the provider stores public-only copies (F-3 resolution, Phase 4.3).
+
+Tests added: `tests/LabAuthServer.UnitTests/Licensing/Phase49TamperAndAbuseResistanceTests.cs`. Every fixture issues a real license through the Phase 4.4 issuer with an ephemeral in-memory key, then mutates it. Coverage: payload, signature, keyId, algorithm and individual field tampering; unknown container and payload properties; malformed, non-object, invalid UTF-8, BOM, trailing-data and malformed/whitespace Base64 input; oversized feature arrays and deeply nested JSON; wrong key, weak key and rotated-key behavior; duplicate trusted key rejection; and fail-closed guarantees that no tampered or missing license yields a valid result or grants a commercial feature.
+
+Still deferred: the additional-validation-point decision (O-15); operator-visible abuse logging (no logging surface exists and none was added); code signing of the distributed binary; online revocation (4.13); server-side execution of high-value features. Phase 4.10 is NOT started.

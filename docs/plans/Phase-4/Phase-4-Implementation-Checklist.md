@@ -133,8 +133,15 @@ Nothing below is complete except the documentation rows already produced by this
 - [x] Realistic protections documented
 - [x] Limitation statement recorded verbatim
 - [x] Abuse scenarios tabulated
-- [ ] Additional-validation-point decision resolved (O-15)
-- [ ] Integrity checks implemented, if approved
+- [x] Threat model recorded (A–L, with protected/not-protected classification)
+- [x] Pre-existing protections verified by test (`Phase49TamperAndAbuseResistanceTests`)
+- [x] Source-available bypass limitation documented
+- [x] Offline-copy limitation documented as model property, not vulnerability
+- [x] Private-key custody boundary re-verified
+- [x] Key rotation behavior re-verified
+- [x] No anti-debugging, obfuscation or hostile-runtime mechanism introduced
+- [ ] Additional-validation-point decision resolved (O-15, TO BE CONFIRMED DURING IMPLEMENTATION)
+- [ ] Integrity checks implemented, if approved (none added; plan states no production code)
 
 ## Phase 4.10 — Testing strategy
 
