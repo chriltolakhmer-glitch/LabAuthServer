@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using LabAuthServer.Api.Extensions;
 using LabAuthServer.Api.Requests;
 using LabAuthServer.Application.Auditing;
 using LabAuthServer.Application.DTOs;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -125,9 +127,36 @@ public sealed class JwtSizeBoundaryTests(JwtSizeApiFactory factory) : IClassFixt
     [Fact]
     public void InconsistentPayloadOverride_FailsOptionsValidation()
     {
-        using var invalidFactory = factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
-            services.PostConfigure<TokenOptions>(options => options.MaximumTokenSize = 16384)));
-        Assert.Throws<OptionsValidationException>(() => invalidFactory.CreateClient());
+        // WebApplicationFactory's DeferredHost surfaces the ValidateOnStart failure as an
+        // ObjectDisposedException, so exercise the production token configuration pipeline
+        // directly and assert the payload-budget validator rejects the inconsistent override.
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Token:Issuer"] = "https://size-tests.example",
+                ["Token:Audience"] = "size-tests",
+                ["Token:AccessTokenLifetime"] = "01:00:00",
+                ["Token:ClockSkew"] = "00:05:00",
+                ["Token:SigningAlgorithm"] = "RS256",
+                ["Token:ActiveKeyId"] = "boundary-test-key",
+                ["Token:SigningCertificateStoreLocation"] = "LocalMachine",
+                ["Token:SigningCertificateStoreName"] = "My",
+                ["Token:SigningCertificateThumbprint"] = "BD545BA289EBFC645C8C3DC424311975579D7E09",
+                ["Token:SigningKeyStoreReference"] = "Cert:/LocalMachine/My/BD545BA289EBFC645C8C3DC424311975579D7E09",
+                ["Token:MaximumClaimSize"] = "4096",
+                ["Token:MaximumTokenSize"] = "16384"
+            })
+            .Build();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddTokenConfiguration(configuration);
+
+        using var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<TokenOptions>>();
+
+        var exception = Assert.Throws<OptionsValidationException>(() => _ = options.Value);
+        Assert.Contains("issuance payload budget", string.Join(" ", exception.Failures), StringComparison.Ordinal);
     }
 
     [Theory]

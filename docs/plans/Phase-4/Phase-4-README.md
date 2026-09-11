@@ -1,8 +1,8 @@
 # Phase 4 ��� Technical License Enforcement
 
-Status: PLANNING COMPLETE — DECISIONS APPROVED. Implementation NOT STARTED. This document set is a permanent project record. It authorizes no implementation, no source change, no configuration change and no commit. [Master roadmap](../README.md).
+Status: IMPLEMENTED — Phases 4.0 through 4.14 executed; Phase 4.15 final security review completed. Current state: 991 tests, 991 passed, 0 failed, 0 skipped (Release). This document set is a permanent project record. [Master roadmap](../README.md).
 
-> Phase 4 planning decisions approved; implementation has not started.
+> Phase 4 planning decisions approved; implementation 4.1–4.12 executed and reviewed by 4.15. Historical phase records below describe the state at the time each phase ran and are not rewritten.
 
 The 22 approved Phase 4 decisions are recorded in the [Decision Log](Phase-4-Decision-Log.md) with status `APPROVED` (date 2026-09-11). Details that were not approved remain marked `TO BE CONFIRMED DURING IMPLEMENTATION`.
 
@@ -226,7 +226,7 @@ Key separation:
 - Licensing tests never require the production private key.
 - Tests prove that an invalid license does not weaken or bypass authentication.
 - Tests prove that an unlicensed optional feature is denied while licensed features remain available.
-- The existing baseline must not regress: 733 tests, 733 passed, 0 failed, 0 skipped, Release build, 0 warnings, 0 errors.
+- The existing baseline must not regress. The planning baseline was 733 tests; the implemented state is 991 tests, 991 passed, 0 failed, 0 skipped, Release build, 0 warnings, 0 errors.
 
 ## 9. Git workflow
 
@@ -264,7 +264,7 @@ Do not combine unrelated phases in one commit.
 - The license format, algorithm choice and trust model are documented with trade-offs.
 - Tests cover every failure case listed in [Phase-4.10](Phase-4.10-Testing-Strategy.md).
 - CI runs restore, Release build, all existing tests and licensing tests, with no vendor private key present.
-- The 733-test baseline is preserved or increased.
+- The test baseline is preserved or increased (planning baseline 733; implemented state 991, all passing).
 - No private key, secret, production configuration or source change is present in the documentation change set.
 - [Phase-4.15](Phase-4.15-Final-Security-Review.md) is completed and signed off before any release.
 

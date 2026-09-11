@@ -1,10 +1,10 @@
 # Phase 4 — Implementation Checklist
 
-Status: PLANNING ONLY. [Phase 4 README](Phase-4-README.md).
+Status: IMPLEMENTED — Phases 4.0 through 4.14 executed; Phase 4.15 final security review completed. [Phase 4 README](Phase-4-README.md).
 
 Legend: `[ ]` Not started, `[~]` In progress, `[x]` Complete, `[!]` Blocked, `[-]` Deferred.
 
-Nothing below is complete except the documentation rows already produced by this planning task. Implementation rows are unchecked by definition.
+Checkbox rows below are the running record and are updated per phase; remaining unchecked rows are open operational or deferred items, not evidence that implementation has not started. Current test state: 991 passed, 0 failed, 0 skipped (Release).
 
 ## Phase 4.0 — Requirements and licensing model
 

@@ -1,6 +1,6 @@
 # Phase 4 — Decision Log
 
-Status: APPROVED — PLANNING COMPLETE. Implementation NOT STARTED. [Phase 4 README](Phase-4-README.md).
+Status: APPROVED — IMPLEMENTED. Phases 4.1–4.12 executed; Phase 4.15 final security review completed. [Phase 4 README](Phase-4-README.md). Historical decision rows below are retained unchanged.
 
 Status values: `APPROVED` (approved baseline decision), `PROPOSED` (needs approval), `FINAL` (approved constraint), `DEFERRED` (explicitly postponed), `REJECTED` (not adopted).
 

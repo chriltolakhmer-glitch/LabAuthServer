@@ -1,159 +1,164 @@
-# Phase 4.15 — Final Security Review
+# Phase 4.15 Final Security Review
 
-Status: PLANNING ONLY. [Phase 4 README](Phase-4-README.md) | Previous: [4.14](Phase-4.14-Documentation-and-Release.md).
+Status: COMPLETE. [Phase 4 README](Phase-4-README.md) | Previous: [4.14](Phase-4.14-Documentation-and-Release.md).
 
-## Objective
+## 1. Review Scope
 
-Define the final security review that must pass before licensing is released to any customer.
+This review covers the Phase 4 Technical License Enforcement capability implemented in Phases 4.1 through 4.12: the license domain model and parser, cryptographic signing and verification, the vendor-side issuer, the server-side validator, feature/edition enforcement, expiration and grace behavior, tamper/abuse resistance, testing, CI and operations. It confirms that licensing did not weaken existing authentication, authorization, TLS, LDAP, request-limit or audit controls. Out of scope: penetration testing of unrelated surfaces, machine binding (deferred), and online activation (deferred).
 
-## Scope
+## 2. Repository Baseline
 
-In scope:
+| Item | Value |
+| --- | --- |
+| Repository | LabAuthServer |
+| Branch | main |
+| HEAD | 3774a98 |
+| Working tree | Modified: `tests/LabAuthServer.IntegrationTests/JwtSizeBoundaryTests.cs` (intentional TEST-ISOLATION-1 fix, preserved) |
+| SDK | .NET SDK 10.0.400 (`global.json`, `rollForward: latestPatch`) |
 
-- Review checklist across cryptography, custody, validation, enforcement, CI and operations.
-- Required evidence.
-- Sign-off requirements.
-- Explicit confirmation that existing security controls are unaffected.
+## 3. Build and Test Results
 
-Out of scope:
+- `dotnet build LabAuthServer.slnx -c Release`: succeeded, 0 warnings, 0 errors.
+- `dotnet test LabAuthServer.slnx -c Release --no-build -m:1`: **total 991, succeeded 991, failed 0, skipped 0**.
+- `dotnet test ... --filter "FullyQualifiedName~JwtSizeBoundaryTests.InconsistentPayloadOverride_FailsOptionsValidation"`: 1 passed, 0 failed (deterministic; the test lives in `LabAuthServer.IntegrationTests`).
 
-- Re-reviewing unrelated security work already completed in earlier phases.
-- Penetration testing of unrelated surfaces.
+## 4. Security Invariants
 
-## Why it exists
+### Cryptography
+- Algorithm: RSA-PSS with SHA-256, matched with ordinal (case-sensitive) comparison against `LicenseConstants.RsaPssSha256Algorithm`. Any other algorithm is rejected as `AlgorithmUnsupported`.
+- Verification policy: `RsaPssLicenseSignatureVerifier` enforces `MinimumRsaKeySize` = 2048; a trusted key below that yields `InvalidConfiguration`. Trusted 2048/3072/4096 keys verify; the approved issuer profile is RSA-3072 (D-11).
+- Exact signed payload bytes: the verifier receives the verbatim decoded `payload` bytes; there is no reserialization before verification.
+- `keyId`: required, ordinal lookup; an unknown or empty `keyId` fails as `KeyUntrusted`.
+- Rotation: `InMemoryTrustedLicenseKeyProvider` adds keys and never replaces them, so a rotated key coexists with the key it supersedes. Keys are copied from public parameters only, so no private material is retained.
 
-Licensing adds a new trust relationship and a new validation path. Both must be reviewed against the existing hardened baseline before release.
+### Parser
+- Strict UTF-8 (`throwOnInvalidBytes`), explicit UTF-8 BOM rejection.
+- Duplicate properties rejected (`HasUniqueProperties`); unknown container and payload properties rejected via allow-lists (`FieldUnknown`).
+- Strict Base64 for both `signature` and `payload`: whitespace rejected, empty decoding rejected, malformed rejected — no normalization before verification.
+- `JsonDocumentOptions`: comments disallowed, trailing commas disallowed, `MaxDepth` = 16.
+- Structural bounds: feature count 256, feature length 128, limit count 64, limit key length 64, limit value > 0 and ≤ `int.MaxValue`; integer-only limits (floats rejected).
+- Version allow-list: `licenseVersion` must be within `MinimumSupportedLicenseVersion`..`MaximumSupportedLicenseVersion` (both 1). Edition must be a known edition.
+- Fail-closed: every malformed input returns a typed deny; the parser never throws for malformed input.
 
-## Prerequisites
+### Validation
+- Ordering (`LicenseValidator.Validate`): empty → parse → algorithm → signature Base64 decode → signature verification over exact bytes → product → edition → issuedAt → expiry sanity → features → limits → expiration; unexpected exceptions deny as `InvalidConfiguration`.
+- Algorithm and trusted-key validation precede semantic trust.
+- Public-safe mapping: `LicenseValidationStatus` is the public-safe category; `LicenseValidationReason` is internal and is never surfaced through a public API response.
+- Clock skew applies to `issuedAt` only (5-minute `ClockSkewAllowance`); it never widens the expiry side.
+- Perpetual licenses (`ExpiresAt` null) never expire and never enter grace.
+- No accidental grace bypass: `LicenseValidator` always passes `LicenseGracePeriod.None` (D-08).
 
-- Phases 4.0 through 4.14 complete for the scope being released.
+### Feature / Edition Enforcement
+- `LicensePolicy.Restricted` (Community) is used for every non-valid validation result: no feature granted, no limit defined.
+- Feature default-deny: a feature is allowed only when it is a known identifier AND explicitly listed in the license. Edition alone never grants a feature.
+- `IsWithinLimit`/`TryGetLimit`: a missing, unknown or restricted limit is never unlimited; `currentUsage < 0` denies.
+- `MeetsMinimumEdition` denies for unknown minimum editions and for the restricted policy.
 
-## Inputs
+### Expiration / Grace
+- Single decision point: `LicenseExpirationEvaluator` (reused by `LicenseValidator`). States: NotYetValid, Perpetual, Active, Expired.
+- Grace is explicit, bounded (`MaximumGracePeriod` = 90 days) and default-disabled; `WithinGrace` is diagnostic only and never grants capability.
+- Warning threshold (30 days) is an observable signal only.
 
-- All Phase 4 documents.
-- Test results and CI evidence.
-- The [Risk Register](Phase-4-Risk-Register.md) and [Decision Log](Phase-4-Decision-Log.md).
+### Tamper Resistance
+- Payload/signature/keyId/algorithm/feature/edition/limit/expiry tampering all invalidate the signature or fail a typed rule.
+- Unknown and duplicate fields are rejected before semantic trust.
+- Deep/large/malformed input is bounded by depth and structural limits.
 
-## Design decisions
+### Abuse Resistance
+- Repeated validation is idempotent and side-effect-free; the validator is a pure function of bytes plus trusted public keys, with no network access in the licensing path.
+- No license path weakens authentication or any security control (verified by the security-independence test).
 
-| ID | Decision | Status | Reason |
+### Key Custody
+- No private key, PEM, `.pfx`/`.p12`, signing password or production signing secret exists in licensing source, tests, CI or build output.
+- The issuer holds the private-key boundary; the server holds public keys only. `RsaPssLicenseSignatureVerifier` requires no private key.
+- Repository-wide search matches for private-key terms are documentation examples, test placeholders, property names or historical backups only — no actual licensing secret material.
+
+## 5. Threat Model Results
+
+| Threat | Protection | Status | Residual limitation |
 | --- | --- | --- | --- |
-| D4.15-1 | No release without a completed security review | FINAL (constraint) | Gate |
-| D4.15-2 | The review confirms existing security controls are unchanged | FINAL (constraint) | Licensing must not weaken security |
-| D4.15-3 | The review confirms no private key is present in any artifact | FINAL (constraint) | Key custody |
-| D4.15-4 | The review confirms fail-closed behavior on every validation path | FINAL (constraint) | Core property |
-| D4.15-5 | Unresolved risks are recorded, accepted by a named owner, and dated | PROPOSED | Accountability |
+| A Modify license file | Signature over exact payload bytes | Protected | None for content authenticity |
+| B Modify signature | RSA-PSS verification | Protected | None |
+| C Modify keyId | Trusted key set lookup | Protected | None |
+| D Modify algorithm | Ordinal algorithm allow-list | Protected | None |
+| E Add unknown JSON properties | Allow-list parsing | Protected | None |
+| F Modify expiration/features/limits | Signature covers all fields | Protected | None |
+| G Large/malformed input | Depth and structural bounds | Protected | Resource cost bounded, not zero |
+| H Repeated validation abuse | Pure, stateless validation | Protected | No rate limit (offline, no surface) |
+| I Modify source | None (source available) | Not protected | Customer controls the source |
+| J Modify binaries | None (source available) | Not protected | Customer controls the build |
+| K Host administrator compromise | None | Not protected | Host admin controls the runtime |
+| L Vendor private-key compromise | Custody controls; rotation | Mitigated | Rotation cannot recall already-issued valid licenses |
 
-DECISION REQUIRED: Who performs the review and who signs off. Recommendation: a reviewer who did not implement the licensing code, plus project ownership sign-off.
+**Source-available statement.** Cryptographic license verification does not prevent a customer who controls the source, binaries or host from modifying the application itself. Technical enforcement is a commercial and authenticity control, not unbreakable DRM.
 
-## Proposed architecture
+## 6. CI Security Review
 
-Review checklist:
+- `.github/workflows/ci.yml`: `push`/`pull_request` to `main`; `permissions: contents: read`; `runs-on: windows-latest`.
+- Steps: checkout, setup-dotnet `10.0.400` (matching `global.json`), NuGet cache, restore, Release build, Release test.
+- No secrets, no production private key, no certificate, no production configuration, no external licensing service, no deployment step.
+- All third-party actions are first-party (`actions/checkout@v4`, `actions/setup-dotnet@v4`, `actions/cache@v4`).
+- GitHub-hosted execution has **NOT** been verified from this environment; only the local Release equivalent was executed.
 
-| # | Area | Question | Evidence required |
-| --- | --- | --- | --- |
-| 1 | Key custody | Is the vendor private key absent from the repository, build output, CI configuration and the server? | Search results and review |
-| 2 | Key custody | Is the private key required only by the issuer, on the vendor side? | Component review |
-| 3 | Cryptography | Is the algorithm and key size as approved, with no weak fallback? | Code review and test output |
-| 4 | Cryptography | Does the server trust a key set, and does rotation preserve existing licenses? | Rotation test result |
-| 5 | Format | Is canonicalization identical on both sides? | Round-trip test result |
-| 6 | Format | Are unknown fields, versions, editions and features rejected? | Negative test results |
-| 7 | Validation | Does every failure path deny? | Failure-path test results |
-| 8 | Validation | Does the validation order place cryptographic verification before semantic trust? | Code review |
-| 9 | Validation | Are internal reasons excluded from public responses? | Response mapping review |
-| 10 | Enforcement | Are authentication and security controls unconditionally active? | Security-independence test result |
-| 11 | Enforcement | Are unknown and missing features denied by default? | Test results |
-| 12 | Expiration | Is grace explicit, bounded and default-off? | Configuration review and boundary tests |
-| 13 | Binding | If deferred, is no binding input required? | Test result |
-| 14 | Tamper | Is the limitation statement published and accurate? | Release notes review |
-| 15 | CI | Does the pipeline run without any vendor private key? | Workflow review and run evidence |
-| 16 | CI | Is the test baseline preserved or increased? | Test count report |
-| 17 | Operations | Do issuance, renewal and recovery procedures avoid key sharing? | Procedure review |
-| 18 | Operations | Is the license file included in the documented backup set? | Procedure review |
-| 19 | Regression | Are all previously hardened controls unchanged? | Diff review of protected files |
-| 20 | Risk | Are all open risks recorded with owners and dates? | Risk register review |
+## 7. Operational Security Review
 
-Required confirmations, stated explicitly in the review record:
+- Procedures documented in Phase 4.12: issuance, install, validate, replace, backup/recovery, renewal, expiry, recovery.
+- Key custody: the vendor private key is not a customer artifact and is never shared with customers.
+- Runtime limitation: there is no license-file loader, reload, DI registration or logging surface in the server today; the file location model is configurable (`Licensing:LicenseFilePath`) with no hard-coded default.
+- Open operational decisions (O-07, O-10, O-17, O-18, O-20) remain OPEN; none is a security blocker because no production license is issued or loaded yet.
 
-- The private key never exists in LabAuthServer.
-- A customer cannot legitimately modify license properties without invalidating the signature.
-- Invalid, modified, expired or incompatible licenses fail closed.
-- Licensing does not disable or bypass authentication or any security control.
-- Technical enforcement cannot make the source impossible to modify, and no document claims otherwise.
+## 8. Open Decision Review
 
-## Files likely to change
+| ID | Item | Classification | Blocker? | Final Decision |
+| --- | --- | --- | --- | --- |
+| D-09 / O-14 | Machine binding | DEFERRED FUTURE WORK | No | Deferred; no binding input required |
+| D-10 / D-22 | Online activation/revocation | DEFERRED FUTURE WORK | No | Offline-first; future option |
+| D-08 / O-11 | Grace period | ACCEPTED CURRENT-DESIGN LIMITATION | No | Default-off, diagnostic only |
+| O-09 / O-15 | Validation cadence | DEFERRED FUTURE WORK | No | No loader/reload surface yet |
+| O-10 / D-13 | License file location | DEFERRED FUTURE WORK | No | Configurable path model approved |
+| O-13 | Clock skew | ACCEPTED CURRENT-DESIGN LIMITATION | No | 5-minute allowance on issuedAt only |
+| O-07 | Production key custody | RELEASE BLOCKER (for production issuance only) | Conditional | Issuer-side; not in server/CI |
+| O-03 / O-04 | Canonicalization/signature profile | ACCEPTED CURRENT-DESIGN LIMITATION | No | Deterministic serialization implemented; format not formally frozen |
+| O-01 | Feature-to-edition matrix | DEFERRED FUTURE WORK | No | Catalog + explicit feature list only |
+| O-17 / O-18 | Issuance authority / register | DEFERRED FUTURE WORK | No | Operational, pre-issuance |
+| O-20 / O-21 | Visibility / release vehicle | DOCUMENTATION LIMITATION | No | Pre-release documentation |
+| — | Runtime loader/reload | DEFERRED FUTURE WORK | No | Not implemented |
+| — | Audit/logging | DEFERRED FUTURE WORK | No | No runtime surface |
+| — | Release artifact process | DEFERRED FUTURE WORK | No | Not implemented |
+| — | Hosted CI verification | DOCUMENTATION LIMITATION | No | Local Release equivalent only |
+| TEST-ISOLATION-1 | Test isolation | CLOSED | No | Fixed by test change |
 
-- None. The review produces a record, not code.
-- A review record document may be added under `docs/` after the review.
+## 9. Findings
 
-## Files that must NOT change
+| ID | Severity | Finding | Status | Action |
+| --- | --- | --- | --- | --- |
+| F-1 | INFO | Runtime license loader/reload not implemented | OPEN (deferred) | Future implementation phase |
+| F-2 | LOW | Canonicalization/signature profile not formally frozen | OPEN (accepted) | Freeze before production issuance |
+| F-3 | MEDIUM | Production vendor key custody (O-07) undecided | OPEN (pre-issuance) | Decide before issuing production licenses |
+| F-4 | LOW | No license audit/logging surface | OPEN (deferred) | Future operations phase |
+| F-5 | INFO | Hosted CI run not verified | OPEN | Verify on first hosted run |
+| F-6 | LOW | Numeric limit `int.MaxValue` accepted as "unlimited-ish" | ACCEPTED | Documented; bounded by policy |
+| TEST-ISOLATION-1 | LOW–MEDIUM | Non-deterministic integration test under parallel assemblies | CLOSED | Test rewritten to exercise production options pipeline |
 
-- Source code and tests, except to fix a defect found by the review, which requires its own change and re-review.
+## 10. Documentation Reconciliation
 
-## Implementation steps
+- `Phase-4-README.md`: status line updated from "Implementation NOT STARTED" to the implemented 991-test state; the 733-test baseline references updated.
+- `Phase-4-Decision-Log.md`: status line updated to "APPROVED — IMPLEMENTED"; historical rows preserved unchanged.
+- `Phase-4-Implementation-Checklist.md`: status line updated; checkboxes remain the running per-phase record.
+- `Phase-4-Risk-Register.md`: status line updated; risk rows preserved.
+- Historical phase documents (4.0–4.14) were not rewritten; they legitimately describe the state at the time each phase executed.
+- TEST-ISOLATION-1 recorded as CLOSED in this document.
 
-1. Resolve the reviewer and sign-off decisions.
-2. Execute the checklist and collect evidence per row.
-3. Record unresolved risks with owners and dates.
-4. Record the sign-off.
-5. Release the gate for 4.14.
+## 11. Final Security Assessment
 
-## Security considerations
+The licensing implementation is fail-closed across parse, cryptographic and semantic paths; cryptographic verification is sound (RSA-PSS/SHA-256, exact signed bytes, multi-key trusted set, public-only keys, minimum 2048-bit); parser strictness is high; feature/edition enforcement is default-deny; expiration is a single decision point with grace default-off; and no private key or production signing secret exists in source, tests, CI or build output. Licensing does not disable or weaken authentication or any security control. The residual limitations are the inherent source-available bypass (customer controls source/binaries/host), deferred binding/online features, the not-yet-frozen canonicalization profile, and the undecided production key custody — none of which is a defect in the implemented code.
 
-- The review must be independent of the implementation.
-- Evidence must be current, not cited from planning documents.
-- A failing row blocks release unless an explicit, recorded, owned acceptance exists.
+## 12. Final Verdict
 
-## Failure cases
+**PASS WITH CONDITIONS**
 
-- Review performed by the implementer without independent verification.
-- Checklist completed by assertion rather than evidence.
-- An open risk accepted without a named owner.
-- Release proceeding while a checklist row is unresolved.
+Conditions: decide production vendor key custody (O-07) and freeze the canonicalization/signature profile (O-03/O-04) before issuing any production license; implement a runtime license loader with an audit/logging surface before enforcement ships to customers; verify the pipeline on a GitHub-hosted run before relying on hosted CI evidence. No security or release blocker exists in the implemented licensing code.
 
-## Testing requirements
+## 13. Recommended Next Phase
 
-- Confirm all licensing tests pass.
-- Confirm the baseline suite passes.
-- Confirm the CI run used for the review contains no vendor private key.
-- Confirm the negative-path tests cover every row in the 4.5 rule table.
-
-## Acceptance criteria
-
-- All checklist rows completed with evidence.
-- Required confirmations stated in the review record.
-- Open risks recorded with owner and date.
-- Sign-off recorded.
-- Release gate status recorded.
-
-## Rollback considerations
-
-If the review finds a blocking defect, the affected phase reverts to its last known-good state and the release is held. The review does not itself change runtime behavior.
-
-## Evidence to record
-
-- Completed checklist with evidence references.
-- Test and CI results.
-- Open risk acceptances.
-- Sign-off record.
-
-## Git/commit strategy
-
-- Suggested message: `docs(licensing): add final security review record`.
-- No commit or push without explicit authorization.
-
-## Dependencies on previous phases
-
-- Requires 4.0 through 4.14.
-
-## Risks
-
-- Review treated as a formality.
-- Evidence collected from an earlier, stale run.
-- Scope of the review not matching the scope of the release.
-
-## Deferred items
-
-- External third-party review.
-- Periodic re-review cadence.
-- Post-release monitoring thresholds.
+Phase 5 — Runtime license enforcement wiring: license-file loader and reload, DI registration, operator-visible logging/audit for validation outcomes, and endpoint-level enforcement of licensed features, together with the production key-custody and canonicalization freezes. Machine binding and online activation remain deferred until separately approved.

@@ -1,6 +1,6 @@
 # Phase 4 — Risk Register
 
-Status: PLANNING ONLY. [Phase 4 README](Phase-4-README.md).
+Status: MAINTAINED — IMPLEMENTED (Phases 4.1–4.12 executed; Phase 4.15 final security review completed). [Phase 4 README](Phase-4-README.md).
 
 Severity and likelihood: Low, Medium, High. Status: OPEN, MITIGATED (control designed), ACCEPTED (with named owner and date), CLOSED.
 
