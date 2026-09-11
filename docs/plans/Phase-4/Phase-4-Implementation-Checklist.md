@@ -38,12 +38,15 @@ Nothing below is complete except the documentation rows already produced by this
 
 - [x] Algorithm trade-offs documented
 - [x] Rotation strategy documented
-- [ ] First algorithm confirmed (O-05)
-- [ ] Minimum key size confirmed (O-06)
-- [ ] Library availability verified on the target runtime
-- [ ] Signing implemented in the issuer
-- [ ] Verification implemented in the server
-- [ ] Round-trip and negative cryptographic tests added
+- [x] First algorithm confirmed (RSA-PSS + SHA-256 + RSA-3072, D-11)
+- [x] Library availability verified on the target runtime (`System.Security.Cryptography`, framework only, no new package)
+- [x] Verification implemented in the server (`RsaPssLicenseSignatureVerifier`)
+- [x] Multiple trusted public keys supported for rotation (`InMemoryTrustedLicenseKeyProvider`, D-12)
+- [x] Round-trip and negative cryptographic tests added (`Phase43CryptographicVerificationTests`)
+- [x] Public-only key enforcement (F-3) resolved
+- [ ] Minimum key size policy confirmed (O-06, TO BE CONFIRMED DURING IMPLEMENTATION; 2048 enforced in code)
+- [ ] Signing implemented in the issuer (Phase 4.4, NOT STARTED)
+- [ ] F-2 envelope binding revisited before the production license format is frozen
 
 ## Phase 4.4 — License issuer
 

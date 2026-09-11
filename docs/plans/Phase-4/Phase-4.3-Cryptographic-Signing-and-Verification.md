@@ -187,3 +187,29 @@ Reverting the implementation removes verification; the server returns to its pre
 - Ed25519 adoption.
 - Hardware-backed signing (4.12).
 - Post-quantum migration planning.
+
+## Implementation record (Phase 4.3 verification, 2026-09-11)
+
+Cryptographic algorithm (approved, D-11): RSA-PSS with SHA-256. Signature encoding (D4.3-4): Base64 of the raw signature bytes. Key identifier (D4.3-5): stable ASCII string, e.g. `lab-license-signing-2026`.
+
+| Concern | Implementation |
+| --- | --- |
+| Padding | `RSASignaturePadding.Pss` only; PKCS#1 v1.5 is rejected |
+| Hash | `HashAlgorithmName.SHA256` only; SHA-384/SHA-512 are rejected |
+| Algorithm identifier | `LicenseConstants.RsaPssSha256Algorithm` = `RSA-PSS-SHA256`, matched with ordinal (case-sensitive) comparison |
+| Minimum RSA key size | `LicenseConstants.MinimumRsaKeySize` = 2048 bits; a trusted key below this fails closed with `InvalidConfiguration` |
+| Initial signing key size | 3072 bits (documented; the verifier accepts 2048/3072/4096) |
+| Signature verification | `RsaPssLicenseSignatureVerifier.VerifyData(payload, signature, SHA256, Pss)` over the exact `SignedLicense.SignedPayload` bytes |
+| Key selection | `ITrustedLicenseKeyProvider.TryGetPublicKey(keyId)`; unknown or empty `keyId` fails closed with `KeyUntrusted` |
+| Multi-key / rotation | `InMemoryTrustedLicenseKeyProvider` is additive; each `keyId` maps to its own public key |
+| Signature encoding validation | `JsonLicenseDocumentParser` rejects non-Base64, empty, and whitespace-containing signature values with `SignatureMalformed` |
+
+Verification flow (implemented): parse container -> decode verbatim payload bytes -> parse payload into `LicenseDocument` -> select trusted public key by `keyId` -> verify RSA-PSS/SHA-256 over the verbatim payload bytes -> structured `LicenseSignatureVerificationOutcome`. The verifier never re-serializes `LicenseDocument`; it verifies `SignedLicense.SignedPayload` exactly as supplied, so there is no parse/re-serialize gap.
+
+F-2 status (envelope binding): unchanged design. `algorithm` and `keyId` remain envelope metadata outside the signed payload. They are selection metadata only: `algorithm` must equal the single approved value and `keyId` must resolve to a trusted key, so any alteration can only cause a fail-closed denial, never an acceptance. This is documented as an intentional design consideration for a future license format version; no claim is made that they are cryptographically authenticated.
+
+F-3 status (public-only enforcement): resolved. `InMemoryTrustedLicenseKeyProvider.Add` now copies the supplied key from its public parameters only (`ExportParameters(false)` then `ImportParameters`), so any private material the caller passes is discarded and never retained. `Provider_DiscardsPrivateKeyMaterial` and `Provider_AddedKeyDoesNotExposePrivateMaterialThroughVerification` verify this. The provider owns its copies; callers keep ownership of the keys they supply.
+
+Tests added: `tests/LabAuthServer.UnitTests/Licensing/Phase43CryptographicVerificationTests.cs` (37 tests) covering successful verification (RSA-3072, key A, key B, multiple keys), payload integrity (modified payload, single-byte mutation, signature from another payload, empty payload), algorithm rejection (PKCS#1, SHA-384, unsupported identifiers, case sensitivity), key handling (unknown/empty/whitespace keyId, wrong key, 2048/3072/4096, weak 1024-bit key), signature encoding (malformed Base64, empty, whitespace), provider security (private-material discard, duplicate keyId, unknown lookup) and error handling (null arguments, truncated signature, no key material in failure outcomes).
+
+Still deferred: the vendor-side issuer, production key generation, key-set configuration binding, canonicalization (O-03), minimum-key-size policy confirmation (O-06), issuer placement (O-08), machine binding, online activation, revocation, feature/edition/limit/expiration enforcement (4.5-4.7). Phase 4.4 is NOT started.

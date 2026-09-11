@@ -77,6 +77,22 @@ public sealed class JsonLicenseDocumentParser : ILicenseDocumentParser
             return LicenseParseOutcome.Failed(LicenseValidationReason.SignatureMalformed);
         }
 
+        // The signature field carries Base64 text (Phase 4.3 decision D4.3-4). Convert ignores
+        // whitespace, so reject it explicitly and require a non-empty decoding; a malformed or
+        // non-canonical encoding must not reach the verifier.
+        try
+        {
+            if (signatureBase64.Any(char.IsWhiteSpace) ||
+                Convert.FromBase64String(signatureBase64).Length == 0)
+            {
+                return LicenseParseOutcome.Failed(LicenseValidationReason.SignatureMalformed);
+            }
+        }
+        catch (FormatException)
+        {
+            return LicenseParseOutcome.Failed(LicenseValidationReason.SignatureMalformed);
+        }
+
         byte[] payloadBytes;
         try
         {

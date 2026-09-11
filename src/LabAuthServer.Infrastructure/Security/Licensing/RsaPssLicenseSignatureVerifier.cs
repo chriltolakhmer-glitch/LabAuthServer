@@ -48,7 +48,10 @@ public sealed class RsaPssLicenseSignatureVerifier : ILicenseSignatureVerifier
         {
             if (publicKey.KeySize < LicenseConstants.MinimumRsaKeySize)
             {
-                return LicenseSignatureVerificationOutcome.Failed(LicenseValidationReason.AlgorithmUnsupported);
+                // A trusted key below the minimum accepted size makes the key set unusable for
+                // verification. The accepted algorithm is unchanged, so this is a configuration
+                // failure rather than an algorithm failure (Phase 4.3).
+                return LicenseSignatureVerificationOutcome.Failed(LicenseValidationReason.InvalidConfiguration);
             }
 
             var verified = publicKey.VerifyData(

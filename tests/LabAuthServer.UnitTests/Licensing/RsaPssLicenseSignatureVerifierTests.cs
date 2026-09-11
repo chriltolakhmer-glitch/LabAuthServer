@@ -99,7 +99,7 @@ public sealed class RsaPssLicenseSignatureVerifierTests
 
     private static InMemoryTrustedLicenseKeyProvider CreateKeyProvider(string keyId, RSA rsa)
     {
-        var publicOnly = RSA.Create();
+        using var publicOnly = RSA.Create();
         publicOnly.ImportParameters(rsa.ExportParameters(false));
         var provider = new InMemoryTrustedLicenseKeyProvider();
         provider.Add(keyId, publicOnly);
