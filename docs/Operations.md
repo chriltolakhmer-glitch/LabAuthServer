@@ -40,6 +40,10 @@ Application size rejection returns an empty 431 for oversized Authorization valu
 5. Check SQL connectivity and procedure-execution permissions.
 6. Check correlation IDs and safe audit-persistence diagnostics.
 
+## Licensing (operational)
+
+The vendor signs a license document; the server verifies it offline against a trusted public-key set. Installing, replacing, backing up and recovering a license file, and the vendor/customer key-custody boundary, are documented in [Phase 4.12 — Operational License Management](plans/Phase-4/Phase-4.12-Operational-License-Management.md). The vendor private signing key is never a customer artifact and no operational procedure requires it to be shared. See [Licensing](Licensing.md) for the implemented behaviour.
+
 ## Rollback
 
 Use the approved deployment workflow to restore the last validated package. Database rollback must be handled by authorized database change control; do not delete audit history as an application rollback step.

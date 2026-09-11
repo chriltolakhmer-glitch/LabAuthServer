@@ -34,6 +34,14 @@ The tests cover configuration fail-closed behavior, LDAPS/UPN validation, LDAP f
 
 The original 37 size-boundary cases, updated for the reduced contract, cover RSA 1024 rejection, 2048/3072/4096 acceptance and 4160 rejection across active/previous signing and public validation in both providers; missing previous signing expiry; unchanged UTF-16 identity and UTF-8 role/scope limits; exact 7680-byte issuance payload; fixed-policy startup consistency; and encoded/header boundary rejection before key, authentication or audit calls. A real 4096-bit synthetic signing key and maximally escaped `kid` produce an accepted 11997-byte issuer token. Separately signed valid tokens at 12288 bytes and raw Authorization values at 12352 bytes pass the application pipeline. Multiple values and multibyte input cannot bypass header byte counting.
 
+## Licensing tests
+
+The licensing suite is under `tests/LabAuthServer.UnitTests/Licensing/`. It covers the license document model, the strict JSON container parser, the RSA-PSS/SHA-256 verifier, the issuer with ephemeral in-memory keys, the validator rule by rule, feature/edition enforcement, expiration and grace boundaries, tamper and abuse resistance, and the cross-cutting guarantees (assembly separation, private-key absence, network independence, deterministic clock, public-safe status/reason separation). Issuer tests use ephemeral keys generated per run; no production private key is required. The current full-suite baseline is 745 unit + 246 integration = 991 passing, 0 failed, 0 skipped when run with `dotnet test LabAuthServer.slnx -c Release --no-build -m:1`.
+
+**Known test-infrastructure limitation (TEST-ISOLATION-1):** `JwtSizeBoundaryTests.InconsistentPayloadOverride_FailsOptionsValidation` intermittently fails when the unit and integration assemblies run concurrently under MSBuild. It passes in isolation, in a full run of the integration project alone, and with `-m:1`. It is a JWT issuance-budget/options-validation test in the authentication path and has no relationship to licensing. The test is not weakened, disabled or retried. Full parallel execution of the solution is therefore not claimed to be reliable.
+
+See [Licensing](Licensing.md) for what the licensing tests cover.
+
 ## What the tests do not prove
 
 These new integration cases use real signing/bearer validation with synthetic authentication, group lookup and audit seams. The exact header whitespace case uses TestServer directly because HttpClient trims trailing whitespace. Neither proves IIS/native/proxy transport compatibility; that requires deployment verification. Existing Phase 1 validation and limiter regressions remain in the full suite.

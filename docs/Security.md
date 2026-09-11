@@ -1,5 +1,9 @@
 # Security
 
+## Licensing (cross-reference)
+
+LabAuthServer also carries an offline, signed license document that is verified with a trusted vendor public key set. Licensing never disables or weakens authentication, authorization, TLS, LDAP transport security, request limits or audit (D-15). Missing, invalid, unsupported or expired licenses place the application in Community/restricted mode; the application does not refuse to start. See [Licensing](Licensing.md) for the implemented behaviour, the source-available limitation and the deferred/future items.
+
 ## Implemented controls
 
 - LDAPS-only directory communication over TCP 636.

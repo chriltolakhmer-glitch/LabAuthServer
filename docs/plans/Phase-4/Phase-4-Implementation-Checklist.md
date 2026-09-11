@@ -219,11 +219,17 @@ Nothing below is complete except the documentation rows already produced by this
 
 - [x] Document set defined
 - [x] Release checklist defined
-- [ ] Document visibility approved (O-20)
-- [ ] Release vehicle approved (O-21)
-- [ ] Release notes drafted with the limitation statement
-- [ ] Customer instructions published
-- [ ] Troubleshooting entries updated
+- [x] Licensing overview published (`docs/Licensing.md`)
+- [x] Cross-references added to `README.md`, `docs/Security.md`, `docs/Configuration.md`, `docs/Operations.md`, `docs/Troubleshooting.md`, `docs/Testing.md`
+- [x] Licensing troubleshooting entries updated
+- [x] Limitation statement published verbatim
+- [x] Technical License Enforcement plan set referenced from `docs/plans/README.md`
+- [x] Release-readiness checklist recorded in the Phase 4.14 document
+- [ ] Document visibility approved (O-20) — OPEN
+- [ ] Release vehicle approved (O-21) — OPEN
+- [ ] Release notes drafted as a release artifact (the limitation statement text is published in `docs/Licensing.md`; the release note itself is not authored until a release is authorized)
+- [ ] Customer install/renew instructions published as standalone pages (currently referenced through Phase 4.12; a loader is not yet implemented)
+- [ ] Release process / artifact definition for licensing — no release process exists (recorded as finding 4.14-F-2)
 
 ## Phase 4.15 — Final security review
 

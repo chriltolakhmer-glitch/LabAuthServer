@@ -2,6 +2,14 @@
 
 Configuration is bound and validated at startup. Public documentation should describe setting names, not deployment values.
 
+## Licensing
+
+The licensing subsystem reads a single configuration value under the `Licensing` section:
+
+- `LicenseFilePath`: configured path to the signed license file. The default is empty, which means no license is configured. No default path is hard-coded. A missing configuration yields Community/restricted mode rather than an exception.
+
+The server currently has no runtime license-file loader and no `Licensing` section in the shipped `appsettings*.json`. The concrete production license file location remains an open decision (see [Phase 4 Decision Log](plans/Phase-4/Phase-4-Decision-Log.md), O-10). See [Licensing](Licensing.md).
+
 ## ActiveDirectory
 
 - `Domain`: configured UPN suffix, for example `<DOMAIN>`.

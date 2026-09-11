@@ -147,3 +147,97 @@ Documentation can be corrected in a follow-up; release rollback follows the exis
 - Localization of customer-facing licensing documentation.
 - Public FAQ.
 - Training material for support staff.
+
+---
+
+## Implementation record (2026-09-11)
+
+Status: COMPLETE — DOCUMENTATION READY; NO RELEASE PERFORMED. No source code, test, configuration or CI change was made.
+
+### Authorization status
+
+Phase 4.14 is a documentation/release-readiness phase. It authorizes documentation updates and a release-readiness checklist; it does not authorize publishing packages, binaries or releases, generating keys, or adding deployment automation. None of those was performed. The stop-and-report clause did not trigger.
+
+### Customer-visible documentation set
+
+The repository already has a `docs/` documentation set with an established shape. Rather than invent a new documentation architecture, the licensing documentation was added to that set:
+
+| Document | Audience | Change |
+| --- | --- | --- |
+| `docs/Licensing.md` | Customer operators and technical staff | **New.** Full licensing overview covering what is implemented, what is not, the license document concept, editions, features, limits, perpetual/expiring licenses, restricted Community behaviour, validation, cryptographic verification, trusted keys, rotation, tampering, install/replace/backup/recovery pointers, troubleshooting, security model, offline-first behaviour, source-available limitations, future online licensing, machine binding, known limitations and open decisions. |
+| `README.md` | All | Added one cross-reference to `docs/Licensing.md`, noting that licensing is not yet wired into the running host. |
+| `docs/Security.md` | All | Added a short licensing cross-reference section stating the security-independence constraint (D-15) and the restricted-mode fallback. |
+| `docs/Configuration.md` | All | Added a `Licensing` section documenting `LicenseFilePath` (empty default, no hard-coded path) and noting that no `Licensing` section exists in the shipped `appsettings*.json`. |
+| `docs/Operations.md` | Operators | Added an operational licensing section pointing to the Phase 4.12 procedures and the key-custody boundary. |
+| `docs/Troubleshooting.md` | Support | Added a licensing troubleshooting section mapping the public-safe status values to causes and forbidding the vendor private-key request. |
+| `docs/Testing.md` | All | Added a licensing test section with the current baseline (745 unit + 246 integration = 991) and the TEST-ISOLATION-1 limitation. |
+| `docs/plans/README.md` | All | Added a Technical License Enforcement plan-set section so the Phase 4 plan set is discoverable from the roadmap. |
+
+### Internal documents (not published)
+
+The Phase 4.0–4.13 plan documents under `docs/plans/Phase-4/` are internal design records. They are not customer-facing. The issuer is vendor-side and remains outside the server build graph.
+
+### What was explicitly NOT done
+
+- No release was created or published.
+- No package or binary was published.
+- No production signing key was generated.
+- No GitHub secret was created.
+- No deployment script, GitHub release automation, signing automation or production license generation was added.
+- No source code or test was changed.
+- No CI workflow was changed.
+- No production `appsettings` was modified.
+- No private key, production certificate, credential, production license file or customer secret was included.
+
+### License example policy
+
+The documentation describes the license document conceptually and does not embed a full example license. No fictional license container is published in a form that could be mistaken for a production license; no production key ID, customer identifier or credential is used anywhere.
+
+### Security model and source-available limitation
+
+The `docs/Licensing.md` security section states the controls that licensing does provide (cryptographic integrity, trusted-key verification, strict parsing, fail-closed validation, default-deny enforcement boundary, expiration handling, tamper and boundary protections) and the source-available limitation (a customer controlling source, binaries and host can bypass client-side enforcement). No claim of unbreakable DRM, impossible bypass, tamper-proof binaries or hardware-level enforcement is made. No anti-debugging or similar mechanism was introduced.
+
+### Offline-first, machine binding, grace, CI, tests
+
+- Offline-first is documented as the current behaviour: no activation server, no revocation service, no telemetry, no network call for license validation. Online activation/revocation remain future work (Phase 4.13).
+- Machine binding is documented as deferred: no machine identity required, no binding field in the license format, no rebind workflow.
+- Grace is documented as default-disabled, bounded and diagnostic only; it is not an entitlement bypass.
+- CI documentation records the Phase 4.11 review outcome: the existing workflow performs checkout, .NET setup, cache, restore, Release build and test with `permissions: contents: read`. **CI configuration validated locally; GitHub-hosted run not executed/verified.**
+- Test documentation records the final state (745 unit + 246 integration = 991 passing, 0 failed, 0 skipped with `-m:1`) and the TEST-ISOLATION-1 limitation. Parallel execution of the full solution is not claimed to be reliable.
+
+### Release-readiness checklist
+
+| # | Item | Status |
+| --- | --- | --- |
+| 1 | Source review (licensing code present and reviewed in Phases 4.1–4.10) | COMPLETE |
+| 2 | Test verification (`-m:1` full suite green) | COMPLETE |
+| 3 | Security review (Phase 4.9 and 4.15 scope) | PHASE 4.15 NOT STARTED — release gate not released |
+| 4 | License format review (format frozen by Phase 4.2; canonicalization O-03 still OPEN) | PARTIAL — OPEN DECISION |
+| 5 | Cryptographic review (RSA-PSS/SHA-256 implemented; O-06 wording OPEN) | PARTIAL — OPEN DECISION |
+| 6 | Key custody (vendor private key never in repo, CI or server) | COMPLETE — production key source O-07 still OPEN |
+| 7 | Documentation (this phase) | COMPLETE |
+| 8 | Operational procedures (Phase 4.12 documented; no runtime loader) | DOCUMENTED — LOADER NOT IMPLEMENTED |
+| 9 | Backup/recovery (Phase 4.12 documented) | DOCUMENTED |
+| 10 | CI (Phase 4.11 reviewed; no workflow change) | COMPLETE — GITHUB-HOSTED RUN NOT VERIFIED |
+| 11 | Release artifacts (what could safely be distributed) | NOT DEFINED — no release process exists for licensing; recorded as a gap |
+| 12 | Secrets scan (no secret in changed files) | COMPLETE |
+| 13 | Private-key scan (no private key in changed files or repository) | COMPLETE |
+| 14 | Production configuration review (no production `appsettings` modified) | COMPLETE — concrete license path O-10 still OPEN |
+| 15 | Final security sign-off (Phase 4.15) | NOT STARTED — RELEASE GATE CLOSED |
+
+### Findings
+
+| ID | Finding | Severity | Disposition |
+| --- | --- | --- | --- |
+| 4.14-F-1 | The server has no runtime license loader, no DI registration and no `Licensing` section in `appsettings*.json`; the operational install/replace procedures documented in 4.12 are therefore not yet executable end to end. | Medium | Documented as a known limitation in `docs/Licensing.md`; wiring the loader is a separate authorized phase that depends on the still-OPEN O-10 and O-09 |
+| 4.14-F-2 | No release process or release-artifact definition exists for the licensing feature. | Low | Recorded as a release-readiness gap; no automation was invented |
+| 4.14-F-3 | TEST-ISOLATION-1 remains OPEN; full parallel solution test execution is not reliable. | Low–Medium | Documented accurately in `docs/Testing.md`; not fixed in this phase |
+
+### Final validation
+
+- Release build: succeeded, 0 warnings, 0 errors.
+- Full test suite with `dotnet test LabAuthServer.slnx -c Release --no-build -m:1`: Unit 745, Integration 246, total 991 passed, 0 failed, 0 skipped.
+- `git diff --check`: clean.
+- No production code, test, configuration or CI change; no secret and no private key introduced.
+- Documentation accurately distinguishes IMPLEMENTED, APPROVED, DEFERRED, FUTURE, OPEN and NOT IMPLEMENTED.
+- **CI configuration validated locally; GitHub-hosted run not executed/verified.**

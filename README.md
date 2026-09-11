@@ -24,6 +24,7 @@ The current API has one public health endpoint, one public login endpoint, and o
 - Centralized, generic `ProblemDetails` responses for unhandled errors.
 - Unit and ASP.NET Core integration tests.
 - File-system publish configuration for IIS deployment.
+- A signed, offline license document that carries commercial entitlement (edition, features, limits, validity window); see [Licensing](docs/Licensing.md). Licensing is not wired into the running host yet.
 
 ## Architecture
 

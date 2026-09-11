@@ -15,6 +15,12 @@ These documents are planning deliverables, not authorization to implement or dep
 
 COMPLETE means delivered at the recorded baseline, not independently certified in production. PLANNED means a proposed implementation sequence needing its stated decisions resolved. FUTURE means candidate scope without implementation approval. OPTIONAL identifies a candidate that may never be selected; it is not a required dependency.
 
+## Technical License Enforcement plan set
+
+A separate, self-contained Phase 4 plan set describes a **Technical License Enforcement** capability (signed offline license document, vendor-side issuer, server-side validator, feature/edition/limit enforcement, expiration, tamper resistance, CI integration, operational management, future online activation). It is independent of, and does not override, the Phase 4 candidate scope above. Entry point: [Phase-4 Technical License Enforcement](Phase-4/Phase-4-README.md).
+
+Current status of that plan set: Phases 4.0–4.13 are documented; implementation phases 4.1–4.13 are complete as recorded in the [Change Record](Phase-4/Phase-4-Change-Record.md). The server currently has no runtime license-file loader; the licensing services are exercised by the validator boundary and the test suites. No online activation, no revocation, no machine binding and no grace entitlement are implemented.
+
 ## Evidence and authority
 
 Read current [Architecture](../Architecture.md), [Security](../Security.md), [Validation Status](../Validation_Status.md), [Project Status](../Project_Status.md), repository [AGENTS.md](../../AGENTS.md), and [Copilot instructions](../../.github/copilot-instructions.md) before future implementation. The instruction references to coding standards and development planning resolve to [the internal standard](../internal/Coding_Standard_and_SOP.md) and [internal development plan](../internal/Development_Plan.md); their older proposed milestones do not override current source.
