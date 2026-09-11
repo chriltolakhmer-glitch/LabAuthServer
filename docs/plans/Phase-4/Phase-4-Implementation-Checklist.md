@@ -120,8 +120,13 @@ Nothing below is complete except the documentation rows already produced by this
 - [x] Options analyzed
 - [x] False-positive scenarios documented
 - [x] Recommendation recorded
+- [x] Approval status assessed: NOT approved for implementation (D-09 APPROVED = deferred; O-14 RESOLVED = deferred)
+- [x] Read-only security analysis recorded (identity stability, virtualization, HA, spoofability, recovery)
+- [x] Required future decisions enumerated
 - [-] Binding implementation (deferred)
 - [-] Rebinding tooling (deferred)
+- [-] License-format binding field (deferred)
+- [-] Server-side binding check (deferred)
 
 ## Phase 4.9 — Tamper and abuse resistance
 
