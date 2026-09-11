@@ -288,6 +288,8 @@ Do not combine unrelated phases in one commit.
 | [Phase-4.13](Phase-4.13-Online-Activation-Future.md) | Future online activation architecture |
 | [Phase-4.14](Phase-4.14-Documentation-and-Release.md) | Documentation and release |
 | [Phase-4.15](Phase-4.15-Final-Security-Review.md) | Final security review |
+| [Phase-4.16](Phase-4.16-Production-Licensing-Readiness.md) | Production licensing readiness |
+| [Phase-4.17](Phase-4.17-Production-License-Governance-and-Final-Sign-Off.md) | Production license governance and final sign-off (PLAN ONLY) |
 | [Decision Log](Phase-4-Decision-Log.md) | Decisions and their status |
 | [Implementation Checklist](Phase-4-Implementation-Checklist.md) | Trackable implementation steps |
 | [Risk Register](Phase-4-Risk-Register.md) | Risks and mitigations |
