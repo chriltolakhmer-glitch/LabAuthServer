@@ -176,10 +176,22 @@ Nothing below is complete except the documentation rows already produced by this
 
 ## Phase 4.12 — Operational license management
 
-- [x] Procedures documented
-- [x] Audit trail fields defined
-- [ ] Issuance authority approved (O-17)
-- [ ] Register format decided (O-18)
+- [x] Procedures documented (operational design only; no runtime implementation)
+- [x] Audit trail fields defined (no runtime audit surface exists — limitation recorded)
+- [x] License lifecycle documented (issue → install → validate → replace → renew → expire → recover)
+- [x] Installation procedure documented against the actual configured-path model (`LicenseValidationOptions.LicenseFilePath`, section name `Licensing`)
+- [x] Replacement procedure documented (validate-before-activate, atomic replace, rollback copy)
+- [x] Backup and recovery procedure documented (license file in the backup set; vendor private key is not a customer backup artifact)
+- [x] Vendor/customer key-custody boundary documented
+- [x] Operator diagnostics documented from `LicenseValidationStatus` (public-safe) and `LicenseValidationReason` (internal)
+- [x] Runtime limitation recorded: no license-file loader, no reload, no DI registration and no logging surface exist in the server today
+- [x] Machine-binding status recorded as DEFERRED (D-09); online activation/revocation recorded as DEFERRED (D-10, D-22)
+- [x] Grace-period status recorded as default-disabled, diagnostic only (D-08, Phase 4.7)
+- [ ] Issuance authority approved (O-17) — OPEN
+- [ ] Register format decided (O-18) — OPEN
+- [ ] Customer-visible vs internal document visibility approved (O-20) — OPEN
+- [ ] Production private key source approved (O-07) — OPEN
+- [ ] Concrete license file location decided (O-10) — OPEN (only the configurable-path model D-13 is approved)
 - [ ] Support runbook drafted
 - [ ] Customer instructions drafted
 - [ ] Renewal reminder timeline defined
