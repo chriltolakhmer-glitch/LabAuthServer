@@ -24,6 +24,19 @@ public sealed class JsonLicenseDocumentParser : ILicenseDocumentParser
         MaxDepth = 16
     };
 
+    // Exact property sets defined by the license format (Phase 4.5, finding M-1).
+    // Any other property name is rejected rather than silently ignored (default-deny).
+    private static readonly string[] AllowedContainerProperties =
+    {
+        "payload", "algorithm", "keyId", "signature"
+    };
+
+    private static readonly string[] AllowedPayloadProperties =
+    {
+        "licenseVersion", "licenseId", "product", "edition", "customer",
+        "issuedAt", "expiresAt", "features", "limits"
+    };
+
     /// <inheritdoc />
     public LicenseParseOutcome Parse(ReadOnlySpan<byte> content)
     {
@@ -65,6 +78,11 @@ public sealed class JsonLicenseDocumentParser : ILicenseDocumentParser
             return LicenseParseOutcome.Failed(LicenseValidationReason.LicenseMalformed);
         }
 
+        if (!HasOnlyAllowedProperties(root, AllowedContainerProperties))
+        {
+            return LicenseParseOutcome.Failed(LicenseValidationReason.FieldUnknown);
+        }
+
         if (!TryGetRequiredString(root, "payload", out var payloadBase64))
         {
             return LicenseParseOutcome.Failed(LicenseValidationReason.FieldMissing);
@@ -93,10 +111,22 @@ public sealed class JsonLicenseDocumentParser : ILicenseDocumentParser
             return LicenseParseOutcome.Failed(LicenseValidationReason.SignatureMalformed);
         }
 
+        // The payload field carries Base64 text; apply the same strict rule as the signature
+        // (Phase 4.5, finding M-2): reject whitespace, reject an empty decoding, and reject
+        // malformed Base64 rather than normalising it before verification.
         byte[] payloadBytes;
         try
         {
+            if (payloadBase64.Any(char.IsWhiteSpace))
+            {
+                return LicenseParseOutcome.Failed(LicenseValidationReason.LicenseMalformed);
+            }
+
             payloadBytes = Convert.FromBase64String(payloadBase64);
+            if (payloadBytes.Length == 0)
+            {
+                return LicenseParseOutcome.Failed(LicenseValidationReason.LicenseMalformed);
+            }
         }
         catch (FormatException)
         {
@@ -123,6 +153,11 @@ public sealed class JsonLicenseDocumentParser : ILicenseDocumentParser
         if (payloadRoot.ValueKind != JsonValueKind.Object || !HasUniqueProperties(payloadRoot))
         {
             return LicenseParseOutcome.Failed(LicenseValidationReason.LicenseMalformed);
+        }
+
+        if (!HasOnlyAllowedProperties(payloadRoot, AllowedPayloadProperties))
+        {
+            return LicenseParseOutcome.Failed(LicenseValidationReason.FieldUnknown);
         }
 
         var document = ReadDocument(payloadRoot);
@@ -166,6 +201,19 @@ public sealed class JsonLicenseDocumentParser : ILicenseDocumentParser
         foreach (var property in element.EnumerateObject())
         {
             if (!names.Add(property.Name))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool HasOnlyAllowedProperties(JsonElement element, string[] allowedNames)
+    {
+        foreach (var property in element.EnumerateObject())
+        {
+            if (Array.IndexOf(allowedNames, property.Name) < 0)
             {
                 return false;
             }

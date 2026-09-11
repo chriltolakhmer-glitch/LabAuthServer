@@ -1,6 +1,8 @@
 # Phase 4.5 — License Validation in LabAuthServer
 
-Status: PLANNING ONLY. [Phase 4 README](Phase-4-README.md) | Previous: [4.4](Phase-4.4-License-Issuer.md).
+Status: IMPLEMENTED — REVIEW REQUIRED; NOT COMMITTED; NOT PUSHED. [Phase 4 README](Phase-4-README.md) | Previous: [4.4](Phase-4.4-License-Issuer.md).
+
+Implementation note (2026-09-11): the validator, typed result model, injectable clock and structural bounds policy are implemented in the documented rule order; M-1 and M-2 are resolved. Validation cadence (O-09) and license file location (O-10) remain open decisions and are not required by this phase's scope. Feature/edition enforcement (4.6) and expiration grace policy (4.7) remain out of scope.
 
 ## Objective
 

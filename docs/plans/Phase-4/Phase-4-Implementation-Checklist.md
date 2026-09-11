@@ -72,9 +72,13 @@ Nothing below is complete except the documentation rows already produced by this
 - [x] Safe error mapping documented
 - [ ] Validation cadence decided (O-09)
 - [ ] License file location decided (O-10)
-- [ ] Validator implemented in the documented order
-- [ ] Public-safe category mapping implemented
-- [ ] Rule-by-rule tests added
+- [x] Validator implemented in the documented order (`LicenseValidator`; parse → algorithm → key → signature → product → edition → time → features → limits → expiry)
+- [x] Public-safe category mapping implemented (`LicenseValidationStatus`; internal `LicenseValidationReason` never public)
+- [x] Rule-by-rule tests added (`Phase45LicenseValidatorTests`, 37 tests)
+- [x] Clock abstraction implemented (`ILicenseClock`, `SystemLicenseClock`)
+- [x] Structural bounds implemented (`LicenseValidationPolicy`)
+- [x] M-1 resolved (unknown container and payload properties rejected; duplicates still rejected)
+- [x] M-2 resolved (strict, non-normalising Base64 for payload and signature)
 
 ## Phase 4.6 — Feature and edition enforcement
 

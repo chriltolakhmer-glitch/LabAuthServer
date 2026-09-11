@@ -34,5 +34,8 @@ public enum LicenseValidationStatus
     NotYetValid = 8,
 
     /// <summary>The trusted key set or validation configuration is unusable.</summary>
-    InvalidConfiguration = 9
+    InvalidConfiguration = 9,
+
+    /// <summary>The license parsed and verified but its content is not usable (unknown property, edition, feature or limit).</summary>
+    InvalidContent = 10
 }

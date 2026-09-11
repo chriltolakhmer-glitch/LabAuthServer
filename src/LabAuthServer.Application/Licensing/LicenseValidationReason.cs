@@ -52,5 +52,14 @@ public enum LicenseValidationReason
     Expired = 14,
 
     /// <summary>The trusted key set or validation configuration is unusable.</summary>
-    InvalidConfiguration = 15
+    InvalidConfiguration = 15,
+
+    /// <summary>A property not defined by the license format was present (Phase 4.5, finding M-1).</summary>
+    FieldUnknown = 16,
+
+    /// <summary>A feature identifier is not in the known feature set (Phase 4.5).</summary>
+    FeatureUnknown = 17,
+
+    /// <summary>A limit value was outside the allowed range (Phase 4.5).</summary>
+    LimitOutOfRange = 18
 }
