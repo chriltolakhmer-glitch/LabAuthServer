@@ -201,8 +201,19 @@ Nothing below is complete except the documentation rows already produced by this
 
 - [x] Architecture documented
 - [x] Capabilities listed
-- [-] Implementation (deferred)
-- [ ] Pursuit-or-defer decision recorded (O-19)
+- [x] Current offline-first behavior verified against the source (no network client, no endpoint, no telemetry)
+- [x] Activation, deactivation and license-status-check design documented as FUTURE OPTION
+- [x] Revocation model options documented with trade-offs (online lookup, signed revocation list, refreshed metadata, short-lived authorization, vendor-issued statement) — none selected
+- [x] Availability and network-failure behaviour documented as OPEN (no fail-open/fail-closed decision selected)
+- [x] Future channel security requirements documented (TLS, certificate validation, server identity, client authentication, replay protection, request signing, rate limiting, abuse, credential storage, token lifetime, key rotation, audit, privacy, DoS)
+- [x] Privacy fields enumerated with data-minimization and retention recommendations (no telemetry introduced)
+- [x] Vendor/customer/server key-custody boundary restated (D-16, D-17, D-18)
+- [x] Machine-binding relationship recorded as DEFERRED (D-09); no binding field added
+- [x] License-format impact recorded as unchanged (no activation token, server URL, device ID, customer ID, revocation or online-status field)
+- [x] Clock behavior unchanged (Phase 4.7); no new clock-skew value invented
+- [x] Open decision register created (4.13-O-01 through 4.13-O-21) — none resolved
+- [-] Implementation (deferred — design only)
+- [x] Pursuit-or-defer decision recorded (O-19 resolved: DEFERRED)
 
 ## Phase 4.14 — Documentation and release
 
