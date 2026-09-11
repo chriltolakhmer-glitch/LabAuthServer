@@ -21,10 +21,9 @@ This page is for customer operators and technical staff. It is not a substitute 
 - It does not implement online revocation. Offline licenses cannot be recalled.
 - It does not implement machine binding. No machine identity is required.
 - It does not implement a grace period. Grace is default-disabled and diagnostic only.
-- It does not read a license file from disk at runtime: the server currently has no license-file loader or reload mechanism, no DI registration for the licensing services, and no `Licensing` section in `appsettings*.json`. The licensing services are exercised by the validator boundary and the test suites; wiring them into the running host is a separate approved decision (see `docs/plans/Phase-4/`).
-- It does not log licensing events. There is no `ILogger` in the licensing code today.
+- It does not provide hot reload or per-request license revalidation. License state is loaded at startup and replacement requires restart/reload.
 
-> The operational procedures for issuing, installing, replacing, backing up and recovering a license file are documented in [Phase 4.12 — Operational License Management](plans/Phase-4/Phase-4.12-Operational-License-Management.md). Until a loader exists, those procedures are operational design, not executable steps.
+> The approved issuance, custody, register, delivery, replacement and recovery procedures are documented in [Phase 4.17 — Production License Governance and Final Sign-Off](plans/Phase-4/Phase-4.17-Implementation-and-Final-Sign-Off.md).
 
 ## License document concept
 
@@ -42,7 +41,7 @@ The signature is computed over the exact signed payload bytes. The container is 
 
 ## Supported editions
 
-Community, Professional and Enterprise are the approved editions. Editions are an entitlement carrier, not a binary switch: the feature list in the signed license is the source of entitlement. Unknown editions are denied (default-deny). The exact commercial feature-to-edition matrix remains an open decision (see [Phase 4 Decision Log](plans/Phase-4/Phase-4-Decision-Log.md), O-01).
+Community, Professional and Enterprise are the approved editions. The approved matrix permits Community features `auth.basic` and `auth.jwt`; Professional additionally permits `auth.ldap` and `audit.logging`; Enterprise permits all five known features, including `admin.console`. The matrix is an upper bound: edition alone never grants a feature, and the explicit feature list in the signed license remains authoritative.
 
 ## Features
 
@@ -152,21 +151,19 @@ Machine binding is **deferred**. No machine identity is currently required, no b
 
 ## Known limitations
 
-- No runtime license loader or reload exists in the server today.
-- No DI registration for the licensing services exists in the host.
-- No `Licensing` section exists in the shipped `appsettings*.json`.
-- No licensing audit surface exists (no `ILogger` on the licensing path).
+- Replacement requires an application restart/reload; hot reload and per-request revalidation are not implemented.
 - Grace is default-disabled and diagnostic only; it is not an entitlement bypass.
 
 ## Open decisions
 
-The following decisions remain open and are not resolved by this documentation: production key source/custody, concrete license file location, validation cadence, clock-skew value, canonicalization profile, enforcement timing, the commercial feature matrix, the future online activation protocol and the future revocation model. See [Phase 4 Decision Log](plans/Phase-4/Phase-4-Decision-Log.md).
+The Phase 4.17 governance decisions for production key custody, feature matrix, issuance authority, external register, and external delivery are approved. Future online activation/revocation, machine binding, and other deferred technical work remain out of scope. See [Phase 4 Decision Log](plans/Phase-4/Phase-4-Decision-Log.md) and the [Phase 4.17 sign-off](plans/Phase-4/Phase-4.17-Implementation-and-Final-Sign-Off.md).
 
 ## Related documents
 
 - [Phase 4 plan set](plans/Phase-4/Phase-4-README.md)
 - [Phase 4.12 — Operational License Management](plans/Phase-4/Phase-4.12-Operational-License-Management.md)
 - [Phase 4.13 — Online Activation and Revocation (Future)](plans/Phase-4/Phase-4.13-Online-Activation-Future.md)
+- [Phase 4.17 — Production License Governance and Final Sign-Off](plans/Phase-4/Phase-4.17-Implementation-and-Final-Sign-Off.md)
 - [Security](Security.md)
 - [Configuration](Configuration.md)
 - [Troubleshooting](Troubleshooting.md)

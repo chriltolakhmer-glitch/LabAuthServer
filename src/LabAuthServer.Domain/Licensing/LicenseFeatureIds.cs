@@ -2,10 +2,8 @@ namespace LabAuthServer.Domain.Licensing;
 
 /// <summary>
 /// Known feature identifiers the application can gate (Phase 4.6, decision D4.6-1).
-/// The set is the current implementation catalog and follows the illustrative identifiers
-/// recorded in the Phase 4.6 plan. The final commercial feature-to-edition mapping remains
-/// TO BE CONFIRMED DURING IMPLEMENTATION (O-01); an identifier absent from this set is
-/// default-deny and must never be treated as granted.
+/// The set is the implementation catalog and the approved feature-to-edition matrix (O-01).
+/// An identifier absent from this set is default-deny and must never be treated as granted.
 /// </summary>
 public static class LicenseFeatureIds
 {
@@ -33,12 +31,32 @@ public static class LicenseFeatureIds
         AdminConsole
     };
 
+    private static readonly IReadOnlyDictionary<string, LicenseEdition> MinimumEditions =
+        new Dictionary<string, LicenseEdition>(StringComparer.Ordinal)
+        {
+            [AuthBasic] = LicenseEdition.Community,
+            [AuthJwt] = LicenseEdition.Community,
+            [AuthLdap] = LicenseEdition.Professional,
+            [AuditLogging] = LicenseEdition.Professional,
+            [AdminConsole] = LicenseEdition.Enterprise
+        };
+
     /// <summary>All known feature identifiers.</summary>
     public static IReadOnlyList<string> All => Known;
 
     /// <summary>True when <paramref name="featureId"/> is a known feature identifier.</summary>
     public static bool IsKnown(string? featureId)
         => featureId is not null && Array.IndexOf(Known, featureId) >= 0;
+
+    /// <summary>
+    /// True when the approved edition matrix permits the feature. This is an upper bound,
+    /// not an entitlement: the signed license must still explicitly list the feature.
+    /// </summary>
+    public static bool IsAllowedForEdition(string? featureId, LicenseEdition edition)
+        => featureId is not null
+            && edition.IsKnown()
+            && MinimumEditions.TryGetValue(featureId, out var minimumEdition)
+            && edition.Rank() >= minimumEdition.Rank();
 
     /// <summary>
     /// True when the identifier has the documented shape: lowercase ASCII, optionally

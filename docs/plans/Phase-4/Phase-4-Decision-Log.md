@@ -100,3 +100,13 @@ Historical note: the original 22 rows used different IDs and wording before this
 - Never delete a row; supersede it with a new row that references the old one.
 - Every implementation phase must cite the decision IDs it depends on.
 - An unresolved open decision is a blocker for the phase that depends on it.
+
+## Phase 4.17 approved governance decisions (2026-09-11)
+
+The following supersede the earlier open rows for Phase 4.17 implementation:
+
+- O-01: Approved matrix is Community = `auth.basic`, `auth.jwt`; Professional = those plus `auth.ldap`, `audit.logging`; Enterprise = all five known features. Edition is an upper bound and never an implicit grant. The signed feature list remains authoritative.
+- O-07: Production private keys are offline vendor-controlled secrets and are absent from the repository, CI, application output, customer servers, and tests. Servers receive public keys only. Physical custody technology remains outside this repository.
+- O-17: Issuance is performed offline by an authorized vendor licensing operator. LabAuthServer is not an issuer and no online licensing service is introduced.
+- O-18: An external controlled license register is required with the minimum fields documented in the Phase 4.17 implementation record; it contains no private keys.
+- O-20/O-21: Licenses remain external files delivered out of band and configured through `Licensing:LicenseFilePath`; replacement requires validation, atomic replacement, restart/reload, and revalidation.

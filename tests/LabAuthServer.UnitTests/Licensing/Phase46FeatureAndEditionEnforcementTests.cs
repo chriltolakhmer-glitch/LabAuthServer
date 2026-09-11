@@ -96,6 +96,38 @@ public sealed class Phase46FeatureAndEditionEnforcementTests
         Assert.False(policy.IsFeatureEnabled(LicenseFeatureIds.AdminConsole));
     }
 
+    [Theory]
+    [InlineData(LicenseEdition.Community, LicenseFeatureIds.AuthBasic, true)]
+    [InlineData(LicenseEdition.Community, LicenseFeatureIds.AuthJwt, true)]
+    [InlineData(LicenseEdition.Community, LicenseFeatureIds.AuthLdap, false)]
+    [InlineData(LicenseEdition.Community, LicenseFeatureIds.AuditLogging, false)]
+    [InlineData(LicenseEdition.Community, LicenseFeatureIds.AdminConsole, false)]
+    [InlineData(LicenseEdition.Professional, LicenseFeatureIds.AuthBasic, true)]
+    [InlineData(LicenseEdition.Professional, LicenseFeatureIds.AuthJwt, true)]
+    [InlineData(LicenseEdition.Professional, LicenseFeatureIds.AuthLdap, true)]
+    [InlineData(LicenseEdition.Professional, LicenseFeatureIds.AuditLogging, true)]
+    [InlineData(LicenseEdition.Professional, LicenseFeatureIds.AdminConsole, false)]
+    [InlineData(LicenseEdition.Enterprise, LicenseFeatureIds.AuthBasic, true)]
+    [InlineData(LicenseEdition.Enterprise, LicenseFeatureIds.AuthJwt, true)]
+    [InlineData(LicenseEdition.Enterprise, LicenseFeatureIds.AuthLdap, true)]
+    [InlineData(LicenseEdition.Enterprise, LicenseFeatureIds.AuditLogging, true)]
+    [InlineData(LicenseEdition.Enterprise, LicenseFeatureIds.AdminConsole, true)]
+    public void ApprovedEditionMatrix_ControlsMaximumFeatureAvailability(
+        LicenseEdition edition, string featureId, bool expected)
+    {
+        var policy = PolicyFor(edition, featureId);
+
+        Assert.Equal(expected, policy.IsFeatureEnabled(featureId));
+    }
+
+    [Fact]
+    public void CommunityEdition_CannotGrantProfessionalFeatureEvenWhenExplicitlyListed()
+    {
+        var policy = PolicyFor(LicenseEdition.Community, LicenseFeatureIds.AuthLdap);
+
+        Assert.False(policy.IsFeatureEnabled(LicenseFeatureIds.AuthLdap));
+    }
+
     [Fact]
     public void EmptyFeatureList_GrantsNothing()
     {

@@ -1,10 +1,10 @@
 # Phase 4 — Implementation Checklist
 
-Status: IMPLEMENTED — Phases 4.0 through 4.14 executed; Phase 4.15 final security review completed. [Phase 4 README](Phase-4-README.md).
+Status: IMPLEMENTED — Phases 4.0 through 4.16 executed; Phase 4.15 final security review completed; Phase 4.17 governance implemented. [Phase 4 README](Phase-4-README.md).
 
 Legend: `[ ]` Not started, `[~]` In progress, `[x]` Complete, `[!]` Blocked, `[-]` Deferred.
 
-Checkbox rows below are the running record and are updated per phase; remaining unchecked rows are open operational or deferred items, not evidence that implementation has not started. Current test state: 991 passed, 0 failed, 0 skipped (Release).
+Checkbox rows below are the running record and are updated per phase; remaining unchecked rows are open operational or deferred items, not evidence that implementation has not started. Current test state: 1,023 passed, 0 failed, 0 skipped (Release).
 
 ## Phase 4.0 — Requirements and licensing model
 
@@ -94,7 +94,7 @@ Checkbox rows below are the running record and are updated per phase; remaining 
 - [x] Limits fail closed: missing/unknown key is never unlimited; `int.MaxValue` boundary and negative usage covered
 - [x] Security-independence test added
 - [x] Tests added (`Phase46FeatureAndEditionEnforcementTests`, 47 tests)
-- [ ] Edition and feature mapping approved (O-01, TO BE CONFIRMED DURING IMPLEMENTATION)
+- [x] Approved edition and feature mapping enforced (O-01, Phase 4.17)
 - [ ] Enforcement timing approved (O-09, TO BE CONFIRMED DURING IMPLEMENTATION)
 - [ ] Denied-feature API response approved (TO BE CONFIRMED DURING IMPLEMENTATION)
 - [ ] Enforcement added to licensed features only (endpoint integration deferred)
@@ -187,9 +187,9 @@ Checkbox rows below are the running record and are updated per phase; remaining 
 - [x] Runtime limitation recorded: no license-file loader, no reload, no DI registration and no logging surface exist in the server today
 - [x] Machine-binding status recorded as DEFERRED (D-09); online activation/revocation recorded as DEFERRED (D-10, D-22)
 - [x] Grace-period status recorded as default-disabled, diagnostic only (D-08, Phase 4.7)
-- [ ] Issuance authority approved (O-17) — OPEN
-- [ ] Register format decided (O-18) — OPEN
-- [ ] Customer-visible vs internal document visibility approved (O-20) — OPEN
+- [x] Offline issuance authority and post-sign validation documented (O-17, Phase 4.17)
+- [x] External license register fields and controls documented (O-18, Phase 4.17)
+- [x] External delivery and replacement procedure documented (O-20/O-21, Phase 4.17)
 - [ ] Production private key source approved (O-07) — OPEN
 - [ ] Concrete license file location decided (O-10) — OPEN (only the configurable-path model D-13 is approved)
 - [ ] Support runbook drafted

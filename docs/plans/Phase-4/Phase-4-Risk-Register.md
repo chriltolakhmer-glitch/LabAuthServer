@@ -37,6 +37,13 @@ All statuses are OPEN or MITIGATED-by-design. No risk is ACCEPTED yet because no
 | R-27 | Dependency added for canonicalization without governance approval | Medium | Low | Repository `AGENTS.md` package approval rules apply; 4.2 records the choice | OPEN |
 | R-28 | Online activation introduced later with a connectivity dependency | High | Low | Offline remains the foundation; unreachable service must not degrade below offline behavior | MITIGATED (by design) |
 
+## Phase 4.17 governance review (2026-09-11)
+
+- Production private-key custody remains an operational control outside this repository; no production key is present in source, CI, output, or tests.
+- Entitlement assignment risk is mitigated by the single edition matrix plus explicit signed feature list and default-deny evaluation.
+- Delivery, replacement, rollback, register, and operator ownership risks are addressed by the Phase 4.17 implementation and final-sign-off record.
+- Online revocation, machine binding, hot reload, and per-request validation remain deferred rather than represented as implemented controls.
+
 ## Review rules
 
 - Every risk must have an owner once implementation begins.

@@ -1,6 +1,6 @@
 # Phase 4 ��� Technical License Enforcement
 
-Status: IMPLEMENTED — Phases 4.0 through 4.14 executed; Phase 4.15 final security review completed. Current state: 991 tests, 991 passed, 0 failed, 0 skipped (Release). This document set is a permanent project record. [Master roadmap](../README.md).
+Status: IMPLEMENTED — Phases 4.0 through 4.16 executed; Phase 4.15 final security review completed; Phase 4.17 governance implemented. Current validation: 1,023 tests, 1,023 passed, 0 failed, 0 skipped (Release). This document set is a permanent project record. [Master roadmap](../README.md).
 
 > Phase 4 planning decisions approved; implementation 4.1–4.12 executed and reviewed by 4.15. Historical phase records below describe the state at the time each phase ran and are not rewritten.
 
@@ -27,20 +27,19 @@ APPROVED ARCHITECTURE (baseline, no longer merely proposed):
 - Default-deny for unknown features/editions (D-20).
 - Typed/structured validation results, not boolean-only (D-21).
 - Revocation only via future online activation, not in the initial offline implementation (D-22).
+- Phase 4.17 approved feature matrix, offline issuance, external register, and external license delivery governance.
 
 IMPLEMENTATION DETAILS STILL TO BE CONFIRMED:
 
 - Canonicalization scheme (O-03).
 - Signature envelope shape (O-04).
 - Minimum accepted RSA key size (O-06).
-- Private key source for the issuer (O-07).
-- Issuer placement in or outside the server solution (O-08).
-- Validation cadence and license file location (O-09, O-10).
+- Physical production key storage and backup technology (operational responsibility outside this repository).
+- Validation cadence and license file location (O-09, O-10; the runtime lifecycle is startup-only and the path is `Licensing:LicenseFilePath`).
 - Clock-skew allowance value (O-13).
 - Additional validation points (O-15).
 - CI test-key strategy details (O-16).
-- Issuance authority, vendor license register format (O-17, O-18).
-- Document visibility, release vehicle, security reviewer (O-20, O-21, O-22).
+- Future online activation/revocation, machine binding, and other deferred work.
 
 Naming note: `docs/plans/Phase-4/README.md` already exists and describes the *Identity Federation & Standards* candidate scope registered in the [master roadmap](../README.md). Technical License Enforcement is a separate, self-contained plan set that happens to live in the same folder. Neither document overrides the other; this file is the entry point for Technical License Enforcement only.
 

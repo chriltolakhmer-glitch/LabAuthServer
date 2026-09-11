@@ -63,6 +63,9 @@ NOT STARTED
 | 4.13 | Online activation (future) | Offline-independence tests | Pre-phase commit | Deferred |
 | 4.14 | Documentation and release | Documented steps verified | Pre-phase commit | Not started |
 | 4.15 | Final security review | Checklist evidence | Pre-phase commit | Not started |
+| 4.17 | Production license governance and final sign-off | Matrix tests, operational governance record, Release validation | 31cf242 | Complete; 1,023 passed, 0 failed, 0 skipped |
+
+Phase 4.17 implementation commit: `daa90d8` (`Implement Phase 4.17 production license governance`). No push was performed. Historical rows above remain unchanged.
 
 ## Recording rules
 

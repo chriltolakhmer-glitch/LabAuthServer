@@ -4,9 +4,9 @@ namespace LabAuthServer.Application.Licensing;
 
 /// <summary>
 /// Immutable licensing policy built from an already-validated license (Phase 4.6).
-/// Features are default-deny: a feature is enabled only when it is a known identifier and the
-/// license explicitly lists it. Edition alone never grants a feature, and the commercial
-/// feature-to-edition mapping remains TO BE CONFIRMED DURING IMPLEMENTATION (O-01).
+/// Features are default-deny: a feature is enabled only when it is known, permitted by the
+/// approved edition matrix, and explicitly listed in the signed license. Edition alone never
+/// grants a feature.
 /// </summary>
 public sealed class LicensePolicy : ILicensePolicy
 {
@@ -88,6 +88,11 @@ public sealed class LicensePolicy : ILicensePolicy
         }
 
         if (!LicenseFeatureIds.IsKnown(featureId))
+        {
+            return LicenseFeatureDecision.Denied(featureId, LicenseValidationReason.FeatureUnknown);
+        }
+
+        if (!LicenseFeatureIds.IsAllowedForEdition(featureId, Edition))
         {
             return LicenseFeatureDecision.Denied(featureId, LicenseValidationReason.FeatureUnknown);
         }
