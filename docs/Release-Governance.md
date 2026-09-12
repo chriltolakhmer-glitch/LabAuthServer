@@ -90,8 +90,9 @@ Approved delivery channel: `<APPROVED_DELIVERY_CHANNEL>` (unresolved).
 
 ## Documentation validation
 
-- Phase 5.7 documentation is complete pending owner review / approval; no explicit owner approval is recorded.
-- Commit `e7929ff282be5144e302a13118133f718e7273cd` was validated by GitHub Actions workflow `LabAuthServer CI`, run `#13` (run ID `34681060457`), with conclusion `SUCCESS`.
+- Phase 5.7 is `PHASE 5.7 — OWNER APPROVED`; the project owner approved the documentation-only closeout on 2026-09-12, and its documentation acceptance criteria remain satisfied.
+- This approval does not resolve any open, pending, blocked, or deferred operational decisions and does not authorize a tag, Release, artifact publication, deployment, visibility or ownership change, signing configuration or key generation, license creation or issuance, branch-protection or ruleset change, or runtime licensing change.
+- Commit `ee3ab733a764a3e2c32009d4806d43ca5b5559d5` was validated by GitHub Actions workflow `LabAuthServer CI`, run `#14` (run ID `34681947100`), with conclusion `SUCCESS`.
 - CI execution success is separate from branch-protection enforcement; `main` enforcement is not claimed by this record.
 
 ## Related documents
