@@ -1,8 +1,8 @@
 # Project Status
 
-## Current update — Phase 6.1 safe automated validation (2026-09-12)
+## Current update — Phase 6.1 safe automated validation and governance packet (2026-09-12)
 
-**IMPLEMENTED AND LOCALLY VALIDATED.** [Phase 6 — Operational Assurance and First-Release Readiness](plans/Phase-6/Phase-6-Plan.md) and [Phase 6.1 implementation/evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md) are the current workstream. Later Phase 6 subphases are planning only.
+**IMPLEMENTED AND LOCALLY VALIDATED.** [Phase 6 — Operational Assurance and First-Release Readiness](plans/Phase-6/Phase-6-Plan.md) and [Phase 6.1 implementation/evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md) are the current workstream. Later Phase 6 subphases are planning only. The governance-only owner decision packet is prepared in [Phase 6 — Owner and Architecture Decision Packet](plans/Phase-6/Phase-6-Owner-Decision-Packet.md) and captures the remaining owner/architecture decisions without authorizing implementation or release.
 
 Release build: zero warnings/errors. Infrastructure-safe default tests: **1,038 passed (783 unit-project, 255 integration-project), zero failures/skips**, with SQL connection and infrastructure enable flags absent; three infrastructure cases excluded. Explicit disposable SQL validation: **2 passed**, zero failures/skips. Separate real LDAP acceptance: **1 case, not run**. Total inventory: 1,041; hosted-equivalent mandatory total: 1,040. The prior full baseline was 1,023 tests, confirmed by CI #39 on `0b6d1ee92220090fb5570323e30f10bfc2dd9ed5`.
 

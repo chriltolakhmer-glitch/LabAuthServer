@@ -1,6 +1,6 @@
 # Phase 6 — Operational Assurance and First-Release Readiness
 
-Status: AUTHORITATIVE ROADMAP. Phase 6.1 is implemented and verified by exact hosted CI. Phase 6.2–6.7 remain planning-only and require separate authorization before any implementation. [Phase index](README.md).
+Status: OWNER-APPROVED GOVERNANCE PACKET RECORDED. Phase 6.1 is implemented and verified by exact hosted CI. Phase 6.2–6.7 remain planning-only and require separate authorization before any implementation. P6-D1 through P6-D6 and P6-D14 are owner approved; P6-D7 through P6-D13 remain intentionally deferred; P6-I1 is an approved implementation direction for later Phase 6.4 review. [Phase index](README.md).
 
 ## Objective and exit state
 
@@ -25,12 +25,12 @@ Phase 6 completion means READY TO REQUEST SEPARATE RELEASE AUTHORIZATION. It doe
 | Subphase | Purpose | Status | Dependencies |
 | --- | --- | --- | --- |
 | [6.1](Phase-6.1-Safe-Automated-Validation-Boundaries.md) | Safe Automated Validation Boundaries | IMPLEMENTED / VERIFIED by exact CI #40 | — |
-| [6.2](Phase-6.2-Authorization-and-Audit-Boundary-Corrections.md) | Authorization and Audit Boundary Corrections | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1 |
-| [6.3](Phase-6.3-Licensing-Boundary-Assurance.md) | Licensing Boundary Assurance | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; relevant boundary findings |
-| [6.4](Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) | Release-Build and Documentation Reconciliation | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; technical corrections ready for docs |
-| [6.5](Phase-6.5-Audit-and-Operational-Acceptance-Design.md) | Audit and Operational Acceptance Design | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; owner/DBA/ops decisions |
+| [6.2](Phase-6.2-Authorization-and-Audit-Boundary-Corrections.md) | Authorization and Audit Boundary Corrections | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; owner-approved P6-D1 and P6-D2 |
+| [6.3](Phase-6.3-Licensing-Boundary-Assurance.md) | Licensing Boundary Assurance | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; owner-approved P6-D3–D6 |
+| [6.4](Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) | Release-Build and Documentation Reconciliation | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; P6-I1 approved implementation direction |
+| [6.5](Phase-6.5-Audit-and-Operational-Acceptance-Design.md) | Audit and Operational Acceptance Design | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; owner/DBA/ops decisions deferred via P6-D7–D13 |
 | [6.6](Phase-6.6-Target-Environment-Acceptance.md) | Target-Environment Acceptance | PLANNED — NOT AUTHORIZED FOR EXECUTION | 6.2–6.5 outcomes and approved environment access |
-| [6.7](Phase-6.7-First-Release-Prerequisite-Readiness.md) | First-Release Prerequisite Readiness | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION OR RELEASE | 6.2–6.6 evidence and external gates |
+| [6.7](Phase-6.7-First-Release-Prerequisite-Readiness.md) | First-Release Prerequisite Readiness | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION OR RELEASE | 6.2–6.6 evidence and external gates; P6-D14 owner approved |
 
 ## Dependency order and safe parallelism
 
@@ -56,21 +56,23 @@ Phase 5 owner-value/governance work is effectively complete. Phase 5.6 remains p
 
 | Gate | Classification | Needed by | Status |
 | --- | --- | --- | --- |
-| Authorization fallback contract for unannotated endpoints, explicit public endpoints, unmatched routes, and 401/403 semantics | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.2 | Open |
-| Audit identity omission for successful protected access with oversized subject | ARCHITECTURE DECISION REQUIRED | 6.2 | Open |
-| Fail-safe behavior for invalid or duplicate trusted-key configuration | ARCHITECTURE DECISION REQUIRED | 6.3 | Open |
-| Startup-cached expiry contract while process remains alive | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.3 | Open |
-| Treatment of catalog-unknown features and limits without changing Version 1 contract | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.3 | Open |
-| Release-qualified solution inclusion of `LabAuthServer.LicenseIssuer` | NO DECISION REQUIRED after evidence review if inclusion is minimal and explicit | 6.4 | Evidence pending |
-| Audit loss tolerance, latency budget, and SQL-outage policy | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.5 | Open |
-| Audit retention period, purge ownership, storage growth monitoring, backup, and recovery | OPERATIONS / DBA INPUT REQUIRED | 6.5 | Open |
-| Monitoring ownership and alert thresholds | OPERATIONS / DBA INPUT REQUIRED | 6.5 | Open |
-| Liveness vs readiness semantics | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.5 | Open |
-| Exact target environment, acceptance identity, and permissions | OWNER DECISION REQUIRED / PLATFORM DEPENDENCY | 6.6 | Open |
-| Representative capacity and outage thresholds | OWNER DECISION REQUIRED / OPERATIONS / DBA INPUT REQUIRED | 6.6 | Open |
-| Release-tag signing vs alternative provenance | OWNER DECISION REQUIRED | 6.7 | Open |
-| Delivery channel and release manifest/register storage vendor/provider | OWNER DECISION REQUIRED / PLATFORM DEPENDENCY | 6.7 | Open |
-| Legal/commercial terms and support commitments | PROFESSIONAL REVIEW REQUIRED | 6.7 | Open |
+| P6-D1 Authorization fallback contract for unannotated endpoints, explicit public endpoints, unmatched routes, and 401/403 semantics | OWNER APPROVED | 6.2 | OWNER APPROVED |
+| P6-D2 Audit identity omission for successful protected access with oversized subject | OWNER APPROVED | 6.2 | OWNER APPROVED |
+| P6-D3 Fail-safe behavior for invalid or duplicate trusted-key configuration | OWNER APPROVED | 6.3 | OWNER APPROVED |
+| P6-D4 Startup-cached expiry contract while process remains alive | OWNER APPROVED | 6.3 | OWNER APPROVED |
+| P6-D5 Treatment of catalog-unknown features and limits without changing Version 1 contract | OWNER APPROVED | 6.3 | OWNER APPROVED |
+| P6-D6 Commercial claim boundary for actual runtime enforcement | OWNER APPROVED | 6.3 | OWNER APPROVED |
+| P6-D14 Release-tag signing policy | OWNER APPROVED — POLICY | 6.7 | OWNER APPROVED — POLICY |
+| P6-D7 Audit loss tolerance, latency budget, and SQL-outage policy | OPERATIONS / DBA INPUT REQUIRED | 6.5 | INTENTIONALLY DEFERRED |
+| P6-D8 Audit request-latency / SQL-outage policy | OPERATIONS / DBA INPUT REQUIRED | 6.5 | INTENTIONALLY DEFERRED |
+| P6-D9 Audit retention period, purge ownership, storage growth monitoring, backup, and recovery | OPERATIONS / DBA INPUT REQUIRED | 6.5 | INTENTIONALLY DEFERRED |
+| P6-D10 Monitoring ownership and alert thresholds | OPERATIONS / DBA INPUT REQUIRED | 6.5 | INTENTIONALLY DEFERRED |
+| P6-D11 Liveness vs readiness semantics | OWNER DECISION REQUIRED / OPERATIONAL CONTRACT | 6.5 | INTENTIONALLY DEFERRED |
+| P6-D12 Exact target environment, acceptance identity, and permissions | OWNER DECISION REQUIRED / PLATFORM DEPENDENCY | 6.6 | INTENTIONALLY DEFERRED |
+| P6-D13 Representative capacity and outage thresholds | OWNER DECISION REQUIRED / OPERATIONS / DBA INPUT REQUIRED | 6.6 | INTENTIONALLY DEFERRED |
+| P6-I1 Inclusion of `LabAuthServer.LicenseIssuer` in Release qualification / solution build coverage | NO OWNER DECISION REQUIRED — APPROVED IMPLEMENTATION DIRECTION | 6.4 | APPROVED IMPLEMENTATION DIRECTION |
+| Delivery channel and release manifest/register storage vendor/provider | OWNER DECISION REQUIRED / PLATFORM DEPENDENCY | 6.7 | INTENTIONALLY DEFERRED |
+| Legal/commercial terms and support commitments | PROFESSIONAL REVIEW REQUIRED | 6.7 | SEPARATE EXTERNAL REVIEW GATE |
 
 Completed Phase 5 decisions are not reopened in this register.
 

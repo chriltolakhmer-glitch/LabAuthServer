@@ -1,6 +1,6 @@
 # Phase 6.2 — Authorization and Audit Boundary Corrections
 
-Status: PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION.
+Status: PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION. Required owner/architecture gates are resolved: P6-D1 and P6-D2 are owner approved. This subphase remains planning-only and does not authorize implementation; it is ready for future execution authorization once a separate implementation approval is given.
 
 ## Purpose
 
