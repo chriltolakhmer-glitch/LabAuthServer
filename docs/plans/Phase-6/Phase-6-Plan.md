@@ -1,47 +1,104 @@
 # Phase 6 — Operational Assurance and First-Release Readiness
 
-Status: OWNER-APPROVED ROADMAP; ONLY PHASE 6.1 IMPLEMENTATION AUTHORIZED by the 2026-09-12 task. Later subphases are planning entries requiring separate approval. [Phase index](README.md).
+Status: AUTHORITATIVE ROADMAP. Phase 6.1 is implemented and verified by exact hosted CI. Phase 6.2–6.7 remain planning-only and require separate authorization before any implementation. [Phase index](README.md).
 
-## Objective
+## Objective and exit state
 
-Establish a safely testable, operationally evidenced baseline that can eventually support a separately authorized first release.
+Establish a safely testable, accurately documented, operationally evidenced baseline that can become ready to request separate first-release authorization.
 
-## Entry state
+Phase 6 completion means READY TO REQUEST SEPARATE RELEASE AUTHORIZATION. It does not mean RELEASE AUTHORIZED. This roadmap authorizes no release, deployment, customer delivery, production license issuance, production key use, or implementation of Phase 6.2–6.7.
 
-- Baseline: clean `main`, `0b6d1ee92220090fb5570323e30f10bfc2dd9ed5`, `Record Phase 5 copyright owner decision`.
-- `LabAuthServer CI` #39, run `34699662852`, succeeded on that exact SHA.
-- Phase 5 owner-value/governance decisions are complete, including owner-approved P54-D1–D6 and P5-C1–C6.
-- Phase 5.6 remains platform/ownership-model blocked or configured but unenforced. Nothing in this plan changes those controls or claims their enforcement.
-- The repository remains private; ALOT role assignments, approved private-delivery policy, no fixed support calendar and no LTS remain unchanged.
-- No real commercial release, customer-license issuance or deployment is authorized.
-- Professional legal/business review remains external and pending.
+## Verified entry state
 
-## Ordered workstreams
+- Phase 6.1 baseline commit: `e7ec1eb80d2ece5fcd87faf07138ac41164e7801`
+- Commit message: `Implement Phase 6.1 safe test isolation`
+- Author/committer: `ALOT <chriltola.khmer@gmail.com>`
+- GitHub signature: `verified: true`, `reason: valid`
+- Exact hosted `LabAuthServer CI` run #40, ID `34701834030`, head SHA `e7ec1eb80d2ece5fcd87faf07138ac41164e7801`, status `completed`, conclusion `success`
+- Phase 5 owner-value/governance work is effectively complete.
+- Phase 5.6 remains platform/ownership-model blocked and is not reopened here.
+- Repository remains private; ALOT role assignments and the approved private-delivery model remain unchanged.
+- No customer release, license issuance, production signing-key operation, or deployment is authorized.
 
-| Subphase | Scope and intended evidence | Authorization / dependencies |
+## Status matrix
+
+| Subphase | Purpose | Status | Dependencies |
+| --- | --- | --- | --- |
+| [6.1](Phase-6.1-Safe-Automated-Validation-Boundaries.md) | Safe Automated Validation Boundaries | IMPLEMENTED / VERIFIED by exact CI #40 | — |
+| [6.2](Phase-6.2-Authorization-and-Audit-Boundary-Corrections.md) | Authorization and Audit Boundary Corrections | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1 |
+| [6.3](Phase-6.3-Licensing-Boundary-Assurance.md) | Licensing Boundary Assurance | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; relevant boundary findings |
+| [6.4](Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) | Release-Build and Documentation Reconciliation | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; technical corrections ready for docs |
+| [6.5](Phase-6.5-Audit-and-Operational-Acceptance-Design.md) | Audit and Operational Acceptance Design | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION | 6.1; owner/DBA/ops decisions |
+| [6.6](Phase-6.6-Target-Environment-Acceptance.md) | Target-Environment Acceptance | PLANNED — NOT AUTHORIZED FOR EXECUTION | 6.2–6.5 outcomes and approved environment access |
+| [6.7](Phase-6.7-First-Release-Prerequisite-Readiness.md) | First-Release Prerequisite Readiness | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION OR RELEASE | 6.2–6.6 evidence and external gates |
+
+## Dependency order and safe parallelism
+
+Recommended default sequence:
+
+`6.1 -> 6.2 -> 6.3 -> 6.4 -> 6.5 -> 6.6 -> 6.7`
+
+Actual dependency analysis supports this order as the default, with limited safe overlap:
+
+- 6.2 and 6.3 may proceed in parallel after their decisions are approved, because they address distinct technical boundaries.
+- 6.4 can partially overlap documentation review while 6.2 and 6.3 are being finalized, but it must not claim final current-state accuracy before those decisions are resolved.
+- 6.5 decision gathering can overlap earlier technical corrections because it is design-first and does not require implementation work.
+- 6.6 depends on the technical and operational baselines established by 6.2 through 6.5.
+- 6.7 depends on 6.4, 6.5, and 6.6 evidence, and should be considered the final readiness package rather than a release action.
+
+No subphase is implementation approval for a later one. Each remains independently reviewable and separately authorized.
+
+## Phase 5 relationship
+
+Phase 5 owner-value/governance work is effectively complete. Phase 5.6 remains platform/ownership-model blocked. Deferred Phase 5 operational items are now carried as explicit gates where relevant. Phase 6 does not reopen completed Phase 5 decisions and does not authorize any release/commercial operation.
+
+## Owner-decision register
+
+| Gate | Classification | Needed by | Status |
+| --- | --- | --- | --- |
+| Authorization fallback contract for unannotated endpoints, explicit public endpoints, unmatched routes, and 401/403 semantics | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.2 | Open |
+| Audit identity omission for successful protected access with oversized subject | ARCHITECTURE DECISION REQUIRED | 6.2 | Open |
+| Fail-safe behavior for invalid or duplicate trusted-key configuration | ARCHITECTURE DECISION REQUIRED | 6.3 | Open |
+| Startup-cached expiry contract while process remains alive | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.3 | Open |
+| Treatment of catalog-unknown features and limits without changing Version 1 contract | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.3 | Open |
+| Release-qualified solution inclusion of `LabAuthServer.LicenseIssuer` | NO DECISION REQUIRED after evidence review if inclusion is minimal and explicit | 6.4 | Evidence pending |
+| Audit loss tolerance, latency budget, and SQL-outage policy | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.5 | Open |
+| Audit retention period, purge ownership, storage growth monitoring, backup, and recovery | OPERATIONS / DBA INPUT REQUIRED | 6.5 | Open |
+| Monitoring ownership and alert thresholds | OPERATIONS / DBA INPUT REQUIRED | 6.5 | Open |
+| Liveness vs readiness semantics | OWNER DECISION REQUIRED / ARCHITECTURE DECISION REQUIRED | 6.5 | Open |
+| Exact target environment, acceptance identity, and permissions | OWNER DECISION REQUIRED / PLATFORM DEPENDENCY | 6.6 | Open |
+| Representative capacity and outage thresholds | OWNER DECISION REQUIRED / OPERATIONS / DBA INPUT REQUIRED | 6.6 | Open |
+| Release-tag signing vs alternative provenance | OWNER DECISION REQUIRED | 6.7 | Open |
+| Delivery channel and release manifest/register storage vendor/provider | OWNER DECISION REQUIRED / PLATFORM DEPENDENCY | 6.7 | Open |
+| Legal/commercial terms and support commitments | PROFESSIONAL REVIEW REQUIRED | 6.7 | Open |
+
+Completed Phase 5 decisions are not reopened in this register.
+
+## Risk traceability
+
+| Confirmed risk or dependency | Owning subphase | Status |
 | --- | --- | --- |
-| [6.1 — Safe Automated Validation Boundaries](Phase-6.1-Safe-Automated-Validation-Boundaries.md) | Infrastructure-safe default tests; explicitly selected SQL/LDAP categories; mandatory disposable SQL CI coverage | Implementation authorized in this task; existing test stack only |
-| 6.2 — Authorization and Audit Boundary Corrections | Approve fallback/public/unmatched-route behavior; correct successful-access oversized audit identity handling with regression tests | PLANNED ONLY; separate owner/architect approval; 6.1 safe validation |
-| 6.3 — Licensing Boundary Assurance | Reliable restricted provider initialization; reconcile catalog/diagnostic and startup-cached expiry contracts; qualify actual feature/limit enforcement | PLANNED ONLY; preserve frozen V1 and core-security independence; separately approve semantic changes |
-| 6.4 — Release-Build and Documentation Reconciliation | Correct LicenseIssuer Release configuration and reconcile current summaries against actual evidence while retaining history | PLANNED ONLY; separate approval; issuer remains outside the solution in 6.1 |
-| 6.5 — Audit and Operational Acceptance Design | Decide acceptable audit loss/latency, retention ownership, readiness/alert requirements and measurable capacity/acceptance thresholds | PLANNED ONLY; owner/architect/DBA/operations decisions; no automatic outbox, purge or monitoring implementation |
-| 6.6 — Target-Environment Acceptance | Authorized exact-build real AD → JWT → protected access; key/DPAPI/SQL permissions, TLS, capacity/outage and rollback evidence | PLANNED ONLY; approved environment and credentials, prior corrections and acceptance criteria; no implied deployment authority |
-| 6.7 — First-Release Prerequisite Readiness | Exact manifest/register storage and private-delivery channel; custody/recovery and external registers; tag-signing disposition; professional review and release evidence checklist | PLANNED ONLY; vendor, legal/business and infrastructure dependencies; release execution remains separate |
+| Test infrastructure accidentally reaches operational SQL/LDAP/credentials | 6.1 | Closed by exact CI and safe test boundaries |
+| Endpoint authorization fallback is not explicitly defined | 6.2 | Open decision required |
+| Successful-access audit event may carry an oversized subject and violate SQL-bound fields | 6.2 | Open boundary correction |
+| Licensing initialization failure can leave the provider unavailable or semantically confusing | 6.3 | Open investigation |
+| Licensing behavior may not match commercial claims or supported runtime enforcement | 6.3 | Open claim reconciliation |
+| Release build does not explicitly qualify the issuer component | 6.4 | Open build documentation gate |
+| Current operational docs are stale or contradict actual code and evidence | 6.4 | Open current-state reconciliation |
+| Audit outage, loss, latency, and retention have no approved operational policy | 6.5 | Open design gate |
+| Target certificate, DPAPI, AD, and SQL acceptance readiness is not proven | 6.6 | Open environment acceptance |
+| Release evidence, manifest storage, signing custody, and governance remain unresolved | 6.7 | Open prerequisite readiness |
+| Platform governance limits remain outside project control | External / Platform | Explicitly tracked, not claimed closed |
+| Single-operator continuity risk remains operationally open | 6.7 / Operational | Open governance gate |
 
-Subphases are independently reviewable. Do not combine production fixes into test isolation. A later numbering entry is not implementation approval.
+## Scope boundaries
 
-## Non-goals
-
-Unless separately approved: online activation; online revocation; billing; customer portal; admin-console implementation; MFA/federation; refresh/session architecture; elaborate DRM; microservices; Kubernetes; multi-region architecture; LTS promises; public-release automation; production signing material in CI; GitHub ownership/plan transfer; reopening Phase 5 owner decisions.
-
-The previous Phase 6 advanced-security candidates (HSM, advanced threat detection, stronger key lifecycle, policy engine, enterprise integrations and security automation) remain optional future requirements topics. Reprioritizing the roadmap does not approve those designs, packages or infrastructure.
-
-## Approval and safety boundaries
-
-Preserve `Domain <- Application <- Infrastructure <- Api`. Packages, architecture and production behavior require their existing approval gates. No incidental authentication, database, license-format, deployment or governance changes are authorized. Preserve historical evidence and explicitly distinguish source tests from live environment acceptance.
+Preserve the approved layer structure: Domain <- Application <- Infrastructure <- Api. Preserve the frozen Version 1 license contract unless a separately approved compatibility decision is made. Preserve historical evidence under docs/archive and do not rewrite archival records. No release authorization, production signing exercise, customer delivery, or commercial operation is implied by this roadmap.
 
 ## Exit principle
 
-Phase completion means **READY TO REQUEST SEPARATE RELEASE AUTHORIZATION**, never **RELEASE AUTHORIZED**.
+Phase 6 closes only when each remaining subphase is separately reviewed, each owner or architectural gate is recorded, and the project can truthfully state: READY TO REQUEST SEPARATE RELEASE AUTHORIZATION. The request for release authorization is separate from any release or customer operation.
 
-Exit evidence must demonstrate safe classified validation, approved boundary corrections, Release coverage, accurate current documentation, accepted operational loss/retention/monitoring decisions, authorized target-environment acceptance and completion or explicit disposition of pre-release professional/operational/platform conditions. Actual release, tags, artifacts, license issuance and deployment each retain their separate authorization requirements.
+## Immediate next step
+
+Proceed with implementation approval only for one approved subphase at a time, using the subphase-specific `Implementation Authorization Packet` as the approval gate for future work.
