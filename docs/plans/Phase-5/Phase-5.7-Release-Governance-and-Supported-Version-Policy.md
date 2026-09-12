@@ -120,9 +120,16 @@ Rules:
 - force-retagging an official release is prohibited
 - corrected releases receive a new version
 - tag creation requires release approval
-- release tags must eventually follow the approved signing policy once signing governance is resolved
+- release tags must eventually follow the approved signing policy once release-tag signing governance is resolved
 
-Important: commit/tag signing is currently **unresolved**. Signing is **not** implemented. This document does not pretend signing is implemented and does not create any tag.
+**Signing state distinction:**
+
+- official governance/release **commit signing**: `OWNER APPROVED — IMPLEMENTED` using the owner-approved repository-local SSH signing policy
+- **release-tag signing**: `UNRESOLVED / NOT IMPLEMENTED` — no tag-signing mechanism is approved or implemented
+- **Release Manifest signing**: `DEFERRED`
+- **artifact / platform code signing**: `DEFERRED / NOT IMPLEMENTED`
+
+This document does not claim tag signing exists, does not treat release-tag signing as resolved merely because commit signing exists, and does not create any tag.
 
 ## 7. Supported-Version Policy
 
@@ -200,7 +207,15 @@ A vendor-controlled external release register is required. Minimum fields:
 - distribution state
 - withdrawn / superseded status where applicable
 
-The register must not store private keys, signing secrets, passwords, credentials, or customer licenses. This document does not invent operator names; unresolved identities remain placeholders or statuses.
+The register must not store private keys, signing secrets, passwords, credentials, or customer licenses.
+
+Current approved release-governance roles applicable to the register:
+
+- Release Operator: `ALOT`
+- Release Approval Authority: `ALOT` initially
+- Security Response Owner: `ALOT`
+
+The exact release-register storage product/location remains `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`. This document does not invent that value.
 
 ## 11. Release Approval Gates
 
@@ -220,7 +235,16 @@ A release gate requires all of:
 - distribution channel approved
 - repository / public-release decision compatible with current policy
 
-Current unresolved identities remain unresolved. This document does not invent approvers, operators, or authorities.
+Current approved release-governance roles:
+
+- Release Operator: `ALOT`
+- Release Approval Authority: `ALOT` initially
+- Security Response Owner: `ALOT`
+- separation of duties: `REQUIRED WHERE PRACTICAL`
+- second-person review is required when another authorized reviewer is available
+- absence of a second authorized reviewer must be explicitly recorded
+
+A release gate still cannot be satisfied while required values remain unresolved. In particular, the approved distribution channel remains unresolved, and the release-register storage product/location remains `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`. Identifying the release operator and approval authority here records the current approved assignments; the actual operator and approval record must still be captured for each real release.
 
 ## 12. Security Release Policy
 
@@ -228,9 +252,14 @@ Current unresolved identities remain unresolved. This document does not invent a
 - expedited does not mean bypassing integrity/provenance controls
 - sensitive vulnerability details may be withheld until remediation is available
 - a security release must still have a version, source SHA, CI evidence, manifest, and approval
-- the security contact is currently unresolved
 
-`<SECURITY_CONTACT>` remains unresolved. This document does not invent a security contact.
+Approved security contacts and roles:
+
+- `SECURITY CONTACT: chriltola.khmer@gmail.com`
+- `SECURITY RESPONSE OWNER: ALOT`
+- the owner-approved shared-mailbox exception applies to security and commercial/evaluation intake
+
+This document does not send email and does not independently authorize a security release.
 
 ## 13. Release Withdrawal / Supersession
 
@@ -262,20 +291,27 @@ Current placeholder remains:
 
 The channel is not invented here. Nothing is published by this phase.
 
+Important distinction: the Phase 5.4 release classification taxonomy `Internal / Evaluation / Production` is a classification taxonomy for release records and **is not** the approved physical/digital customer delivery channel. The delivery channel remains a separate, unresolved pre-release operational value.
+
 ## 15. Release Roles
 
-Roles are defined conceptually:
+Roles are defined with their current approved assignments:
 
-| Role | Responsibility |
-| --- | --- |
-| Release Operator | Builds, prepares, and records the release under the approved process. |
-| Release Approval Authority | Reviews and approves the release gate. |
-| Security Response Owner | Owns security-release coordination and vulnerability handling. |
-| Licensing Operator | Owns commercial license issuance and license/version compatibility. |
+| Role | Responsibility | Current approved assignment |
+| --- | --- | --- |
+| Release Operator | Builds, prepares, and records the release under the approved process. | `ALOT` |
+| Release Approval Authority | Reviews and approves the release gate. | `ALOT` initially |
+| Distribution Operator | Delivers the approved artifact set through the approved channel. | `ALOT` initially |
+| Security Response Owner | Owns security-release coordination and vulnerability handling. | `ALOT` |
+| Licensing Operator | Owns commercial license issuance and license/version compatibility. | `UNRESOLVED / OWNER VALUE REQUIRED` in the current Phase 5.3 governance state |
 
-Existing unresolved placeholders apply. No names are assigned.
+Current approved governance:
 
-Least privilege and separation of duties should be applied where practical; the exact separation remains an owner decision.
+- separation of duties: `REQUIRED WHERE PRACTICAL`
+- second-person review required when another authorized reviewer is available
+- if no second authorized reviewer exists, absence of independent review must be explicitly recorded
+- two-person separation is **not** claimed under the current single-named-operator state
+- no GitHub permission is changed by this assignment
 
 ## 16. Release Checklist
 
@@ -286,7 +322,7 @@ This is a future operational checklist. Every step is documentation only. It is 
 - [ ] confirm repository remains private and policy-compliant
 - [ ] confirm supported-version classification for this release
 - [ ] prepare release notes draft
-- [ ] identify release operator and approval authority
+- [ ] record the release operator and approval authority for this specific release (governance roles are already assigned: Release Operator `ALOT`; Release Approval Authority `ALOT` initially)
 
 ### BUILD / PROVENANCE
 
@@ -338,20 +374,27 @@ This is a future operational checklist. Every step is documentation only. It is 
 | --- | --- |
 | formal supported-version duration | OPEN — COMMERCIAL / SUPPORT POLICY DECISION |
 | LTS policy | PENDING — COMMERCIAL / SUPPORT POLICY DECISION |
-| release operator assignment | BLOCKED — UNRESOLVED ASSIGNMENT |
-| release approval authority assignment | BLOCKED — UNRESOLVED ASSIGNMENT |
+| release operator assignment | OWNER APPROVED — `ALOT` |
+| release approval authority assignment | OWNER APPROVED — `ALOT` initially |
+| distribution operator assignment | OWNER APPROVED — `ALOT` initially |
 | approved distribution channel (`<APPROVED_DELIVERY_CHANNEL>`) | BLOCKED — UNRESOLVED VALUE |
-| commit/tag signing mechanism | BLOCKED — UNRESOLVED SIGNING MECHANISM |
-| security contact (`<SECURITY_CONTACT>`) | BLOCKED — UNRESOLVED VALUE |
-| commercial contact (`<COMMERCIAL_CONTACT>`) | BLOCKED — UNRESOLVED VALUE |
+| official commit signing | OWNER APPROVED — IMPLEMENTED (repository-local SSH signing) |
+| release-tag signing | UNRESOLVED / NOT IMPLEMENTED |
+| security contact | OWNER APPROVED — IMPLEMENTED — `chriltola.khmer@gmail.com` |
+| commercial contact | OWNER APPROVED — IMPLEMENTED — `chriltola.khmer@gmail.com` |
 | SBOM requirement | DEFERRED — RECOMMENDED FUTURE WORK |
 | manifest-signing decision | DEFERRED |
 | platform/code-signing decision | DEFERRED |
-| stable vendor-controlled commit identity | BLOCKED — UNRESOLVED VALUE |
-| repository-admin assignments | BLOCKED — UNRESOLVED ASSIGNMENTS |
-| Security Response Owner | BLOCKED — UNRESOLVED ASSIGNMENT |
+| stable vendor-controlled commit identity | OWNER APPROVED — IMPLEMENTED — `ALOT <chriltola.khmer@gmail.com>` |
+| repository-admin assignments | OWNER APPROVED — IMPLEMENTED — `ALOT` (backup administrator `NOT DESIGNATED`) |
+| Security Response Owner | OWNER APPROVED — IMPLEMENTED — `ALOT` (backup `NOT DESIGNATED`) |
+| Licensing Operator | UNRESOLVED / OWNER VALUE REQUIRED (Phase 5.3) |
+| Commercial Approval Authority | UNRESOLVED / OWNER VALUE REQUIRED (Phase 5.3) |
+| manifest storage provider / location | PRE-RELEASE VALUE REQUIRED — `TO BE SELECTED BEFORE FIRST REAL RELEASE` |
+| release-register storage product / location | PRE-RELEASE OWNER VALUE REQUIRED — `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE` |
+| professional legal / business review | PENDING — PROFESSIONAL LEGAL REVIEW |
 
-No value is invented for any of these items.
+No value is invented for any unresolved or deferred item. Approving the implemented items above does not create a release, tag, manifest, artifact, deployment, or GitHub setting change.
 
 ## 19. Acceptance Criteria
 
@@ -392,7 +435,7 @@ Preserved official-build principles:
 - Release Manifest V1
 - checksum proves integrity relative to a trusted manifest
 - checksum alone does **not** prove publisher identity
-- reproducibility remains `NOT YET VERIFIED`
+- reproducibility remains `VERIFIED — SAME-HOST CLEAN PUBLISH REPEATABILITY`; `CROSS-HOST / CROSS-ENVIRONMENT REPRODUCIBILITY — NOT YET VERIFIED`
 - SBOM remains recommended future governance work
 - private signing keys must never enter the repository or CI
 
@@ -404,7 +447,9 @@ Professional legal review remains `PENDING — PROFESSIONAL LEGAL REVIEW` where 
 
 ## 22. Current Status
 
-PHASE 5.7 — OWNER APPROVED. Documentation and governance only. The project owner approved this documentation on 2026-09-12, and all ten acceptance criteria in section 19 remain satisfied; no actual release is required for this closeout. Approval does not resolve the open, pending, blocked, or deferred decisions in section 18.
+PHASE 5.7 — OWNER APPROVED. Documentation and governance only. The project owner approved this documentation on 2026-09-12, and all ten acceptance criteria in section 19 remain satisfied; no actual release is required for this closeout.
+
+This current-state wording was reconciled on 2026-09-12 against the later owner-approved Phase 5.4, Phase 5.6, and release-governance records. Several previously stale status rows in sections 6, 10, 11, 12, 14, 15, and 18 now reflect the implemented governance state. This reconciliation does not resolve the remaining open, pending, blocked, or deferred decisions in section 18 and does not authorize a release.
 
 - No Git tag created.
 - No GitHub Release created.

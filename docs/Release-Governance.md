@@ -32,6 +32,12 @@ This document summarizes how LabAuthServer releases are governed. It is a govern
 - Release Manifest V1 records the artifact filename, exact byte size, and lowercase hexadecimal SHA-256 digest, alongside version, Git SHA, build timestamp, CI run reference, and release operator.
 - Checksums do **not** independently establish publisher identity. An unsigned manifest establishes integrity relative to a trusted channel only.
 
+## Reproducibility
+
+- Same-host clean publish repeatability: `VERIFIED — SAME-HOST CLEAN PUBLISH REPEATABILITY`.
+- Cross-host / cross-environment reproducibility: `NOT YET VERIFIED`.
+- This reproducibility evidence does not constitute a real release.
+
 ## Versioning
 
 Product versions use `MAJOR.MINOR.PATCH`.
@@ -56,10 +62,12 @@ A valid signed commercial license does not automatically imply software-version 
 
 ## Release signing
 
-- Release signing is **not yet implemented**.
-- Commit/tag signing is unresolved.
-- No signing keys are generated or stored in the repository or CI.
-- Platform/code signing and SBOM generation are future items and are not implemented.
+- Official governance/release **commit signing** is `OWNER APPROVED — IMPLEMENTED` using the owner-approved repository-local SSH signing policy.
+- **Release-tag signing** remains `UNRESOLVED / NOT IMPLEMENTED`.
+- **Release Manifest signing** remains `DEFERRED`.
+- **Platform / artifact code signing** remains `DEFERRED / NOT IMPLEMENTED`.
+- No signing private keys are generated or stored in the repository or CI.
+- SBOM generation remains a future governance item and is not implemented.
 
 ## Security releases
 
@@ -67,6 +75,17 @@ A valid signed commercial license does not automatically imply software-version 
 - Expedited governance does not bypass integrity or provenance controls.
 - A security release still requires a version, source SHA, CI evidence, manifest, and approval.
 - The security contact is `chriltola.khmer@gmail.com` and is owner-approved for operational use; the same mailbox is the approved shared-mailbox exception for security and commercial/evaluation intake.
+- Security Response Owner: `ALOT` (backup `NOT DESIGNATED`).
+
+## Release roles
+
+- Release Operator: `ALOT`
+- Release Approval Authority: `ALOT` initially
+- Distribution Operator: `ALOT` initially
+- Security Response Owner: `ALOT`
+- Separation of duties: `REQUIRED WHERE PRACTICAL`
+- Independent second-person review is required when another authorized reviewer is available; absence of a second authorized reviewer must be explicitly recorded.
+- Two-person separation is not claimed under the current single-named-operator state.
 
 ## Withdrawal and supersession
 
@@ -91,6 +110,7 @@ Approved delivery channel: `<APPROVED_DELIVERY_CHANNEL>` (unresolved).
 ## Documentation validation
 
 - Phase 5.7 is `PHASE 5.7 — OWNER APPROVED`; the project owner approved the documentation-only closeout on 2026-09-12, and its documentation acceptance criteria remain satisfied.
+- The Phase 5.7 and Release-Governance current-state wording was reconciled on 2026-09-12 against later owner-approved Phase 5.4, Phase 5.6, and release-governance decisions. Genuine release blockers (approved distribution channel, Licensing Operator, Commercial Approval Authority, formal supported-version duration, LTS policy, release-tag signing, exact manifest-storage and release-register storage locations, and professional legal/business review) remain unresolved.
 - This approval does not resolve any open, pending, blocked, or deferred operational decisions and does not authorize a tag, Release, artifact publication, deployment, visibility or ownership change, signing configuration or key generation, license creation or issuance, branch-protection or ruleset change, or runtime licensing change.
 - Commit `ee3ab733a764a3e2c32009d4806d43ca5b5559d5` was validated by GitHub Actions workflow `LabAuthServer CI`, run `#14` (run ID `34681947100`), with conclusion `SUCCESS`.
 - CI execution success is separate from branch-protection enforcement; `main` enforcement is not claimed by this record.
