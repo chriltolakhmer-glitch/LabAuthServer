@@ -1,12 +1,28 @@
 # Phase 4 ��� Technical License Enforcement
 
-Status: IMPLEMENTED — Phases 4.0 through 4.16 executed; Phase 4.15 final security review completed; Phase 4.17 governance implemented. Current validation: 1,023 tests, 1,023 passed, 0 failed, 0 skipped (Release). This document set is a permanent project record. [Master roadmap](../README.md).
+Status: IMPLEMENTED — Phases 4.0 through 4.18 executed as documentation and governance closure; Phase 4.15 final security review completed; Phase 4.17 governance implemented; Phase 4.18 final verification closure completed. Final verdict: PHASE 4 — CLOSED WITH ACCEPTED NON-BLOCKING CONDITIONS. Current validation: 1,023 tests, 1,023 passed, 0 failed, 0 skipped (Release). This document set is a permanent project record. [Master roadmap](../README.md).
 
 > Phase 4 planning decisions approved; implementation 4.1–4.12 executed and reviewed by 4.15. Historical phase records below describe the state at the time each phase ran and are not rewritten.
 
 The 22 approved Phase 4 decisions are recorded in the [Decision Log](Phase-4-Decision-Log.md) with status `APPROVED` (date 2026-09-11). Details that were not approved remain marked `TO BE CONFIRMED DURING IMPLEMENTATION`.
 
 ## Approved architecture vs. implementation details still to be confirmed
+
+## Phase 4.18 — Final licensing closure & verification
+
+This closure phase formalizes the verified repository state and records the final decision for the Phase 4 technical licensing implementation.
+
+Final verdict: PHASE 4 — CLOSED WITH ACCEPTED NON-BLOCKING CONDITIONS.
+
+The closure record is stored in [Phase-4.18-Final-Closure-and-Verification.md](Phase-4.18-Final-Closure-and-Verification.md).
+
+The accepted non-blocking conditions are:
+
+- production key custody and rotation remain an external vendor operation
+- hosted GitHub Actions validation should be observed after push
+- production monitoring should be documented without exposing license contents
+
+These are operational governance conditions rather than implementation defects. The implementation itself remains closed and verified in repo.
 
 APPROVED ARCHITECTURE (baseline, no longer merely proposed):
 

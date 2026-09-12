@@ -44,6 +44,16 @@ All statuses are OPEN or MITIGATED-by-design. No risk is ACCEPTED yet because no
 - Delivery, replacement, rollback, register, and operator ownership risks are addressed by the Phase 4.17 implementation and final-sign-off record.
 - Online revocation, machine binding, hot reload, and per-request validation remain deferred rather than represented as implemented controls.
 
+## Phase 4.18 closure review (2026-09-11)
+
+The final Phase 4 implementation is closed with accepted non-blocking conditions. No implementation defect remains open in the repository. The following operational conditions are accepted as governance responsibilities outside the repo and do not reopen the implementation:
+
+- P4-COND-01: production private-key custody, backup, rotation, and incident-response remain vendor-controlled operations outside the application code
+- P4-COND-02: hosted GitHub Actions validation should be observed and recorded after push
+- P4-COND-03: production monitoring and alerting must route validation failures without exposing sensitive license contents
+
+These conditions are tracked as closure conditions, not as implementation work items or code defects.
+
 ## Review rules
 
 - Every risk must have an owner once implementation begins.

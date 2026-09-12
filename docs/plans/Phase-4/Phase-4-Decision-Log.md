@@ -4,6 +4,18 @@ Status: APPROVED — IMPLEMENTED. Phases 4.1–4.12 executed; Phase 4.15 final s
 
 Status values: `APPROVED` (approved baseline decision), `PROPOSED` (needs approval), `FINAL` (approved constraint), `DEFERRED` (explicitly postponed), `REJECTED` (not adopted).
 
+## Phase 4.18 closure decision (2026-09-11)
+
+| ID | Decision | Status | Rationale | Date | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| D-23 | Phase 4 licensing implementation is closed with accepted non-blocking conditions | FINAL | The repo implementation is verified, and the residual items are operational/governance conditions outside the application source tree | 2026-09-11 | [Phase-4.18-Final-Closure-and-Verification.md](Phase-4.18-Final-Closure-and-Verification.md) |
+
+Additional accepted non-blocking conditions:
+
+- vendor production-key custody, rotation, and incident-response procedures remain external to the codebase
+- a hosted GitHub Actions run should be observed and recorded after push
+- production monitoring procedures must avoid exposing license contents while surfacing validation failures
+
 On 2026-09-11 the project owner approved the 22 Phase 4 Technical License Enforcement baseline decisions below. Approved rows are marked `APPROVED`. Historical decision information is retained; rows are not deleted. Nothing in this log is evidence that a decision has been implemented — implementation has NOT started.
 
 ## Core decisions
