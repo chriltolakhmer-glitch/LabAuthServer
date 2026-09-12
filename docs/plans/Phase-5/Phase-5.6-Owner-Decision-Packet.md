@@ -4,7 +4,7 @@
 
 ## 1. Purpose
 
-This packet prepares the remaining Phase 5.6 governance decisions for separate owner review. It records current evidence, recommendations, tradeoffs, and blank owner-input fields. It does not approve, implement, or configure any decision.
+This packet records the remaining Phase 5.6 governance decisions for separate owner review and the owner-authorized D2 implementation. It records current evidence, recommendations, tradeoffs, and unresolved owner-input fields. It does not approve, implement, or configure any decision other than the separately authorized D2 repository-local identity.
 
 Phase 5 remains `PHASE 5 IN PROGRESS — PHASE 5.6 REMAINS OPEN`. Phase 5.6 remains `IMPLEMENTATION IN PROGRESS`. The repository remains `PRIVATE`. Remote governance controls remain `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`.
 
@@ -21,7 +21,7 @@ Phase 5 remains `PHASE 5 IN PROGRESS — PHASE 5.6 REMAINS OPEN`. Phase 5.6 rema
 | Phase 5.6 status | `IMPLEMENTATION IN PROGRESS` |
 | Main governance state | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | Forking | `ALLOWED` (`allow_forking = true`); disablement is blocked by the repository ownership model |
-| Git identity | `unknown <Administrator@LAB.LOCAL>` |
+| Git identity before D2 implementation | `unknown <Administrator@LAB.LOCAL>` |
 | Latest commit signature | `N` (unsigned) |
 | Security contact | `<SECURITY_CONTACT>` |
 | Commercial contact | `<COMMERCIAL_CONTACT>` |
@@ -62,23 +62,23 @@ The owner has resolved the Phase 5.5 / Phase 5.6 consistency issue by confirming
 
 ### D2 - Vendor-Controlled Git Commit Identity
 
-**Current status:** `OWNER POLICY APPROVED — EXACT IDENTITY VALUES STILL REQUIRED`.
+**Current status:** `OWNER APPROVED — IMPLEMENTED`.
 
-Current local and latest-commit evidence remains `unknown <Administrator@LAB.LOCAL>`. No identity was changed and existing history must not be rewritten by this packet.
+The owner supplied and approved the exact identity values `ALOT <chriltola.khmer@gmail.com>`. Repository-local Git configuration was updated for future commits. Existing history was not rewritten or amended; the pre-change latest commit remains unsigned (`N`).
 
-**Approved policy:** Use one stable vendor-controlled identity for future governance and release commits. Prefer a GitHub-associated noreply address if the owner chooses privacy/platform association. Use repository-local Git configuration. The exact name and email remain unresolved.
+**Approved policy:** Use one stable vendor-controlled identity for future governance and release commits. Use repository-local Git configuration. The same identity is approved for release and governance commits.
 
-**Tradeoffs:** a stable vendor identity improves accountability and release traceability. A GitHub noreply address may reduce personal-address exposure and can support platform association, but its exact value must be supplied and confirmed by the owner. A vendor-controlled mailbox may improve continuity outside GitHub but must be monitored and controlled.
+**Tradeoffs:** a stable vendor identity improves accountability and release traceability. The owner-approved vendor-controlled mailbox supports continuity outside GitHub and must be monitored and controlled.
 
 **Exact owner-input fields:**
 
-- `OFFICIAL GIT AUTHOR NAME: OWNER VALUE REQUIRED`
-- `OFFICIAL GIT AUTHOR EMAIL: OWNER VALUE REQUIRED`
-- `GITHUB NOREPLY EMAIL PREFERRED: YES`
+- `OFFICIAL GIT AUTHOR NAME: ALOT`
+- `OFFICIAL GIT AUTHOR EMAIL: chriltola.khmer@gmail.com`
+- `GITHUB NOREPLY EMAIL PREFERRED: NO — owner-supplied mailbox is approved`
 - `USE SAME IDENTITY FOR RELEASE / GOVERNANCE COMMITS: YES`
 - `GIT CONFIGURATION SCOPE: REPOSITORY-LOCAL`
 
-No `git config` operation is authorized by this packet.
+The authorized repository-local configuration is implemented. No global Git configuration was changed.
 
 ### D3 - Commit-Signing Mechanism
 
