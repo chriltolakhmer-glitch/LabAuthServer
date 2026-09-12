@@ -1,6 +1,10 @@
 # Phase 5 — Evaluation Distribution, Proprietary Source Licensing, and Commercial Governance
 
-Status: PLANNING ONLY. No implementation, no source-code changes, no production configuration changes, no deployment actions, and no code signing/secret generation are authorized by this plan.
+Status: PHASE 5 IN PROGRESS — PHASE 5.1 OWNER-APPROVED. The eight Phase 5.1 decision gates are owner-approved, but implementation and external source distribution remain unauthorized until separately approved for the applicable subphase and legal review is complete where required. No source-code changes, production configuration changes, deployment actions, repository-publication actions, or code signing/secret generation are authorized by this plan.
+
+Phase 5.1 owner-approval closeout: [Phase-5.1-Commercial-Model-and-Decision-Gates.md](Phase-5.1-Commercial-Model-and-Decision-Gates.md). All eight decision gates are `OWNER APPROVED — 2026-09-12`. Legal approval remains `PENDING — PROFESSIONAL LEGAL REVIEW` where applicable; no final legal terms are created by this update.
+
+Phase 5.1 is complete from the project-owner decision perspective. The repository remains private and controlled, public source release remains unauthorized, and Phase 5 is IN PROGRESS. Phase 5.2 is ready to begin, but must not publish the repository or create legally final terms without the required legal review and explicit approvals.
 
 ## 1. Executive summary
 
