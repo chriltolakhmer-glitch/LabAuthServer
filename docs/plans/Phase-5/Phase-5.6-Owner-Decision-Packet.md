@@ -4,7 +4,7 @@
 
 ## 1. Purpose
 
-This packet records the remaining Phase 5.6 governance decisions for separate owner review and the owner-authorized D2 implementation. It records current evidence, recommendations, tradeoffs, and unresolved owner-input fields. It does not approve, implement, or configure any decision other than the separately authorized D2 repository-local identity.
+This packet records the remaining Phase 5.6 governance decisions for separate owner review and the owner-authorized D2 and D3 implementations. It records current evidence, recommendations, tradeoffs, and unresolved owner-input fields. It does not approve, implement, or configure any decision other than the separately authorized D2 repository-local identity and D3 SSH signing.
 
 Phase 5 remains `PHASE 5 IN PROGRESS — PHASE 5.6 REMAINS OPEN`. Phase 5.6 remains `IMPLEMENTATION IN PROGRESS`. The repository remains `PRIVATE`. Remote governance controls remain `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`.
 
@@ -82,7 +82,7 @@ The authorized repository-local configuration is implemented. No global Git conf
 
 ### D3 - Commit-Signing Mechanism
 
-**Current status:** `OWNER APPROVED — IMPLEMENTATION BLOCKED BY KEY/CUSTODY VALUES`. Current signing remains unresolved; the latest commit is unsigned (`N`).
+**Current status:** `OWNER APPROVED — IMPLEMENTED`. SSH signing is configured repository-locally and the new Phase 5.6 governance commit is SSH signed. The public signing key is registered with GitHub; the private key remains outside the repository.
 
 | Option | Operational complexity | GitHub verification compatibility | Custody and recovery | Machine requirements |
 | --- | --- | --- | --- | --- |
@@ -90,17 +90,19 @@ The authorized repository-local configuration is implemented. No global Git conf
 | GPG commit signing | Moderate to high; more components and lifecycle administration | Supported by GitHub with an uploaded/associated public key and matching identity | Requires protected private-key custody, passphrase handling, expiry, revocation, backup, and recovery procedures | Git, GnuPG, keyring management, and a managed GPG key |
 | Platform-verified mechanism | Potentially low for supported web/platform flows | Depends on the supported GitHub account, plan, and workflow; compatibility must be verified before adoption | Delegates more custody and recovery to the platform; account recovery and access policy become critical | Supported GitHub account/workflow and platform capability |
 
-**Approved policy:** SSH is the selected signing mechanism and should be mandatory for official vendor governance/release history once implemented. Key custody must remain vendor-controlled, with rotation and revocation procedures documented before production use.
+**Approved policy:** SSH is the selected signing mechanism and is mandatory for official vendor governance/release history. `ALOT` owns the signing key, custody and recovery, rotation, and revocation decisions. The Ed25519 public key fingerprint is `SHA256:GwFTsR04jnXRbLiRnaEhjiGEgnx36rtuWmxFubZHXyo`; the private key is not stored in the repository.
 
 **Exact owner selection:**
 
 - `SIGNING MECHANISM: SSH`
 - `MANDATORY FOR OFFICIAL HISTORY: YES`
-- `SIGNING IDENTITY / KEY OWNER: OWNER VALUE REQUIRED`
-- `KEY CUSTODY LOCATION AND RECOVERY OWNER: OWNER VALUE REQUIRED`
-- `ROTATION / REVOCATION PROCESS OWNER: OWNER VALUE REQUIRED`
+- `SIGNING IDENTITY / KEY OWNER: ALOT`
+- `KEY CUSTODY LOCATION AND RECOVERY OWNER: ALOT`
+- `ROTATION / REVOCATION PROCESS OWNER: ALOT`
 
-No keys will be generated and signing will not be configured by this packet.
+Repository-local signing configuration: `gpg.format=ssh`, `user.signingkey` points to the dedicated Ed25519 private-key path outside the repository, and `commit.gpgSign=true`.
+
+Rotation and revocation policy: `ALOT` owns rotation and revocation decisions. If compromise is suspected, remove the GitHub public signing key promptly, generate and register a replacement before further official governance/release commits, retire obsolete public keys, keep replacement private keys outside the repository, and do not rewrite previously published history solely because a key was rotated or revoked.
 
 ### D4 - Security Contact
 
@@ -188,7 +190,7 @@ The repository must remain private. Making it public is not a workaround and is 
 
 ## 5. Risks and Tradeoffs
 
-- Unresolved identity and signing leave official history with weak attribution and no cryptographic authorship proof.
+- D4–D7 unresolved contacts and named assignments leave remaining governance continuity gaps; D3 signing is implemented.
 - Unresolved contacts block dependable vulnerability intake and commercial/evaluation requests.
 - Unresolved named administrator and response-owner identities create continuity and response gaps even though the policy roles are approved.
 - Allowed forking increases private source-copy and access-cleanup risk, while disabling it may impede a controlled vendor workflow.
@@ -199,10 +201,10 @@ The repository must remain private. Making it public is not a workaround and is 
 
 This packet does not authorize or perform:
 
-- implementing any recorded owner decision or changing any GitHub repository setting
+- implementing any recorded owner decision or changing any GitHub repository setting beyond the completed D3 public-key registration
 - changing Git identity or rewriting history
-- generating or configuring SSH, GPG, or other signing keys
-- enabling commit or tag signing
+- generating additional SSH, GPG, or other signing keys
+- enabling any signing mechanism other than the completed repository-local SSH commit signing
 - changing branch protection or rulesets
 - changing repository visibility or ownership
 - enabling or disabling forking

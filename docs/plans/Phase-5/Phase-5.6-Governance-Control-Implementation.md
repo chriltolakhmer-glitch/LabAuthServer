@@ -2,13 +2,13 @@
 
 > IMPLEMENTATION IN PROGRESS — NOT COMPLETE
 
-Status: PHASE 5.6 — IMPLEMENTATION IN PROGRESS. This record documents the Phase 5.6 implementation pass for the owner-approved Phase 5.5 governance controls. The repository-side immutable GitHub Actions SHA pinning is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`, commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9`). For D2, the externally supplied prerequisite verification for workflow `LabAuthServer CI`, run #22 / `34689144991`, head `50723d2e6ae3e2153dc4d914cbc697db416df859`, status `COMPLETED`, conclusion `SUCCESS`, is accepted. A classic GitHub branch-protection rule for `main` was configured by the owner, but GitHub reports that it is not enforced for this private personal-account repository; no ruleset was created, no fork setting was changed, no collaborator access was changed, and no signing mechanism was configured. The repository remains private and no public workaround is authorized; see section 15.
+Status: PHASE 5.6 — IMPLEMENTATION IN PROGRESS. This record documents the Phase 5.6 implementation pass for the owner-approved Phase 5.5 governance controls. The repository-side immutable GitHub Actions SHA pinning is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`, commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9`). For D2, the externally supplied prerequisite verification for workflow `LabAuthServer CI`, run #22 / `34689144991`, head `50723d2e6ae3e2153dc4d914cbc697db416df859`, status `COMPLETED`, conclusion `SUCCESS`, is accepted. For D3, the externally supplied prerequisite verification for workflow `LabAuthServer CI`, run #24 / `34691894674`, head `63564b1c4a0457c4c85d739bffa8344409d30e95`, status `COMPLETED`, conclusion `SUCCESS`, is accepted. A classic GitHub branch-protection rule for `main` was configured by the owner, but GitHub reports that it is not enforced for this private personal-account repository; no ruleset was created, no fork setting was changed, and no collaborator access was changed. D3 SSH signing is configured repository-locally and the new governance commit is signed. The repository remains private and no public workaround is authorized; see section 15.
 
 ## 1. Purpose
 
 Phase 5.5 approved 12 repository, security, and contribution governance decisions. Phase 5.6 implements only the controls that are technically safe, platform-supported, and free of unresolved values.
 
-Phase 5.5 owner approval recorded policy direction, not implemented control. This phase therefore implements what can be implemented without inventing identities, contacts, assignments, or signing mechanisms, and it records every control that remains blocked.
+Phase 5.5 owner approval recorded policy direction, not implemented control. This phase implements what can be implemented without inventing identities, contacts, or assignments, and records every control that remains blocked.
 
 ## 2. Scope
 
@@ -97,7 +97,7 @@ No tooling was installed, no token was requested, exposed, printed, or stored, a
 | 4 | Strongest supported private-repository protection mechanism | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | 5 | Disable private forking | `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL` |
 | 6 | Stable vendor-controlled commit identity | `OWNER APPROVED — IMPLEMENTED` |
-| 7 | Mandatory SSH commit signing for future official history | `OWNER APPROVED — IMPLEMENTATION BLOCKED BY KEY/CUSTODY VALUES` |
+| 7 | Mandatory SSH commit signing for future official history | `OWNER APPROVED — IMPLEMENTED` |
 | 8 | Immutable GitHub Actions SHA pinning | `COMPLETE — IMPLEMENTED AND HOSTED-CI VALIDATED` |
 | 9 | Security contact policy and value | `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED` |
 | 10 | Commercial contact policy and value | `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED` |
@@ -261,7 +261,7 @@ The owner-verified GitHub Actions jobs API identifies the successful job as `Bui
 
 ## 9. Rollback Considerations
 
-The implemented repository-side controls are immutable Action SHA pinning and the owner-approved D2 repository-local Git identity. The identity is `ALOT <chriltola.khmer@gmail.com>` for future governance and release commits. Previous history was not rewritten, and commit signing remains unimplemented under D3.
+The implemented repository-side controls are immutable Action SHA pinning, the owner-approved D2 repository-local Git identity, and D3 SSH commit signing. D3 uses an Ed25519 signing key owned and held by `ALOT`, with fingerprint `SHA256:GwFTsR04jnXRbLiRnaEhjiGEgnx36rtuWmxFubZHXyo`; the private key remains outside the repository. Git signing is configured repository-locally with `gpg.format=ssh`, the dedicated signing-key path, and `commit.gpgSign=true`. Previous history was not rewritten.
 
 - No remote rollback is required, because no remote setting was changed.
 - Rollback for the pins is a normal forward commit that restores the previous major-version references (`@v4`) for the affected Action only, then re-verifies before re-pinning. No force push, reset, rebase, or history rewrite is involved or authorized.
@@ -277,8 +277,7 @@ Owner-approved and not yet executed:
 - enforce the pull-request workflow for normal `main` changes
 - prohibit force pushes to `main`
 - resolve the owner-approved private-forking policy through a separately authorized ownership-model decision; no retry is actionable under the current model
-- obtain signing identity and key-custody values for the owner-approved SSH mechanism
-- document rotation/revocation ownership before enabling signing for official vendor/release history
+- maintain the owner-approved SSH signing-key rotation and revocation policy
 - obtain the exact `<SECURITY_CONTACT>` value
 - obtain the exact `<COMMERCIAL_CONTACT>` value
 - record exact named repository administrator assignments where required
@@ -288,7 +287,7 @@ Blocking prerequisites:
 
 - an organization-owned private-repository model is required before `allow_forking` can be changed; authentication is available and is not the D1 blocker
 - the GitHub plan must be upgraded, or the required private-repository administration features otherwise obtained, before the deferred remote controls can be attempted
-- signing custody, contact, and named-assignment values must be supplied by the owner; they must not be invented
+- contact and named-assignment values must be supplied by the owner; they must not be invented
 
 The Phase 5.5 hosted CI gate is now verified `SUCCESS` and is no longer a blocking prerequisite.
 
@@ -340,7 +339,7 @@ No private key, signing key, GPG key, SSH key, password, token, credential, cust
 - [ ] Branch-deletion restriction enforced. (`BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION`; currently `CONFIGURED BUT NOT ENFORCED`)
 - [ ] Repository forking disabled. (`OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL`; current state `ALLOWED`)
 - [x] Exact Git identity values supplied and applied: `ALOT <chriltola.khmer@gmail.com>`, repository-local, same identity for governance/release commits. (`OWNER APPROVED — IMPLEMENTED`; previous history was not rewritten)
-- [ ] SSH commit signing implemented. (`OWNER APPROVED — IMPLEMENTATION BLOCKED BY KEY/CUSTODY VALUES`)
+- [x] SSH commit signing implemented: Ed25519, owner/custody/recovery/rotation owner `ALOT`, fingerprint `SHA256:GwFTsR04jnXRbLiRnaEhjiGEgnx36rtuWmxFubZHXyo`, GitHub signing-key registration verified, repository-local configuration verified, and signed commit created. (`OWNER APPROVED — IMPLEMENTED`)
 - [ ] Security contact value supplied. (`OWNER POLICY APPROVED — CONTACT VALUE REQUIRED`)
 - [ ] Commercial contact value supplied. (`OWNER POLICY APPROVED — CONTACT VALUE REQUIRED`)
 - [ ] Exact repository administrator assignments recorded. (`OWNER POLICY APPROVED — EXACT NAMED ASSIGNMENTS STILL REQUIRED WHERE APPLICABLE`)
@@ -354,7 +353,7 @@ Phase 5.6 is **not complete**. Critical governance controls remain unimplemented
 
 ## 14. Current Status
 
-Phase 5.6 — IMPLEMENTATION IN PROGRESS. The repository-side immutable Actions SHA pinning control is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`). The required CI check context is verified as `Build and Test (Release)` (job ID `103504610220`); GitHub reports the configured classic rule as `NOT ENFORCED`. Remote GitHub governance controls remain `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`. D2 is `OWNER APPROVED — IMPLEMENTED` with repository-local identity `ALOT <chriltola.khmer@gmail.com>` for future governance and release commits; previous history was not rewritten. Owner policy decisions remain recorded for forking, SSH signing, security/commercial contacts, repository administration, and the initial Security Response Owner policy; signing custody, contact, and named-assignment values remain unresolved and operational implementation remains pending. The repository remains private, no public-visibility workaround was used, and no transfer is authorized at this time. Phase 5.6 is not fully complete. Phase 5.7 is `OWNER APPROVED — 2026-09-12` and remains documentation-only.
+Phase 5.6 — IMPLEMENTATION IN PROGRESS. The repository-side immutable Actions SHA pinning control is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`). The required CI check context is verified as `Build and Test (Release)` (job ID `103504610220`); GitHub reports the configured classic rule as `NOT ENFORCED`. Remote GitHub governance controls remain `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`. D2 is `OWNER APPROVED — IMPLEMENTED` with repository-local identity `ALOT <chriltola.khmer@gmail.com>` for future governance and release commits; previous history was not rewritten. D3 is `OWNER APPROVED — IMPLEMENTED` with repository-local SSH signing, GitHub registration of the Ed25519 public key, fingerprint `SHA256:GwFTsR04jnXRbLiRnaEhjiGEgnx36rtuWmxFubZHXyo`, and a successfully signed governance commit. Owner policy decisions remain recorded for forking, security/commercial contacts, repository administration, and the initial Security Response Owner policy; contact and named-assignment values remain unresolved and operational implementation remains pending. The repository remains private, no public-visibility workaround was used, and no transfer is authorized at this time. Phase 5.6 is not fully complete. Phase 5.7 is `OWNER APPROVED — 2026-09-12` and remains documentation-only.
 
 ## 15. CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION
 
@@ -401,7 +400,7 @@ Every incomplete Phase 5.6 item has a precise classification below. No row repre
 | Force-push prohibition | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` | The same enforced private-repository protection capability that restricts force pushes. |
 | Branch-deletion restriction | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` | The same enforced private-repository protection capability that protects `main` from deletion. |
 | Repository forking policy | `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL` | The desired policy is approved, but GitHub requires an org-owned private repository before `allow_forking` can be changed. |
-| Commit-signing mechanism and enablement | `OWNER APPROVED — IMPLEMENTATION BLOCKED BY KEY/CUSTODY VALUES` | Owner-supplied signing identity, key custody/recovery owner, and rotation/revocation owner before SSH signing is configured. |
+| Commit-signing mechanism and enablement | `OWNER APPROVED — IMPLEMENTED` | SSH signing is configured repository-locally; the Ed25519 public key is registered with GitHub; `ALOT` owns custody, recovery, rotation, and revocation. |
 | `<SECURITY_CONTACT>` | `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED` | Owner-supplied approved security-reporting contact. |
 | `<COMMERCIAL_CONTACT>` | `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED` | Owner-supplied approved commercial/evaluation contact. |
 | Repository administrator assignments | `OWNER POLICY APPROVED — EXACT NAMED ASSIGNMENTS STILL REQUIRED WHERE APPLICABLE` | Record exact named assignments where repository convention requires them; role policy is already approved. |
