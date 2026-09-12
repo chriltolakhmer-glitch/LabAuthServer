@@ -217,14 +217,15 @@ This packet does not authorize or perform:
 
 ## 7. Next Steps After Owner Decisions
 
-1. Preserve the recorded policy decisions and supply unresolved exact values in a separately authorized task.
-2. Obtain an authorized administrative path before attempting any GitHub setting change.
-3. Apply only explicitly approved identity, signing, contact, role, or setting changes in a separately authorized task.
-4. Re-verify hosted CI, repository privacy, remote governance state, and secret boundaries after any authorized implementation.
-5. Keep Phase 5.6 `IMPLEMENTATION IN PROGRESS` until the platform-blocked controls and remaining owner-value items are resolved and verified.
+1. Preserve the completed D2-D7 owner decisions and implementation records.
+2. Do not retry D1 under the current repository ownership model.
+3. Revisit platform-blocked controls only if repository ownership or plan capabilities change, or a separately authorized governance decision changes the model.
+4. Apply only explicitly approved identity, signing, contact, role, or setting changes in a separately authorized task.
+5. Continue verifying repository privacy, hosted CI, remote governance state, and secret boundaries after any future authorized governance change.
+6. Keep Phase 5.6 `IMPLEMENTATION IN PROGRESS` because the platform/ownership-model controls remain blocked or unenforced.
 
 ## 8. Packet Status
 
-`OWNER POLICY DECISIONS RECORDED — IMPLEMENTATION PENDING FOR ALL OPERATIONAL ACTIONS`
+`OWNER DECISIONS D2-D7 IMPLEMENTED — PLATFORM / OWNERSHIP-MODEL BLOCKERS REMAIN`
 
 This packet does not mark Phase 5.6 complete and does not mark Phase 5 complete.
