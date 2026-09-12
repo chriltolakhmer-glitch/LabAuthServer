@@ -2,7 +2,7 @@
 
 Status: IMPLEMENTED — Phases 4.0 through 4.16 executed; Phase 4.15 final security review completed; Phase 4.17 governance implemented. [Phase 4 README](Phase-4-README.md).
 
-Status update for closure: Phase 4.18 remediation is locally verified; engineering closure remains pending the post-remediation hosted CI run.
+Status update for closure: Phase 4.18 remediation and hosted-CI evidence are complete. Final verdict: PHASE 4 — ENGINEERING CLOSED.
 
 Legend: `[ ]` Not started, `[~]` In progress, `[x]` Complete, `[!]` Blocked, `[-]` Deferred.
 
@@ -224,11 +224,12 @@ Checkbox rows below are the running record and are updated per phase; remaining 
 - [x] Final licensing governance closure documented
 - [x] Non-blocking operational conditions captured and accepted
 - [x] Initial Phase 4 closure record and accepted conditions documented
-- [ ] Phase 5 entry qualified as safe to proceed after hosted CI remediation
+- [x] Phase 5 entry qualified as safe to proceed after hosted CI remediation
 - [x] Initial hosted CI failure recorded (run 34669268162; five test-harness failures)
 - [x] LDAP validation test made deterministic through the production options-registration path
 - [x] SQL audit tests given disposable CI database provisioning from controlled repository scripts
-- [~] Post-remediation hosted CI run pending before engineering closure
+- [x] Post-remediation hosted CI run verified (run 34669800856; 1,023 passed, 0 failed, 0 skipped; 0 warnings, 0 errors)
+- [x] Final engineering closure recorded: PHASE 4 — ENGINEERING CLOSED
 
 ## Phase 4.14 — Documentation and release
 

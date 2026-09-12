@@ -1,6 +1,6 @@
 # Phase 4 ��� Technical License Enforcement
 
-Status: IMPLEMENTED — Phases 4.0 through 4.18 executed as documentation, implementation, governance, and hosted-CI remediation; Phase 4.15 final security review completed; Phase 4.17 governance implemented. Current verdict: PHASE 4 — ENGINEERING CLOSURE PENDING post-remediation hosted CI. Current local validation: 1,023 tests, 1,023 passed, 0 failed, 0 skipped (Release). This document set is a permanent project record. [Master roadmap](../README.md).
+Status: IMPLEMENTED — Phases 4.0 through 4.18 executed as documentation, implementation, governance, and hosted-CI remediation; Phase 4.15 final security review completed; Phase 4.17 governance implemented. Final verdict: PHASE 4 — ENGINEERING CLOSED. Hosted CI run `34669800856` passed for remediation commit `48a8bccd7e1a72e8603be307060aa7fa4d109370`. Current hosted validation: 1,023 tests, 1,023 passed, 0 failed, 0 skipped; 0 build warnings, 0 build errors. This document set is a permanent project record. [Master roadmap](../README.md).
 
 > Phase 4 planning decisions approved; implementation 4.1–4.12 executed and reviewed by 4.15. Historical phase records below describe the state at the time each phase ran and are not rewritten.
 
@@ -12,17 +12,17 @@ The 22 approved Phase 4 decisions are recorded in the [Decision Log](Phase-4-Dec
 
 This closure phase formalizes the verified repository state and records the final decision for the Phase 4 technical licensing implementation.
 
-Current verdict: PHASE 4 — ENGINEERING CLOSURE PENDING post-remediation hosted CI.
+Final verdict: PHASE 4 — ENGINEERING CLOSED.
 
 The closure record is stored in [Phase-4.18-Final-Closure-and-Verification.md](Phase-4.18-Final-Closure-and-Verification.md).
 
 The accepted non-blocking conditions are:
 
 - production key custody and rotation remain an external vendor operation
-- initial hosted GitHub Actions validation failed with five test-harness failures; the post-remediation run is pending
+- hosted GitHub Actions remediation run `34669800856` passed with 1,023 tests passed, 0 failed, and 0 skipped
 - production monitoring should be documented without exposing license contents
 
-These are operational governance conditions or evidence conditions rather than licensing implementation defects. The implementation itself remains verified in repo; engineering closure awaits the post-remediation hosted CI result.
+These are external operational governance conditions rather than licensing implementation defects. The implementation and hosted-CI evidence are closed; these conditions do not reopen Phase 4 engineering.
 
 APPROVED ARCHITECTURE (baseline, no longer merely proposed):
 

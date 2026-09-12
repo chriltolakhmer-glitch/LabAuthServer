@@ -57,9 +57,10 @@ The final Phase 4 implementation is closed with accepted non-blocking conditions
 - Hosted run `34669268162` failed because SQL audit persistence tests assumed a developer-local database and one LDAP startup-validation test depended on exception propagation through `WebApplicationFactory`/`DeferredHost`.
 - The SQL tests remain real persistence tests; CI now provisions disposable LocalDB from the controlled Phase 11 schema and stored-procedure scripts.
 - The LDAP test now exercises the production options registration directly and asserts `OptionsValidationException` with the production validation message.
-- Engineering closure remains pending the new hosted run; no Phase 5 implementation may begin before it passes.
+- Hosted run `34669800856` passed for commit `48a8bccd7e1a72e8603be307060aa7fa4d109370` with 1,023 tests passed, 0 failed, 0 skipped, and 0 build warnings/errors.
+- The hosted-CI evidence condition is CLOSED. Phase 4 engineering is closed; the remaining conditions below are external operational responsibilities only and do not reopen engineering.
 
-These conditions are tracked as closure conditions, not as implementation work items or code defects.
+The remaining conditions are tracked as external operational governance responsibilities, not as implementation work items or code defects.
 
 ## Review rules
 
