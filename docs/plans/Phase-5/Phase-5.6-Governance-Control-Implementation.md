@@ -2,7 +2,7 @@
 
 > IMPLEMENTATION IN PROGRESS — NOT COMPLETE
 
-Status: PHASE 5.6 — IMPLEMENTATION IN PROGRESS. This record documents the first implementation pass for the owner-approved Phase 5.5 governance controls. The Phase 5.5 hosted CI gate is verified `SUCCESS` (run #9 / `34674729292`, commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9`). Repository-side changes are limited to immutable GitHub Actions SHA pinning. No GitHub governance setting was changed, no branch protection was enabled, no ruleset was created, no fork setting was changed, no collaborator access was changed, and no signing mechanism was configured.
+Status: PHASE 5.6 — IMPLEMENTATION IN PROGRESS. This record documents the Phase 5.6 implementation pass for the owner-approved Phase 5.5 governance controls. The repository-side immutable GitHub Actions SHA pinning is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`). The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`, commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9`). No GitHub governance setting was changed, no branch protection was enabled, no ruleset was created, no fork setting was changed, no collaborator access was changed, and no signing mechanism was configured.
 
 ## 1. Purpose
 
@@ -98,7 +98,7 @@ No tooling was installed, no token was requested, exposed, printed, or stored, a
 | 5 | Disable private forking | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
 | 6 | Stable vendor-controlled commit identity | `BLOCKED — UNRESOLVED VALUE` |
 | 7 | Mandatory commit signing for future official history | `BLOCKED — UNRESOLVED SIGNING MECHANISM` |
-| 8 | Immutable GitHub Actions SHA pinning | `IMPLEMENTED` (repository-side, uncommitted) |
+| 8 | Immutable GitHub Actions SHA pinning | `IMPLEMENTED AND HOSTED-CI VALIDATED` |
 | 9 | Security contact | `BLOCKED — UNRESOLVED VALUE` |
 | 10 | Commercial contact | `BLOCKED — UNRESOLVED VALUE` |
 | 11 | Named repository administrator roles | `BLOCKED — UNRESOLVED ASSIGNMENT` |
@@ -161,7 +161,20 @@ No SHA was invented, estimated, or copied from a third-party mirror. Each resolv
 - `git diff --check`: clean
 - Workflow inspected after edit; diff limited to the three Action reference lines
 
-Note on validation scope: a SHA-pin change is a hosted-runner-only reference change. A local `dotnet restore` / `build` / `test` does not execute or resolve the pinned Action references, so a local build or test run would not validate this change. The definitive validation is the next hosted CI run after the change is reviewed, committed, and pushed. This change remains uncommitted, so it is not part of the already-verified hosted CI evidence for `8d0c0e9`.
+### Hosted execution validation
+
+The pinned Action references were validated by hosted workflow execution:
+
+| Item | Value |
+| --- | --- |
+| Commit | `966fe71733e6bb8bbdce5c41267da88c1b4571ae` |
+| Hosted run | Run #10 |
+| Run ID | `34675530766` |
+| Conclusion | `SUCCESS` |
+
+Result: `IMPLEMENTED AND HOSTED-CI VALIDATED`.
+
+Note on validation scope: a SHA-pin change is a hosted-runner-only reference change. A local `dotnet restore` / `build` / `test` does not execute or resolve the pinned Action references, so a local build or test run would not validate this change. Hosted CI run #10 resolved and executed the pinned references successfully, which is the definitive validation for this control.
 
 ## 8. Remote GitHub Changes
 
@@ -190,16 +203,70 @@ Settings not changed and still at their verified prior state:
 - rulesets: `UNAVAILABLE UNDER CURRENT PRIVATE-REPOSITORY PLAN`
 - GitHub Releases: `NONE`
 
-No setting is reported as implemented. No update request was issued, so no remote state was re-read.
+No remote setting is reported as implemented. No update request was issued, so no remote state was re-read.
+
+### Remote implementation matrix
+
+| Control | Current | Target | Capability | Implementation State |
+| --- | --- | --- | --- | --- |
+| Main protection | `DISABLED` | Protected `main` using the strongest supported private-repository mechanism | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
+| PR requirement | Not enforced | PR required for normal `main` changes | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
+| Approving review | Not enforced | Minimum 1 approving review where supported | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
+| Required CI check | `OFF` | `Build and Test (Release)` required before normal `main` update | Branch-protection capability `NOT VERIFIED` | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
+| Force push | Not restricted | Prohibited on `main` where supported | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
+| Branch deletion | Not restricted | Prohibited on `main` where supported | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
+| Forking | `ALLOWED` | Disable unless a specific controlled vendor workflow requires it | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
+| Rulesets | Unavailable | Not the selected mechanism | `BLOCKED — PLAN LIMITATION` (verified) | `BLOCKED — PLAN LIMITATION` |
+| Immutable Actions SHA pinning | Pinned `v4` SHAs | Immutable SHA pins | Repository-side, supported | `IMPLEMENTED AND HOSTED-CI VALIDATED` |
+
+No row is marked implemented without re-read evidence. Only the repository-side SHA pinning row has such evidence.
+
+### Branch-protection capability
+
+Classification: `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`.
+
+- GitHub documentation states that protected branches for private repositories require GitHub Pro, GitHub Team, GitHub Enterprise Cloud, or GitHub Enterprise Server.
+- Whether the current account and repository plan satisfies that requirement could not be determined in this environment.
+- Authenticated administrative tooling is unavailable: `gh` is not installed, and no `GH_TOKEN` / `GITHUB_TOKEN` credential is present. None was requested, created, printed, or stored.
+- The repository is private, so unauthenticated capability inspection is not possible.
+- No capability claim is made in either direction. Making the repository public to obtain branch-protection functionality is not approved and was not done.
+
+### Required CI check context
+
+Required CI check context: `Build and Test (Release)` — VERIFIED.
+
+Evidence:
+
+| Item | Value |
+| --- | --- |
+| Workflow | `LabAuthServer CI` |
+| Run | #10 / `34675530766` |
+| Job / check | `Build and Test (Release)` |
+| Job ID | `103504610220` |
+| Conclusion | `SUCCESS` |
+
+Clarification: the workflow name and the required check/job context are not the same field.
+
+- Workflow name: `LabAuthServer CI`
+- Job/check context: `Build and Test (Release)`
+
+The owner-verified GitHub Actions jobs API identifies the successful job as `Build and Test (Release)`, which is the check context to use for future required-check configuration. The required status check is **not** configured by this phase; the setting remains `OFF`.
+
+### Forking control
+
+- Current: `ALLOWED`.
+- Approved target: disable unnecessary private forking unless a specific controlled vendor workflow requires it.
+- Authenticated admin tooling is unavailable to change the setting.
+- Classification: `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED`.
+- Repository visibility was not changed.
 
 ## 9. Rollback Considerations
 
-The only change made is the repository-side Action SHA pinning, and it remains uncommitted.
+The only control implemented is the repository-side Action SHA pinning, now committed and pushed as `966fe71733e6bb8bbdce5c41267da88c1b4571ae`.
 
 - No remote rollback is required, because no remote setting was changed.
-- The workflow change is uncommitted, so discarding the working-tree change fully reverts it.
-- If the pin is later committed and a pinned SHA fails to resolve, the documented rollback is to restore the previous major-version references (`@v4`) for the affected Action only, then investigate before re-pinning.
-- The pins are additive and reversible; no history rewrite is involved.
+- Rollback for the pins is a normal forward commit that restores the previous major-version references (`@v4`) for the affected Action only, then re-verifies before re-pinning. No force push, reset, rebase, or history rewrite is involved or authorized.
+- The pins are additive and reversible; hosted CI run #10 confirms they resolve correctly.
 - No key, secret, tag, release, or deployment is involved, so no credential rotation or release retraction is required.
 
 ## 10. Remaining Governance Work
@@ -254,9 +321,13 @@ No private key, signing key, GPG key, SSH key, password, token, credential, cust
 - [x] Phase 5.5 CI gate verified `SUCCESS` and recorded.
 - [x] Current GitHub state preserved from owner-verified Phase 5.5 evidence.
 - [x] Immutable Actions SHA pinning implemented with upstream-verified SHAs.
+- [x] Immutable Actions SHA pinning committed, pushed, and hosted-CI validated (run #10 / `34675530766`).
 - [x] Action pinning security review performed.
 - [x] Behavior-preservation review performed.
 - [x] Remote GitHub settings change correctly withheld.
+- [x] Remote implementation matrix recorded.
+- [x] Branch-protection capability recorded as `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`.
+- [x] Required CI check context verified and recorded as `Build and Test (Release)` (run #10 / `34675530766`, job ID `103504610220`, conclusion `SUCCESS`).
 - [ ] `main` branch protection implemented.
 - [ ] Required CI status check implemented.
 - [ ] Pull-request requirement enforced.
@@ -277,4 +348,4 @@ Phase 5.6 is **not complete**. Critical governance controls remain unimplemented
 
 ## 14. Current Status
 
-Phase 5.6 — IMPLEMENTATION IN PROGRESS. One repository-side control (immutable Actions SHA pinning) was implemented and left uncommitted for owner review. The Phase 5.5 hosted CI gate is verified `SUCCESS` for commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9` (run #9 / `34674729292`). Remote GitHub governance controls remain `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED`; commit identity, commit signing, and the contact and assignment items remain blocked by unresolved owner-supplied values. No GitHub setting was changed. Phase 5.7 is not started.
+Phase 5.6 — IMPLEMENTATION IN PROGRESS. The repository-side immutable Actions SHA pinning control is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`). The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`). The required CI check context is verified as `Build and Test (Release)` (job ID `103504610220`); the required-check setting itself remains `OFF` and unconfigured. Remote GitHub governance controls remain `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED`, and branch-protection capability remains `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`; commit identity, commit signing, and the contact and assignment items remain blocked by unresolved owner-supplied values. No GitHub setting was changed and the repository remained private. Phase 5.7 is not started.
