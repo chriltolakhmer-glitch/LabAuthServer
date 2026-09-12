@@ -1,19 +1,20 @@
 # Phase 5.4 - Remaining Owner Decision Packet
 
-> DOCUMENTATION-ONLY DECISION PREPARATION — PHASE 5.4 DESIGN IS OWNER-APPROVED; SIX OPERATING-POLICY DECISIONS REMAIN
+> DOCUMENTATION-ONLY APPROVAL RECORD — PHASE 5.4 P54-D1 THROUGH P54-D6 ARE OWNER APPROVED; NO RELEASE ACTION AUTHORIZED
 
 ## 1. Purpose
 
-This packet prepares the remaining owner-required Phase 5.4 operating-policy decisions for explicit approval. The Phase 5.4 design itself remains owner-approved and same-host clean publish repeatability is verified; the unresolved items are not technical implementation work and are not release actions. This packet does not authorize a real release, manifest artifact, code signing, repo setting change, deployment, or source/runtime change.
+This packet records the project owner's explicit approval of the remaining Phase 5.4 operating-policy decisions P54-D1 through P54-D6. The Phase 5.4 design itself remains owner-approved and same-host clean publish repeatability is verified; these six items are governance policy choices, not technical implementation work and not release actions. This packet does not authorize a real release, manifest artifact, code signing, repo setting change, deployment, or source/runtime change.
 
 ## 2. Verified baseline
 
 | Item | Verified value |
 | --- | --- |
 | Branch | `main` |
-| Current Git SHA | `b80374712e5fad9831379bfd22c418f17224eb66` |
-| Current HEAD commit | `Verify Phase 5.4 build repeatability` |
-| Hosted validation | `LabAuthServer CI`, run `#31`, run ID `34695872722`, head `b80374712e5fad9831379bfd22c418f17224eb66`, status `completed`, conclusion `success` |
+| Current Git SHA | `b7d0408b1ecc7a284d1a2280990476bb262ce72f` |
+| Current HEAD commit | `Finalize Phase 5.4 retention recommendation` |
+| Hosted validation | `LabAuthServer CI`, run `#33`, run ID `34696584613`, head `b7d0408b1ecc7a284d1a2280990476bb262ce72f`, status `completed`, conclusion `success` |
+| GitHub signature verification | `verified: true`, reason `valid` |
 | Same-host reproducibility | `VERIFIED — SAME-HOST CLEAN PUBLISH REPEATABILITY` |
 | Cross-host / cross-environment reproducibility | `NOT YET VERIFIED` |
 | Repository visibility | `PRIVATE` |
@@ -21,63 +22,70 @@ This packet prepares the remaining owner-required Phase 5.4 operating-policy dec
 | Release-authorizing action | `NOT AUTHORIZED` |
 | Phase 5.6 status | `FROZEN / UNCHANGED` per the documented Phase 5.6 boundary |
 
-The baseline remains the verified owner-accepted state already recorded for the repository in this working branch. The packet below records only the remaining owner-required decisions and the deferred items, without implementing them.
+The baseline above is the independently verified prerequisite state for this approval record. The packet below records the owner-approved decisions and the still-deferred items, without implementing them.
 
 ## 3. Owner decision matrix
 
 ### P54-D1 — Release identifier format
 
 - Decision: Release identifier format for approved formal releases.
-- Current status: `OWNER DECISION REQUIRED`.
-- Recommended choice: `LAS-vMAJOR.MINOR.PATCH-<shortsha>`.
+- Current status: `OWNER APPROVED` — 2026-09-12.
+- Approved value: `LAS-vMAJOR.MINOR.PATCH-<shortsha>`.
+- Rules: human-readable; tied to the product version; tied to the source SHA; immutable once issued; no mutable branch dependency; the release timestamp remains separate metadata. No actual release ID is created by this record.
 - Rationale: This format is simple, deterministic, immutable once issued, tied to the product version and exact source revision, non-secret, and does not depend on mutable branch names or local dates. It is easier to audit than a date-based identifier and remains stable for evidence, support, and register matching.
 - Tradeoffs: A date-based identifier can be useful for operational chronology, but it adds an unnecessary mutable business dimension to a format that is already tied to a version and commit. If a later operational need for a date is established, it can be represented in a separate release timestamp field rather than in the ID itself.
-- Exact owner-approval field: `P54-D1 RELEASE IDENTIFIER FORMAT: LAS-vMAJOR.MINOR.PATCH-<shortsha>`
+- Approved owner-decision record: `P54-D1 RELEASE IDENTIFIER FORMAT: LAS-vMAJOR.MINOR.PATCH-<shortsha>`
 
 ### P54-D2 — Release channel taxonomy
 
 - Decision: Release channel taxonomy to use for formal release governance.
-- Current status: `OWNER DECISION REQUIRED`.
-- Recommended choice: Freeze the existing taxonomy as `Internal`, `Evaluation`, and `Production`.
+- Current status: `OWNER APPROVED` — 2026-09-12.
+- Approved taxonomy: `Internal`, `Evaluation`, `Production`. This taxonomy is frozen for the current Phase 5 release-governance model.
+- Preserved rule: a channel label does not itself grant legal, commercial, evaluation, or production permission.
 - Rationale: The taxonomy is already documented, understandable, and operationally sufficient for non-production and production release governance. Freezing it preserves clarity and avoids creating additional channels before an actual release process exists. The label remains informational only; it does not grant commercial or legal authorization.
 - Tradeoffs: Adding more categories could reflect nuanced operational needs later, but it increases governance complexity and introduces ambiguity before a real release process is running. Preserving the current taxonomy avoids overengineering and keeps the model aligned with the current design.
-- Exact owner-approval field: `P54-D2 RELEASE CHANNEL TAXONOMY: Internal / Evaluation / Production (freeze current taxonomy)`
+- Approved owner-decision record: `P54-D2 RELEASE CHANNEL TAXONOMY: Internal / Evaluation / Production (freeze current taxonomy)`
 
 ### P54-D3 — Manifest storage / custody model
 
 - Decision: Policy for manifest storage and custody.
-- Current status: `OWNER DECISION REQUIRED`.
-- Recommended choice: Use vendor-controlled private storage limited to authorized release operators, with immutable-or-append-preserving retention where practical, and keep the manifest associated with the exact release ID, Git SHA, and artifact hashes. Store no private keys, credentials, or customer licenses with it. Customer-facing copies are distributed only through the approved vendor process.
+- Current status: `OWNER APPROVED — POLICY` — 2026-09-12.
+- Approved policy: vendor-controlled private storage; access limited to authorized release operators; immutable or append-preserving history where practical; the manifest is associated with the exact release ID, Git SHA, and artifact hashes; no private keys; no credentials; no customer licenses; customer-facing copies are delivered only through the approved distribution process.
+- Preserved future operational value: `LOCATION / PROVIDER TO BE SELECTED BEFORE FIRST REAL RELEASE`. No provider is invented or created, and no storage is created, by this record.
 - Rationale: A manifest is evidence, not a general document store. It should be kept in a controlled private archive or vendor-managed repository area accessible only to the named release operators and approvers, while preserving a traceable history and retaining the manifest with the release evidence. This keeps provenance intact without introducing a new public or third-party service.
-- Tradeoffs: Private vendor storage is more operationally controlled than a shared or public venue, but it requires disciplined access control and retention. The recommendation intentionally avoids inventing a third-party service or location before owner approval.
-- Exact owner-approval field: `P54-D3 MANIFEST STORAGE POLICY: VENDOR-CONTROLLED PRIVATE STORAGE; ACCESS LIMITED TO AUTHORIZED RELEASE OPERATORS; IMMEDIATE LOCATION / PROVIDER TO BE SELECTED BEFORE FIRST REAL RELEASE`
+- Tradeoffs: Private vendor storage is more operationally controlled than a shared or public venue, but it requires disciplined access control and retention. The policy intentionally defers the exact provider/location to a future pre-release operational step.
+- Approved owner-decision record: `P54-D3 MANIFEST STORAGE POLICY: VENDOR-CONTROLLED PRIVATE STORAGE; ACCESS LIMITED TO AUTHORIZED RELEASE OPERATORS; LOCATION / PROVIDER TO BE SELECTED BEFORE FIRST REAL RELEASE`
 
 ### P54-D4 — External release register storage
 
 - Decision: Policy for the external vendor-controlled release register.
-- Current status: `OWNER DECISION REQUIRED`.
-- Recommended choice: Approve the policy requirements now and retain the exact platform / location value as `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`.
-- Rationale: The policy requirements are clear and stable: private/vendor-controlled, append-preserving, access-controlled, backed up, auditable, separate from the application database, and never containing private signing keys, credentials, or customer licenses. The platform choice should be deferred until a first real release requires the exact storage product or location, without delaying the governance policy.
-- Tradeoffs: Settling the product/location too early risks choosing a system that is not operationally suitable for the real release environment. Deferring the exact vendor location preserves policy readiness without inventing a solution before owner approval.
-- Exact owner-approval field: `P54-D4 RELEASE REGISTER STORAGE POLICY: POLICY APPROVED; STORAGE PRODUCT / LOCATION = OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`
+- Current status: `OWNER APPROVED — POLICY` — 2026-09-12.
+- Approved policy: private/vendor-controlled; append-preserving; access-controlled; backed up; auditable; separate from the application database; no private keys; no credentials; no customer licenses.
+- Preserved future pre-release operational value: `STORAGE PRODUCT / LOCATION = OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`. This is intentionally a future pre-release operational prerequisite, not an unresolved policy decision. No storage product is invented or created by this record.
+- Rationale: The policy requirements are clear and stable. The platform choice should be deferred until a first real release requires the exact storage product or location, without delaying the governance policy.
+- Tradeoffs: Settling the product/location too early risks choosing a system that is not operationally suitable for the real release environment. Deferring the exact vendor location preserves policy readiness without inventing a solution before it is needed.
+- Approved owner-decision record: `P54-D4 RELEASE REGISTER STORAGE POLICY: POLICY APPROVED; STORAGE PRODUCT / LOCATION = OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`
 
 ### P54-D5 — Release-record retention
 
 - Decision: Operational retention policy for release records.
-- Current status: `OWNER DECISION REQUIRED`.
-- Recommended choice: `Retain release records for the supported lifetime of the release and indefinitely thereafter until an approved legal/business retention policy supersedes this rule.` This is an operational preservation rule, not legal advice. Release records are relatively small governance and provenance records, and indefinite preservation avoids destroying the evidence trail before legal or business retention requirements are finalized. A later approved legal/business policy may replace this operational default. This rule does not require retaining private keys, credentials, customer licenses, or unrelated customer data.
+- Current status: `OWNER APPROVED — OPERATIONAL POLICY` — 2026-09-12.
+- Approved value: `RETAIN FOR SUPPORTED LIFETIME AND INDEFINITELY THEREAFTER UNTIL SUPERSEDED BY APPROVED LEGAL/BUSINESS RETENTION POLICY`.
+- Preserved: `LEGAL / CONTRACTUAL RETENTION REQUIREMENT = PROFESSIONAL REVIEW PENDING`.
+- Clarifications: this is an operational preservation rule, not legal advice; a later approved legal/business retention policy may supersede it; the rule concerns release-governance and provenance records; and it does not require retention of private keys, credentials, customer licenses, or unrelated customer data.
 - Rationale: The repository does not contain a professional legal review establishing a binding legal retention period. An operational retention policy is therefore appropriate now, while acknowledging that future legal or contractual policy may supersede it. This is conservative, auditable, and realistic for a controlled vendor process without pretending the legal answer is known.
 - Tradeoffs: A shorter fixed retention window may be easier to administer but risks destroying provenance evidence before a legal or business requirement is finalized. Extending preservation indefinitely for the minimal governance records is a conservative default while the legal/business policy remains pending.
-- Exact owner-approval field: `P54-D5 RELEASE RECORD RETENTION: RETAIN FOR SUPPORTED LIFETIME AND INDEFINITELY THEREAFTER UNTIL SUPERSEDED BY APPROVED LEGAL/BUSINESS RETENTION POLICY; LEGAL / CONTRACTUAL RETENTION REQUIREMENT = PROFESSIONAL REVIEW PENDING`
+- Approved owner-decision record: `P54-D5 RELEASE RECORD RETENTION: RETAIN FOR SUPPORTED LIFETIME AND INDEFINITELY THEREAFTER UNTIL SUPERSEDED BY APPROVED LEGAL/BUSINESS RETENTION POLICY; LEGAL / CONTRACTUAL RETENTION REQUIREMENT = PROFESSIONAL REVIEW PENDING`
 
 ### P54-D6 — Release approval / separation of duties
 
 - Decision: Release roles and separation of duties for release and security operations.
-- Current status: `OWNER DECISION REQUIRED`.
-- Recommended choice: Use the already-approved governance identity `ALOT` for all core roles initially, while explicitly documenting that `separation of duties: REQUIRED WHERE PRACTICAL`, and that a production release should use independent review when another authorized reviewer is available. The current record must not falsely claim two-person control when only one named operator exists.
-- Rationale: The existing owner-approved governance identity is the stable named operator and security response owner. The initial state is therefore `Release Operator = ALOT`, `Release Approval Authority = ALOT`, `Distribution Operator = ALOT`, `Security Response Owner = ALOT`. This is a realistic starting state and does not pretend to provide independent review where it does not exist. The policy explicitly requires independent review when a second authorized reviewer is available.
-- Tradeoffs: A single-person model is operationally simpler but weaker for independent approval. The recommended policy reflects the current operational reality while preserving the principle that independent review should be used where practical, without inventing nonexistent staffing.
-- Exact owner-approval field: `P54-D6 RELEASE ROLES / SEPARATION OF DUTIES: Release Operator = ALOT; Release Approval Authority = ALOT initially; Distribution Operator = ALOT initially; Security Response Owner = ALOT; separation of duties = REQUIRED WHERE PRACTICAL; second-person review only when another authorized reviewer is available; absence of second reviewer MUST BE RECORDED`
+- Current status: `OWNER APPROVED` — 2026-09-12.
+- Approved assignments: Release Operator `ALOT`; Release Approval Authority `ALOT` initially; Distribution Operator `ALOT` initially; Security Response Owner `ALOT`; separation of duties `REQUIRED WHERE PRACTICAL`; second-person review required when another authorized reviewer is available; if no second authorized reviewer exists, the absence of independent review must be explicitly recorded.
+- Two-person control: not claimed. The current record does not pretend that independent review exists when only one named operator is available. No GitHub permission is changed by this record.
+- Rationale: The existing owner-approved governance identity is the stable named operator and security response owner. This is a realistic starting state that does not pretend to provide independent review where it does not exist. The policy explicitly requires independent review when a second authorized reviewer is available.
+- Tradeoffs: A single-person model is operationally simpler but weaker for independent approval. The policy reflects the current operational reality while preserving the principle that independent review should be used where practical, without inventing nonexistent staffing.
+- Approved owner-decision record: `P54-D6 RELEASE ROLES / SEPARATION OF DUTIES: Release Operator = ALOT; Release Approval Authority = ALOT initially; Distribution Operator = ALOT initially; Security Response Owner = ALOT; separation of duties = REQUIRED WHERE PRACTICAL; second-person review only when another authorized reviewer is available; absence of second reviewer MUST BE RECORDED`
 
 ## 4. Deferred items
 
@@ -125,16 +133,20 @@ This packet does not authorize any of the following:
 
 This packet is limited to governance decision preparation only.
 
-## 7. Owner response form
+## 7. Approved Owner Decision Record
+
+The project owner explicitly approved all P54-D1 through P54-D6 recommended decisions. The approved values are recorded below. This is an approval record, not a pending response form.
 
 ```text
 P54-D1 RELEASE IDENTIFIER FORMAT: LAS-vMAJOR.MINOR.PATCH-<shortsha>
 P54-D2 RELEASE CHANNEL TAXONOMY: Internal / Evaluation / Production (freeze current taxonomy)
-P54-D3 MANIFEST STORAGE POLICY: VENDOR-CONTROLLED PRIVATE STORAGE; ACCESS LIMITED TO AUTHORIZED RELEASE OPERATORS; IMMEDIATE LOCATION / PROVIDER TO BE SELECTED BEFORE FIRST REAL RELEASE
+P54-D3 MANIFEST STORAGE POLICY: VENDOR-CONTROLLED PRIVATE STORAGE; ACCESS LIMITED TO AUTHORIZED RELEASE OPERATORS; LOCATION / PROVIDER TO BE SELECTED BEFORE FIRST REAL RELEASE
 P54-D4 RELEASE REGISTER STORAGE POLICY: POLICY APPROVED; STORAGE PRODUCT / LOCATION = OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE
 P54-D5 RELEASE RECORD RETENTION: RETAIN FOR SUPPORTED LIFETIME AND INDEFINITELY THEREAFTER UNTIL SUPERSEDED BY APPROVED LEGAL/BUSINESS RETENTION POLICY; LEGAL / CONTRACTUAL RETENTION REQUIREMENT = PROFESSIONAL REVIEW PENDING
 P54-D6 RELEASE ROLES / SEPARATION OF DUTIES: Release Operator = ALOT; Release Approval Authority = ALOT initially; Distribution Operator = ALOT initially; Security Response Owner = ALOT; separation of duties = REQUIRED WHERE PRACTICAL; second-person review only when another authorized reviewer is available; absence of second reviewer MUST BE RECORDED
 ```
+
+Approving these decisions does not select a storage provider or location, does not create a release ID, does not create a release, and does not change any GitHub setting.
 
 ## 8. Follow-up reconciliation required
 
@@ -152,4 +164,4 @@ These should be recorded as `FOLLOW-UP RECONCILIATION REQUIRED` in a later docum
 
 ## 9. Packet status
 
-`PHASE 5.4 REMAINING OWNER DECISIONS PREPARED — NO RELEASE ACTION AUTHORIZED`
+`PHASE 5.4 P54-D1 THROUGH P54-D6 OWNER APPROVED — NO RELEASE ACTION AUTHORIZED`

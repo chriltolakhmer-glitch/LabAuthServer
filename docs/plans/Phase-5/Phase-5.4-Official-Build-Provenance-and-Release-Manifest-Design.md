@@ -330,16 +330,16 @@ This model reduces operational ambiguity but does not overclaim cryptographic se
 
 | Decision | Status | Placeholder / next question |
 | --- | --- | --- |
-| Final release identifier format | OWNER DECISION REQUIRED | Select and freeze a human-readable deterministic format. |
-| Final release channel taxonomy | OWNER DECISION REQUIRED | Confirm Internal, Evaluation, Production, or another controlled taxonomy. |
-| Manifest storage location | OWNER DECISION REQUIRED | Select vendor-controlled storage and distribution channels. |
-| Release register storage | OWNER DECISION REQUIRED | Select the external controlled register and access policy. |
+| Final release identifier format | OWNER APPROVED | `LAS-vMAJOR.MINOR.PATCH-<shortsha>`. |
+| Final release channel taxonomy | OWNER APPROVED | `Internal / Evaluation / Production`, frozen for the current Phase 5 release-governance model. A channel label does not itself grant legal, commercial, evaluation, or production permission. |
+| Manifest storage location | OWNER APPROVED — POLICY | Vendor-controlled private storage; access limited to authorized release operators; immutable or append-preserving history where practical; manifest associated with the exact release ID, Git SHA, and artifact hashes; no private keys, credentials, or customer licenses; customer-facing copies only through the approved distribution process. Exact provider/location: `TO BE SELECTED BEFORE FIRST REAL RELEASE`. |
+| Release register storage | OWNER APPROVED — POLICY | Private/vendor-controlled; append-preserving; access-controlled; backed up; auditable; separate from the application database; no private keys, credentials, or customer licenses. Exact product/location: `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`. |
 | Future manifest signing | DEFERRED | Decide whether and when detached manifest signatures are approved. |
 | Future artifact code signing | DEFERRED | Decide platform scope, certificates, custody, and operations. |
 | SBOM requirement | DEFERRED | Decide whether the future recommendation becomes mandatory. |
 | Runtime build metadata | DEFERRED | Decide whether non-secret provenance is embedded in binaries or diagnostics. |
-| Release-record retention period | OWNER DECISION REQUIRED | Define retention, access, and disposal requirements. |
-| Release approval separation of duties | OWNER DECISION REQUIRED | Define approver, operator, and distributor responsibilities. |
+| Release-record retention period | OWNER APPROVED — OPERATIONAL POLICY | Retain for the supported lifetime and indefinitely thereafter until superseded by an approved legal/business retention policy. Professional legal/contractual retention review remains pending. |
+| Release approval separation of duties | OWNER APPROVED | Release Operator `ALOT`; Release Approval Authority `ALOT` initially; Distribution Operator `ALOT` initially; Security Response Owner `ALOT`; separation of duties required where practical; second-person review when another authorized reviewer exists; absence must be recorded. |
 
 No business choice is silently finalized by this design.
 
@@ -371,6 +371,19 @@ This document introduces no private keys, passwords, tokens, credentials, produc
 
 ## 24. Current Status
 
-PHASE 5.4 — OWNER APPROVED — 2026-09-12
+PHASE 5.4 — P54-D1 THROUGH P54-D6 OWNER APPROVED — 2026-09-12
 
-The project owner approved the completed Phase 5.4 documentation on 2026-09-12. All 19 documentation completion criteria in section 22 are satisfied. Same-host clean publish repeatability is verified at commit `e6f94579022c741ce09f3fde37f8631bcd073533`; cross-host and cross-environment reproducibility remain not yet verified. Open decisions remain unresolved or deferred; manifest signing and artifact/code signing remain deferred and unimplemented; and SBOM remains recommended future release governance work. No real release, Release Manifest V1 artifact, package, signing operation, or deployment was produced or performed. The repository remains private and controlled. This documentation/governance approval does not authorize release publication, customer distribution, production key generation, or implementation changes.
+The project owner approved the completed Phase 5.4 documentation on 2026-09-12, and on 2026-09-12 also approved the remaining operating-policy decisions P54-D1 through P54-D6 as recorded in section 21 and in [Phase-5.4-Remaining-Owner-Decision-Packet.md](Phase-5.4-Remaining-Owner-Decision-Packet.md).
+
+- P54-D1 through P54-D6 are `OWNER APPROVED`.
+- Same-host clean publish repeatability remains `VERIFIED — SAME-HOST CLEAN PUBLISH REPEATABILITY`.
+- Cross-host and cross-environment reproducibility remain `NOT YET VERIFIED`.
+- Manifest storage and release-register storage policies are approved; the exact provider/product and location values remain future pre-release operational prerequisites (`TO BE SELECTED BEFORE FIRST REAL RELEASE` and `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`).
+- Legal/contractual retention remains `LEGAL / CONTRACTUAL RETENTION REQUIREMENT — PROFESSIONAL REVIEW PENDING`; the approved retention rule is an operational preservation policy only.
+- Manifest signing remains `DEFERRED`.
+- Artifact / code signing remains `DEFERRED / NOT IMPLEMENTED`.
+- SBOM remains `DEFERRED / FUTURE GOVERNANCE`.
+- Runtime build metadata remains `DEFERRED`.
+- No real release, Release Manifest V1 artifact, package, signing operation, or deployment was produced or performed, and no release has been authorized. The repository remains private and controlled.
+
+This record does not mark Phase 5 fully complete and does not authorize release publication, customer distribution, production key generation, or implementation changes.
