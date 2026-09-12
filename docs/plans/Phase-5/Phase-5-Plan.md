@@ -8,6 +8,8 @@ Phase 5.1 is complete from the project-owner decision perspective. The repositor
 
 Phase 5.2 status: PHASE 5.2 — OWNER REVIEW READY. See [Phase-5.2-Proprietary-Notices-and-Evaluation-Documentation.md](Phase-5.2-Proprietary-Notices-and-Evaluation-Documentation.md). This documentation/governance subphase prepares draft notices and evaluation/commercial process documents only; it does not authorize public release, external source distribution, final legal terms, deployment, or implementation changes. Phase 5.3 is not authorized.
 
+Phase 5.3 status: PHASE 5.3 — IN PROGRESS. See [Phase-5.3-Commercial-Licensing-and-Customer-Workflow.md](Phase-5.3-Commercial-Licensing-and-Customer-Workflow.md). This documentation/governance subphase defines the draft commercial customer lifecycle and operator workflow around the existing offline licensing model; it does not create legal terms, issue licenses, change runtime behavior, or authorize Phase 5.4.
+
 ## 1. Executive summary
 
 Phase 4 establishes the technical foundation for signed offline commercial licensing, but it does not define the business/legal package that governs how source is distributed, how evaluation use is permitted, how commercial use is sold, or how official vendor builds are distinguished from arbitrary source builds. Phase 5 addresses that gap.

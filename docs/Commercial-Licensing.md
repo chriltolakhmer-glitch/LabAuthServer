@@ -43,6 +43,8 @@ Online activation, online revocation, automated billing, customer self-service, 
 
 See [Evaluation Use](Evaluation-Use.md) for the draft evaluation policy. Evaluation access does not itself authorize production, live, customer-facing, commercial-service, redistribution, sublicensing, resale, competing-product, or general modification use.
 
+See [Phase 5.3 — Commercial Licensing and Customer Workflow](plans/Phase-5/Phase-5.3-Commercial-Licensing-and-Customer-Workflow.md) for the draft vendor-side request, approval, issuance, delivery, installation, replacement, renewal, support, and offboarding workflow. That document is an operational draft, not a legal contract.
+
 ## Official Build Trust
 
 Official releases should be accompanied by a vendor-controlled record containing the product version, Git commit SHA, build timestamp, CI evidence/reference, release manifest, artifact filename, SHA-256 checksum, and release owner/operator record. A checksum alone is not proof of publisher identity unless the manifest and artifact record are authenticated separately.
