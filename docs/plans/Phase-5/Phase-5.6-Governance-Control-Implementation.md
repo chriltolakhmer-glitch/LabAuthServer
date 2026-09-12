@@ -401,7 +401,6 @@ Every incomplete Phase 5.6 item has a precise classification below. No row repre
 | Force-push prohibition | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` | The same enforced private-repository protection capability that restricts force pushes. |
 | Branch-deletion restriction | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` | The same enforced private-repository protection capability that protects `main` from deletion. |
 | Repository forking policy | `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL` | The desired policy is approved, but GitHub requires an org-owned private repository before `allow_forking` can be changed. |
-| Commit identity | `OWNER POLICY APPROVED — EXACT IDENTITY VALUES STILL REQUIRED` | Owner-supplied stable vendor/operator name and email; do not rewrite history or change identity in this task. |
 | Commit-signing mechanism and enablement | `OWNER APPROVED — IMPLEMENTATION BLOCKED BY KEY/CUSTODY VALUES` | Owner-supplied signing identity, key custody/recovery owner, and rotation/revocation owner before SSH signing is configured. |
 | `<SECURITY_CONTACT>` | `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED` | Owner-supplied approved security-reporting contact. |
 | `<COMMERCIAL_CONTACT>` | `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED` | Owner-supplied approved commercial/evaluation contact. |
