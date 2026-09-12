@@ -20,9 +20,9 @@ This packet does not implement commercial operation, issue a customer license, c
 | Item | Verified value |
 | --- | --- |
 | Branch | `main` |
-| Current Git SHA | `357896707b6144cda40ef504cf859075a460bd65` |
-| Current HEAD commit | `Reconcile Phase 5.7 governance state` |
-| Hosted validation | `LabAuthServer CI`, run `#35`, run ID `34697642890`, head `357896707b6144cda40ef504cf859075a460bd65`, status `completed`, conclusion `success` |
+| Current Git SHA | `ac915ddefcbe3395e09e4426a75cdb890484982c` |
+| Current HEAD commit | `Reconcile Phase 5 commercial decision reference` |
+| Hosted validation | `LabAuthServer CI`, run `#37`, run ID `34698559913`, head `ac915ddefcbe3395e09e4426a75cdb890484982c`, status `completed`, conclusion `success` |
 | Repository visibility | `PRIVATE` |
 | Release existence | `NO RELEASE EXISTS` |
 | Commercial operation | `NOT AUTHORIZED` |
@@ -47,7 +47,7 @@ Each decision records its current status, the recommendation, the rationale, the
 ### P5-C2 — Approved delivery channel
 
 - Decision: the controlled channel used for customer license delivery, approved production artifact delivery where applicable, and delivery evidence / receipt confirmation.
-- Current status: `OWNER DECISION REQUIRED — POLICY`.
+- Current status: `OWNER APPROVED — POLICY`.
 - Current placeholder: `<APPROVED_DELIVERY_CHANNEL>`.
 - Recommendation: `VENDOR-CONTROLLED PRIVATE DELIVERY CHANNEL; ACCESS LIMITED TO AUTHORIZED OPERATORS; RECIPIENT IDENTITY VERIFIED; DELIVERY EVENT AND RECEIPT RECORDED; EXACT PROVIDER / CHANNEL TO BE SELECTED BEFORE FIRST EXTERNAL CUSTOMER DELIVERY`.
 - Rationale: the policy requirements are stable and can be approved now; the exact service or provider is an operational choice that does not need to be fixed before a first external delivery exists.
@@ -57,7 +57,7 @@ Each decision records its current status, the recommendation, the rationale, the
 ### P5-C3 — Commercial Approval Authority
 
 - Decision: the named role that authorizes commercial permission and business approval.
-- Current status: `OWNER DECISION REQUIRED`.
+- Current status: `OWNER APPROVED`.
 - Current placeholder: `<COMMERCIAL_APPROVAL_AUTHORITY>` (Phase 5.3 placeholder register).
 - Recommendation: `ALOT`.
 - Rationale: `ALOT` is already the approved governance identity and the current operation is single-owner / single-operator.
@@ -67,7 +67,7 @@ Each decision records its current status, the recommendation, the rationale, the
 ### P5-C4 — Licensing Operator / Authorized License Issuer
 
 - Decision: the named operator authorized to perform the approved offline license-issuance procedure.
-- Current status: `OWNER DECISION REQUIRED`.
+- Current status: `OWNER APPROVED`.
 - Current placeholder: `<LICENSING_OPERATOR>` (Phase 5.3 placeholder register).
 - Recommendation: `ALOT initially`.
 - Scope and limitations:
@@ -86,8 +86,8 @@ Each decision records its current status, the recommendation, the rationale, the
 ### P5-C5 — Supported-version duration
 
 - Decision: whether a fixed calendar support term is committed.
-- Current status: `OPEN — COMMERCIAL / SUPPORT POLICY DECISION`.
-- Recommendation: `NO FIXED CALENDAR SUPPORT TERM YET`.
+- Current status: `OWNER APPROVED — POLICY`.
+- Approved policy: `NO FIXED CALENDAR TERM; FUTURE COMMERCIAL / LEGAL POLICY REQUIRED`.
 - Preserved supported-version classification: current release `SUPPORTED`; immediately previous MINOR release `SECURITY / CRITICAL FIX SUPPORT where practical`; older releases `UNSUPPORTED unless a commercial agreement explicitly says otherwise`.
 - Recorded policy: `FORMAL CALENDAR SUPPORT DURATION: NOT COMMITTED UNTIL COMMERCIAL / LEGAL SUPPORT POLICY IS APPROVED`.
 - Rationale: no fixed number of months or years has received commercial or legal approval; this avoids accidentally creating a support warranty or contractual promise; the existing version-state model can operate without a fixed calendar term; a later approved commercial/support policy may define a calendar period.
@@ -97,8 +97,8 @@ Each decision records its current status, the recommendation, the rationale, the
 ### P5-C6 — LTS policy
 
 - Decision: whether any release is designated LTS.
-- Current status: `PENDING — COMMERCIAL / SUPPORT POLICY DECISION`.
-- Recommendation: `NO LTS DESIGNATION IN THE CURRENT BASELINE`.
+- Current status: `OWNER APPROVED — POLICY`.
+- Approved policy: `NO LTS DESIGNATION UNTIL SEPARATELY APPROVED`.
 - Rationale: no release should currently be described as LTS; LTS requires an explicit servicing duration, maintenance obligations, support capacity, commercial terms, and legal/business approval; the ordinary supported-version model remains available without making an LTS commitment.
 - Boundary: do not designate any release as LTS.
 - Exact owner-response field: `P5-C6 LTS POLICY: NO LTS DESIGNATION UNTIL SEPARATELY APPROVED`
@@ -139,10 +139,10 @@ Each decision records its current status, the recommendation, the rationale, the
 | Placeholder / phrase | Classification |
 | --- | --- |
 | `<COPYRIGHT_OWNER>` in `COPYRIGHT.md` | Current unresolved value — see P5-C1 |
-| `<APPROVED_DELIVERY_CHANNEL>` in `docs/plans/Phase-5/Phase-5.3-...` and `docs/Release-Governance.md` | Current unresolved value — see P5-C2 |
-| `<COMMERCIAL_APPROVAL_AUTHORITY>` in the Phase 5.3 placeholder register | Current unresolved assignment — see P5-C3 |
-| `<LICENSING_OPERATOR>` in the Phase 5.3 placeholder register | Current unresolved assignment — see P5-C4 |
-| `PENDING — COMMERCIAL / SUPPORT POLICY DECISION` (LTS, support duration) | Current unresolved commercial/support policy — see section 6 |
+| `<APPROVED_DELIVERY_CHANNEL>` in the Phase 5.3 workflow and release summary | Owner-approved policy; exact provider/channel remains a prerequisite before first external customer delivery |
+| `<COMMERCIAL_APPROVAL_AUTHORITY>` in the Phase 5.3 placeholder register | Owner-approved assignment: `ALOT` |
+| `<LICENSING_OPERATOR>` in the Phase 5.3 placeholder register | Owner-approved assignment: `ALOT initially` |
+| `PENDING — COMMERCIAL / SUPPORT POLICY DECISION` (LTS, support duration) | Superseded by the owner-approved policies in P5-C5 and P5-C6 |
 | `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE` (release-register storage) | Current pre-release operational prerequisite — see section 6 |
 | `TO BE SELECTED BEFORE FIRST REAL RELEASE` (manifest storage provider/location) | Current pre-release operational prerequisite — see section 6 |
 | `<SECURITY_CONTACT>` references in Phase 5.3 / Phase 5.5 | Historical text — the value is now resolved; do not reopen |
@@ -174,14 +174,9 @@ Each decision records its current status, the recommendation, the rationale, the
 - runtime build metadata: `DEFERRED`
 - cross-host reproducibility: `NOT YET VERIFIED`
 
-## 7. Follow-up reconciliation observations
+## 7. Current-state reconciliation
 
-Phase 5.3 still contains stale placeholder-register entries for:
-
-- `<SECURITY_CONTACT>`
-- `<COMMERCIAL_CONTACT>`
-
-Those contacts are already resolved by D4 and D5. Classification: `FOLLOW-UP RECONCILIATION REQUIRED`. They are not unresolved owner decisions, and Phase 5.3 is not broadly edited by this task.
+The Phase 5.3 contact values are already owner-approved and implemented, including the shared-mailbox exception. P5-C2 through P5-C6 are now owner-approved as recorded in this packet. P5-C1 remains the only exact owner-supplied identity value required; the exact delivery provider/channel and other operational, signing, storage, and professional-review items remain deferred or pending as listed above.
 
 ## 8. Non-authorizations
 
@@ -207,7 +202,7 @@ This packet does not authorize any of the following:
 - GitHub setting changes
 - Phase 5.6 changes
 
-## 9. Owner response form
+## 9. Approved Owner Decision Record / Remaining Owner Value
 
 ```text
 P5-C1 COPYRIGHT / RIGHTS-HOLDER IDENTITY:
@@ -218,6 +213,8 @@ P5-C5 FORMAL SUPPORTED-VERSION DURATION: NO FIXED CALENDAR TERM; FUTURE COMMERCI
 P5-C6 LTS POLICY: NO LTS DESIGNATION UNTIL SEPARATELY APPROVED
 ```
 
+P5-C2 through P5-C6 are recorded as `OWNER APPROVED`. P5-C1 remains intentionally blank and `OWNER VALUE REQUIRED`.
+
 ## 10. Packet status
 
-`PHASE 5 REMAINING COMMERCIAL AND SUPPORT OWNER DECISIONS PREPARED — NO COMMERCIAL OPERATION OR RELEASE ACTION AUTHORIZED`
+`P5-C2 THROUGH P5-C6 OWNER APPROVED — P5-C1 COPYRIGHT / RIGHTS-HOLDER IDENTITY REMAINS OWNER VALUE REQUIRED — NO COMMERCIAL OPERATION AUTHORIZED`

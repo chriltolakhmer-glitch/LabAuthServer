@@ -141,9 +141,9 @@ Initial supported-version model:
 | Immediately previous MINOR release | SECURITY / CRITICAL FIX SUPPORT where practical |
 | Older releases | UNSUPPORTED unless a commercial agreement explicitly says otherwise |
 
-No fixed calendar support period is promised at this time.
+Formal calendar support duration: `OWNER APPROVED — NO FIXED CALENDAR TERM; FUTURE COMMERCIAL / LEGAL POLICY REQUIRED`.
 
-Formal LTS duration: `PENDING — COMMERCIAL / SUPPORT POLICY DECISION`.
+LTS policy: `OWNER APPROVED — NO LTS DESIGNATION UNTIL SEPARATELY APPROVED`. No release is designated LTS.
 
 Clarification: a valid signed commercial license does **not** automatically imply entitlement to support for any specific software version. License validity and version support entitlement are separate concerns.
 
@@ -244,7 +244,7 @@ Current approved release-governance roles:
 - second-person review is required when another authorized reviewer is available
 - absence of a second authorized reviewer must be explicitly recorded
 
-A release gate still cannot be satisfied while required values remain unresolved. In particular, the approved distribution channel remains unresolved, and the release-register storage product/location remains `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`. Identifying the release operator and approval authority here records the current approved assignments; the actual operator and approval record must still be captured for each real release.
+A release gate still cannot be satisfied while required values remain unresolved. In particular, the exact delivery provider/channel must be selected before first external customer delivery, and the release-register storage product/location remains `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE`. Identifying the release operator and approval authority here records the current approved assignments; the actual operator and approval record must still be captured for each real release.
 
 ## 12. Security Release Policy
 
@@ -283,13 +283,9 @@ The controlled-distribution model is preserved.
 
 Official production artifacts may only be delivered through an approved vendor distribution channel.
 
-Current placeholder remains:
+Current policy: `OWNER APPROVED — POLICY`.
 
-```
-<APPROVED_DELIVERY_CHANNEL>
-```
-
-The channel is not invented here. Nothing is published by this phase.
+The channel must be vendor-controlled and private, limited to authorized operators, used only after recipient identity verification, and accompanied by recorded delivery and receipt evidence. The exact provider/channel remains `TO BE SELECTED BEFORE FIRST EXTERNAL CUSTOMER DELIVERY`. Nothing is published by this phase.
 
 Important distinction: the Phase 5.4 release classification taxonomy `Internal / Evaluation / Production` is a classification taxonomy for release records and **is not** the approved physical/digital customer delivery channel. The delivery channel remains a separate, unresolved pre-release operational value.
 
@@ -303,7 +299,8 @@ Roles are defined with their current approved assignments:
 | Release Approval Authority | Reviews and approves the release gate. | `ALOT` initially |
 | Distribution Operator | Delivers the approved artifact set through the approved channel. | `ALOT` initially |
 | Security Response Owner | Owns security-release coordination and vulnerability handling. | `ALOT` |
-| Licensing Operator | Owns commercial license issuance and license/version compatibility. | `UNRESOLVED / OWNER VALUE REQUIRED` in the current Phase 5.3 governance state |
+| Licensing Operator / Authorized License Issuer | Owns commercial license issuance and license/version compatibility. | `ALOT initially` — `OWNER APPROVED` |
+| Commercial Approval Authority | Owns commercial/business approval decisions. | `ALOT` — `OWNER APPROVED` |
 
 Current approved governance:
 
@@ -372,12 +369,12 @@ This is a future operational checklist. Every step is documentation only. It is 
 
 | Decision / Item | Status |
 | --- | --- |
-| formal supported-version duration | OPEN — COMMERCIAL / SUPPORT POLICY DECISION |
-| LTS policy | PENDING — COMMERCIAL / SUPPORT POLICY DECISION |
+| formal supported-version duration | OWNER APPROVED — NO FIXED CALENDAR TERM; FUTURE COMMERCIAL / LEGAL POLICY REQUIRED |
+| LTS policy | OWNER APPROVED — NO LTS DESIGNATION UNTIL SEPARATELY APPROVED |
 | release operator assignment | OWNER APPROVED — `ALOT` |
 | release approval authority assignment | OWNER APPROVED — `ALOT` initially |
 | distribution operator assignment | OWNER APPROVED — `ALOT` initially |
-| approved distribution channel (`<APPROVED_DELIVERY_CHANNEL>`) | BLOCKED — UNRESOLVED VALUE |
+| approved distribution channel (`<APPROVED_DELIVERY_CHANNEL>`) | OWNER APPROVED — POLICY; EXACT PROVIDER / CHANNEL REQUIRED BEFORE FIRST EXTERNAL CUSTOMER DELIVERY |
 | official commit signing | OWNER APPROVED — IMPLEMENTED (repository-local SSH signing) |
 | release-tag signing | UNRESOLVED / NOT IMPLEMENTED |
 | security contact | OWNER APPROVED — IMPLEMENTED — `chriltola.khmer@gmail.com` |
@@ -388,8 +385,8 @@ This is a future operational checklist. Every step is documentation only. It is 
 | stable vendor-controlled commit identity | OWNER APPROVED — IMPLEMENTED — `ALOT <chriltola.khmer@gmail.com>` |
 | repository-admin assignments | OWNER APPROVED — IMPLEMENTED — `ALOT` (backup administrator `NOT DESIGNATED`) |
 | Security Response Owner | OWNER APPROVED — IMPLEMENTED — `ALOT` (backup `NOT DESIGNATED`) |
-| Licensing Operator | UNRESOLVED / OWNER VALUE REQUIRED (Phase 5.3) |
-| Commercial Approval Authority | UNRESOLVED / OWNER VALUE REQUIRED (Phase 5.3) |
+| Licensing Operator | OWNER APPROVED — `ALOT initially` |
+| Commercial Approval Authority | OWNER APPROVED — `ALOT` |
 | manifest storage provider / location | PRE-RELEASE VALUE REQUIRED — `TO BE SELECTED BEFORE FIRST REAL RELEASE` |
 | release-register storage product / location | PRE-RELEASE OWNER VALUE REQUIRED — `OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE` |
 | professional legal / business review | PENDING — PROFESSIONAL LEGAL REVIEW |

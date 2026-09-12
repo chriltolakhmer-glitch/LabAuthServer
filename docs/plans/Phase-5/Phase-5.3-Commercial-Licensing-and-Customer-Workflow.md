@@ -53,7 +53,7 @@ This phase does not include:
 | 5. Commercial approval/agreement | Commercial Owner | Validated request and business terms | Approved commercial permission | Authorized business owner; legal review pending | Approval reference and agreement reference | Commercial permission is separate from technical entitlement |
 | 6. License issuance authorization | Licensing Approver | Approved request and agreement reference | Authorized issuance instruction | Licensing Approver authorizes issuer | Issuance authorization record | Issuer access is restricted; approver need not access the private key |
 | 7. Offline license issuance | Authorized License Issuer | Authorized request and approved keyId | Signed License Version 1 document | Authorized License Issuer follows approved process | Issuance metadata and License ID | Private key remains outside repository, application, and CI |
-| 8. Controlled delivery | Support Operator / Release Operator | Independently verified license file | Delivered license file | Delivery recipient is approved | Delivery event and receipt confirmation | Use `<APPROVED_DELIVERY_CHANNEL>`; never send key material |
+| 8. Controlled delivery | Support Operator / Release Operator | Independently verified license file | Delivered license file | Delivery recipient is approved | Delivery event and receipt confirmation | Use the owner-approved vendor-controlled private delivery policy; never send key material |
 | 9. Customer installation | Customer / Support Operator | Delivered license file and configured path | File staged at `Licensing:LicenseFilePath` | Customer administrator follows procedure | Installation confirmation | Do not place licenses in GitHub, source, webroot, or generic releases |
 | 10. Restart/reload | Customer / Support Operator | Installed file | Application reloads startup licensing state | Customer administrator | Restart/reload timestamp | No hot reload or per-request revalidation is implied |
 | 11. Startup validation | Application / Support Operator | License file and trusted public keys | Effective policy and status | Technical verification by operator | Safe status, edition, features, limits, expiry metadata | Invalid/missing content remains restricted Community behavior |
@@ -76,6 +76,13 @@ The lifecycle is a proposed operational process and remains subject to business 
 - **Security Owner**: receives compromise/security escalations and coordinates incident response and key-compromise handling.
 
 Commercial approval and license issuance are separate responsibilities. The person approving commercial entitlement does not automatically need access to the production private signing key. Only authorized issuance operators should perform signing. No specific HSM/KMS or physical key-storage product is selected by this phase.
+
+Current owner-approved assignments:
+
+- **Commercial Approval Authority**: `ALOT`.
+- **Licensing Operator / Authorized License Issuer**: `ALOT initially`.
+
+These assignments authorize the documented governance roles only. They do not grant new private-key access, perform signing, issue a customer license, or alter runtime licensing rules. Separation of duties remains `REQUIRED WHERE PRACTICAL`.
 
 ## 6. Edition and Feature Request Workflow
 
@@ -193,7 +200,7 @@ LabAuthServer must never issue commercial licenses. GitHub Actions must never ho
 - Record the delivery event and receipt confirmation.
 - Never send private signing material.
 - Treat the license document as customer-sensitive operational data.
-- Use `<APPROVED_DELIVERY_CHANNEL>` until an approved channel is documented.
+- Use a vendor-controlled private delivery channel with access limited to authorized operators, verified recipient identity, and recorded delivery and receipt evidence. The exact provider/channel must be selected before first external customer delivery.
 - Do not store customer licenses in GitHub or source control.
 - Do not put customer license files in the webroot.
 - Do not package customer licenses into generic product releases.
@@ -300,14 +307,14 @@ Do not request or collect:
 
 | Placeholder | Purpose | Files | Resolve before external commercial operation? |
 | --- | --- | --- | --- |
-| `<COMMERCIAL_CONTACT>` | Commercial and evaluation contact | `README.md`, `docs/Evaluation-Use.md`, `docs/Commercial-Licensing.md` | Yes |
-| `<SECURITY_CONTACT>` | Vulnerability-reporting channel | `SECURITY.md` | Yes |
-| `<COPYRIGHT_OWNER>` | Ownership identity | `COPYRIGHT.md` | Yes |
-| `<APPROVED_DELIVERY_CHANNEL>` | Approved controlled license-delivery channel | This document | Yes |
-| `<COMMERCIAL_APPROVAL_AUTHORITY>` | Named commercial approval authority | Future operational record | Yes |
-| `<LICENSING_OPERATOR>` | Named authorized issuer/operator reference | Future operational record | Yes |
+| `<COMMERCIAL_CONTACT>` | Commercial and evaluation contact | `README.md`, `docs/Evaluation-Use.md`, `docs/Commercial-Licensing.md` | `chriltola.khmer@gmail.com` — `OWNER APPROVED — IMPLEMENTED` |
+| `<SECURITY_CONTACT>` | Vulnerability-reporting channel | `SECURITY.md` | `chriltola.khmer@gmail.com` — `OWNER APPROVED — IMPLEMENTED` |
+| `<COPYRIGHT_OWNER>` | Ownership identity | `COPYRIGHT.md` | `OWNER VALUE REQUIRED` |
+| `<APPROVED_DELIVERY_CHANNEL>` | Approved controlled license-delivery channel | This document | `OWNER APPROVED — POLICY; EXACT PROVIDER / CHANNEL TO BE SELECTED BEFORE FIRST EXTERNAL CUSTOMER DELIVERY` |
+| `<COMMERCIAL_APPROVAL_AUTHORITY>` | Named commercial approval authority | Future operational record | `ALOT` — `OWNER APPROVED` |
+| `<LICENSING_OPERATOR>` | Named authorized issuer/operator reference | Future operational record | `ALOT initially` — `OWNER APPROVED` |
 
-No real placeholder values are invented by this phase.
+No legal identity or external provider is invented by this phase.
 
 ## 19. Phase 5.3 Completion Checklist
 
@@ -338,4 +345,4 @@ This process document is not a final agreement, final license, legal opinion, or
 
 PHASE 5.3 — OWNER APPROVED — 2026-09-12
 
-The project owner approved the completed Phase 5.3 documentation on 2026-09-12. All 16 documentation completion criteria in section 19 are satisfied. Professional legal/business review remains pending; unresolved placeholders remain unresolved; no production signing or customer-license issuance occurred; and no commercial operation is authorized solely by this approval. The Phase 5.4 source document is currently ready for owner review; the earlier statement that Phase 5.4 was not authorized is historical context and is superseded by the current Phase 5.4 status in the master Phase 5 plan. Phase 5.4 is not owner-approved by this record.
+The project owner approved the completed Phase 5.3 documentation on 2026-09-12. All 16 documentation completion criteria in section 19 are satisfied. Current and resolved values are the commercial contact, security contact, delivery-channel policy, Commercial Approval Authority, and Licensing Operator. `<COPYRIGHT_OWNER>`, the exact delivery provider/channel, and professional legal/business review remain unresolved or pending. No production signing or customer-license issuance occurred, and no commercial operation is authorized solely by this approval. The Phase 5.4 source document is currently ready for owner review; the earlier statement that Phase 5.4 was not authorized is historical context and is superseded by the current Phase 5.4 status in the master Phase 5 plan. Phase 5.4 is not owner-approved by this record.
