@@ -57,6 +57,6 @@ A party controlling the source code, build process, and host can technically mod
 
 ## Contact
 
-For evaluation access or classification questions, use the approved vendor process: `<COMMERCIAL_CONTACT>`.
+For evaluation access or classification questions, use the approved vendor process: `chriltola.khmer@gmail.com`.
 
-The contact placeholder requires business completion and is not an approved contact address.
+OWNER-APPROVED SHARED-MAILBOX EXCEPTION: the same approved mailbox is used for security and commercial/evaluation intake.

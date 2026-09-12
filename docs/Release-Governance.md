@@ -66,7 +66,7 @@ A valid signed commercial license does not automatically imply software-version 
 - Security fixes may use expedited governance.
 - Expedited governance does not bypass integrity or provenance controls.
 - A security release still requires a version, source SHA, CI evidence, manifest, and approval.
-- The security contact remains unresolved.
+- The security contact is `chriltola.khmer@gmail.com` and is owner-approved for operational use; the same mailbox is the approved shared-mailbox exception for security and commercial/evaluation intake.
 
 ## Withdrawal and supersession
 

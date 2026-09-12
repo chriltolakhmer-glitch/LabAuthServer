@@ -32,7 +32,9 @@ The current API has one public health endpoint, one public login endpoint, and o
 
 LabAuthServer is proprietary software. Source availability does not mean that the project is open source. The repository remains private and controlled for vendor-approved evaluation and review; no public source release is authorized.
 
-Production, live, customer-facing, or commercial use requires vendor authorization and an appropriate vendor-issued signed commercial license. Source access does not itself grant modification, redistribution, derivative-work, or commercial-use rights. Use the vendor process for evaluation access and production licensing: `<COMMERCIAL_CONTACT>`.
+Production, live, customer-facing, or commercial use requires vendor authorization and an appropriate vendor-issued signed commercial license. Source access does not itself grant modification, redistribution, derivative-work, or commercial-use rights. Use the vendor process for evaluation access and production licensing: `chriltola.khmer@gmail.com`.
+
+OWNER-APPROVED SHARED-MAILBOX EXCEPTION: the same approved mailbox is used for security and commercial/evaluation intake.
 
 Phase 4 technical licensing remains offline-first. The application validates signed entitlements at startup and does not provide online activation or revocation. A party controlling source, build, and host can technically modify an unofficial build; the system does not claim unbreakable DRM. See [Evaluation Use](docs/Evaluation-Use.md), [Commercial Licensing](docs/Commercial-Licensing.md), and [Licensing](docs/Licensing.md).
 

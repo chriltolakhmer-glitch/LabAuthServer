@@ -23,8 +23,8 @@ Phase 5 remains `PHASE 5 IN PROGRESS — PHASE 5.6 REMAINS OPEN`. Phase 5.6 rema
 | Forking | `ALLOWED` (`allow_forking = true`); disablement is blocked by the repository ownership model |
 | Git identity before D2 implementation | `unknown <Administrator@LAB.LOCAL>` |
 | Latest commit signature | `N` (unsigned) |
-| Security contact | `<SECURITY_CONTACT>` |
-| Commercial contact | `<COMMERCIAL_CONTACT>` |
+| Security contact | `chriltola.khmer@gmail.com` |
+| Commercial contact | `chriltola.khmer@gmail.com` |
 
 The hosted validation result above is accepted as externally verified evidence. Local `gh` authentication is not required to re-prove it.
 
@@ -106,29 +106,31 @@ Rotation and revocation policy: `ALOT` owns rotation and revocation decisions. I
 
 ### D4 - Security Contact
 
-**Current status:** `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED`.
+**Current status:** `OWNER APPROVED — IMPLEMENTED`.
 
-The eventual value must be vendor-controlled, monitored, appropriate for vulnerability reports, not a personal secret, and safe to publish wherever [SECURITY.md](../../../SECURITY.md) requires it. It should support a private intake process and should not require reporters to disclose sensitive material publicly.
+The approved value is vendor-controlled, monitored, appropriate for private vulnerability reports, not a personal secret, and safe to publish wherever [SECURITY.md](../../../SECURITY.md) requires it. It supports a private intake process and does not require reporters to disclose sensitive material publicly.
 
-**Approved policy:** Use a dedicated, monitored, vendor-controlled security reporting channel that supports private vulnerability reporting, is safe to publish in `SECURITY.md`, and has continuity if personnel change. The exact contact remains unresolved.
+**Approved policy:** Use a monitored, vendor-controlled security reporting mailbox that supports private vulnerability intake and has continuity if personnel change. The current approved operational value is `chriltola.khmer@gmail.com`, and the owner-approved shared-mailbox exception applies to both security and commercial/evaluation intake.
 
 **Exact owner-input field:**
 
-- `SECURITY CONTACT: OWNER VALUE REQUIRED`
-- `MONITORING / ESCALATION OWNER: OWNER VALUE REQUIRED`
+- `SECURITY CONTACT: chriltola.khmer@gmail.com`
+- `MONITORING / ESCALATION OWNER: ALOT`
+- `OWNER-APPROVED SHARED-MAILBOX EXCEPTION: YES`
 
 ### D5 - Commercial Contact
 
-**Current status:** `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED`.
+**Current status:** `OWNER APPROVED — IMPLEMENTED`.
 
-The eventual value must be vendor-controlled, monitored, suitable for evaluation and commercial requests, and appropriate for publication in customer-facing documentation. It must support continuity if personnel change and must not expose a personal secret.
+The approved value is vendor-controlled, monitored, suitable for evaluation and commercial requests, and appropriate for publication in customer-facing documentation. It supports continuity if personnel change and does not expose a personal secret.
 
-**Approved policy:** Use a dedicated, monitored, vendor-controlled commercial/evaluation channel separate from security intake where practical. It must be suitable for customer-facing documentation and support evaluation and commercial requests with continuity if personnel change. The exact value remains unresolved.
+**Approved policy:** Use a monitored, vendor-controlled commercial/evaluation mailbox that supports evaluation and commercial intake with continuity if personnel change. The current approved operational value is `chriltola.khmer@gmail.com`, and the owner-approved shared-mailbox exception applies to both security and commercial/evaluation intake.
 
 **Exact owner-input field:**
 
-- `COMMERCIAL CONTACT: OWNER VALUE REQUIRED`
-- `EVALUATION REQUEST MONITORING OWNER: OWNER VALUE REQUIRED`
+- `COMMERCIAL CONTACT: chriltola.khmer@gmail.com`
+- `EVALUATION REQUEST MONITORING OWNER: ALOT`
+- `OWNER-APPROVED SHARED-MAILBOX EXCEPTION: YES`
 
 ### D6 - Repository Administrator Assignments
 
@@ -190,9 +192,9 @@ The repository must remain private. Making it public is not a workaround and is 
 
 ## 5. Risks and Tradeoffs
 
-- D4–D7 unresolved contacts and named assignments leave remaining governance continuity gaps; D3 signing is implemented.
-- Unresolved contacts block dependable vulnerability intake and commercial/evaluation requests.
-- Unresolved named administrator and response-owner identities create continuity and response gaps even though the policy roles are approved.
+- D6–D7 exact named assignments remain the outstanding governance continuity gap; D3 signing is implemented.
+- D4 and D5 are implemented with the approved shared-mailbox exception, so vulnerability intake and commercial/evaluation requests are operationally resolved.
+- Remaining named administrator and response-owner identities create continuity and response gaps even though the policy roles are approved.
 - Allowed forking increases private source-copy and access-cleanup risk, while disabling it may impede a controlled vendor workflow.
 - Platform-blocked branch controls continue to leave enforcement unavailable even if owner values are supplied.
 - The repository remains private and proprietary; no public workaround is authorized.
