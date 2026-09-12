@@ -2,7 +2,7 @@
 
 > DESIGN DRAFT - REVIEW REQUIRED
 
-Status: PHASE 5.4 — OWNER APPROVED. Documentation/governance approval recorded on 2026-09-12. All Phase 5.4 documentation completion criteria are satisfied. This remains a design record, not a final legal agreement or implementation authorization. Open decisions remain unresolved, reproducibility remains `NOT YET VERIFIED`, signing remains deferred and unimplemented, and SBOM remains future governance work. No real release, manifest artifact, package, signing operation, or deployment was performed or authorized by this approval.
+Status: PHASE 5.4 — OWNER APPROVED. Documentation/governance approval recorded on 2026-09-12. All Phase 5.4 documentation completion criteria are satisfied. This remains a design record, not a final legal agreement or implementation authorization. Same-host clean publish repeatability is verified; cross-host and cross-environment reproducibility are not yet verified. Open decisions remain unresolved, signing remains deferred and unimplemented, and SBOM remains future governance work. No real release, manifest artifact, package, signing operation, or deployment was performed or authorized by this approval.
 
 ## 1. Purpose
 
@@ -253,9 +253,32 @@ A future release-oriented CI design may eventually produce a deterministic artif
 
 ## 17. Reproducibility
 
-The current reproducibility status is **NOT YET VERIFIED**. The repository evidence does not establish that independently repeated builds produce byte-identical artifacts.
+The current reproducibility status is **VERIFIED — SAME-HOST CLEAN PUBLISH REPEATABILITY; CROSS-HOST REPRODUCIBILITY NOT YET VERIFIED**.
 
-Future reproducibility verification should consider:
+On 2026-09-12, two detached, clean temporary Git worktrees on the same host were checked out independently at exact commit `e6f94579022c741ce09f3fde37f8631bcd073533`. The environment was Windows `10.0.20348`, `win-x64`, x64 architecture, with .NET SDK `10.0.401` selected under the repository's `global.json` request for `10.0.400` and `rollForward: latestPatch`. The .NET host/runtime version was `10.0.12`.
+
+Each worktree independently ran:
+
+```powershell
+dotnet restore .\LabAuthServer.slnx
+
+dotnet publish `
+  .\src\LabAuthServer.Api\LabAuthServer.Api.csproj `
+  -c Release `
+  --no-restore `
+  -p:PublishProfile=FolderProfile `
+  -o .\Build\Release
+```
+
+The explicit output option selected the profile's documented worktree-local `Build/Release` candidate artifact directory without modifying the existing profile. Both operations used target framework `net10.0`, configuration `Release`, and `FolderProfile`; neither worktree reused the other's `bin`, `obj`, restore outputs, or publish output.
+
+Every regular file under each `Build/Release` directory was enumerated recursively. Paths were normalized relative to that directory with `/` separators and sorted ordinally. For each path, the comparison recorded exact byte size and a lowercase hexadecimal SHA-256 digest. Each publish contained 52 files. The path sets, all byte sizes, and all SHA-256 values matched; there were zero differing paths.
+
+As an additional check, each sorted record set was encoded as UTF-8 without BOM using LF-terminated `<sha256> <sizeBytes> <normalized/path>` records. Both directory fingerprints were `7349b8de3e620bf0ab5f2e76c3598e1756a17813a1037c23ae106d4832fb548e`.
+
+This evidence establishes repeatability only for separate clean restore/build/publish operations from the same exact Git SHA on the same host, OS, SDK, and toolchain. **CROSS-HOST / CROSS-ENVIRONMENT REPRODUCIBILITY — NOT YET VERIFIED.** It does not establish cross-machine, cross-OS, cross-SDK, or universal reproducibility.
+
+Future cross-environment reproducibility verification should consider:
 
 - deterministic build metadata and timestamp handling
 - package dependency pinning and lock policy
@@ -334,7 +357,7 @@ No business choice is silently finalized by this design.
 - [x] Release register defined.
 - [x] Approval flow defined.
 - [x] CI boundary preserved.
-- [x] Reproducibility status documented honestly as NOT YET VERIFIED.
+- [x] Same-host clean publish repeatability verified; cross-host reproducibility remains not yet verified.
 - [x] SBOM future recommendation recorded.
 - [x] Verification procedure documented.
 - [x] Threat model completed.
@@ -350,4 +373,4 @@ This document introduces no private keys, passwords, tokens, credentials, produc
 
 PHASE 5.4 — OWNER APPROVED — 2026-09-12
 
-The project owner approved the completed Phase 5.4 documentation on 2026-09-12. All 19 documentation completion criteria in section 22 are satisfied. Open decisions remain unresolved or deferred; reproducibility remains `NOT YET VERIFIED`; manifest signing and artifact/code signing remain deferred and unimplemented; and SBOM remains recommended future release governance work. No real release, Release Manifest V1 artifact, package, signing operation, or deployment was produced or performed. The repository remains private and controlled. This documentation/governance approval does not authorize release publication, customer distribution, production key generation, or implementation changes.
+The project owner approved the completed Phase 5.4 documentation on 2026-09-12. All 19 documentation completion criteria in section 22 are satisfied. Same-host clean publish repeatability is verified at commit `e6f94579022c741ce09f3fde37f8631bcd073533`; cross-host and cross-environment reproducibility remain not yet verified. Open decisions remain unresolved or deferred; manifest signing and artifact/code signing remain deferred and unimplemented; and SBOM remains recommended future release governance work. No real release, Release Manifest V1 artifact, package, signing operation, or deployment was produced or performed. The repository remains private and controlled. This documentation/governance approval does not authorize release publication, customer distribution, production key generation, or implementation changes.
