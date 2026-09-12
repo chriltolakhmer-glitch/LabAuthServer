@@ -385,7 +385,7 @@ Constraints and preserved facts:
 
 ## 16. Current Status (Deferral Note)
 
-Phase 5.6 is **not fully complete** while the controls in section 15 remain not enforced and exact owner-supplied identity, custody, contact, and named-assignment values remain unresolved. Phase 5.7 is `OWNER APPROVED — 2026-09-12`; that approval did not resolve or override the Phase 5.6 blockers.
+Phase 5.6 is **not fully complete** while the controls in section 15 remain not enforced and exact owner-supplied contact and named-assignment values remain unresolved. Phase 5.7 is `OWNER APPROVED — 2026-09-12`; that approval did not resolve or override the Phase 5.6 blockers.
 
 ## 17. Remaining Blocker Matrix
 
