@@ -2,7 +2,7 @@
 
 > IMPLEMENTATION IN PROGRESS — NOT COMPLETE
 
-Status: PHASE 5.6 — IMPLEMENTATION IN PROGRESS. This record documents the Phase 5.6 implementation pass for the owner-approved Phase 5.5 governance controls. The repository-side immutable GitHub Actions SHA pinning is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`, commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9`). No GitHub governance setting was changed, no branch protection was enabled, no ruleset was created, no fork setting was changed, no collaborator access was changed, and no signing mechanism was configured. Remote private-repository GitHub governance controls are `TEMPORARILY DEFERRED — OWNER DECISION`; see section 15.
+Status: PHASE 5.6 — IMPLEMENTATION IN PROGRESS. This record documents the Phase 5.6 implementation pass for the owner-approved Phase 5.5 governance controls. The repository-side immutable GitHub Actions SHA pinning is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`, commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9`). A classic GitHub branch-protection rule for `main` was configured by the owner, but GitHub reports that it is not enforced for this private personal-account repository; no ruleset was created, no fork setting was changed, no collaborator access was changed, and no signing mechanism was configured. The repository remains private and no public workaround is authorized; see section 15.
 
 ## 1. Purpose
 
@@ -58,8 +58,8 @@ Owner-verified GitHub state carried forward from Phase 5.5:
 
 - Repository visibility: `PRIVATE`
 - Default branch: `main`
-- `main` branch protection: `DISABLED`
-- Required status checks on `main`: `OFF`
+- `main` branch protection: classic rule configured by owner; GitHub reports `NOT ENFORCED`
+- Required status checks on `main`: not enforced
 - Repository forking: `ALLOWED`
 - Rulesets: `UNAVAILABLE UNDER CURRENT PRIVATE-REPOSITORY PLAN`
 - GitHub Releases: `NONE`
@@ -91,11 +91,11 @@ No tooling was installed, no token was requested, exposed, printed, or stored, a
 
 | # | Approved Control | Classification |
 | --- | --- | --- |
-| 1 | Pull request required for normal `main` changes | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 2 | Successful LabAuthServer CI required before `main` update | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 3 | Force pushes prohibited on `main` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 4 | Strongest supported private-repository protection mechanism | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 5 | Disable private forking | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 1 | Pull request required for normal `main` changes | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 2 | Successful LabAuthServer CI required before `main` update | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 3 | Force pushes prohibited on `main` | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 4 | Strongest supported private-repository protection mechanism | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 5 | Disable private forking | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | 6 | Stable vendor-controlled commit identity | `BLOCKED — UNRESOLVED VALUE` |
 | 7 | Mandatory commit signing for future official history | `BLOCKED — UNRESOLVED SIGNING MECHANISM` |
 | 8 | Immutable GitHub Actions SHA pinning | `IMPLEMENTED AND HOSTED-CI VALIDATED` |
@@ -104,7 +104,7 @@ No tooling was installed, no token was requested, exposed, printed, or stored, a
 | 11 | Named repository administrator roles | `BLOCKED — UNRESOLVED ASSIGNMENT` |
 | 12 | Named Security Response Owner | `BLOCKED — UNRESOLVED ASSIGNMENT` |
 
-Controls 1–5 are classified `TEMPORARILY DEFERRED — OWNER DECISION`. The Phase 5.5 CI gate is verified `SUCCESS`, so tooling availability is the remaining blocker for these controls. These are **not** platform or plan limitations: traditional branch protection was not tested and rejected; only the authenticated administrative tooling required to attempt it was unavailable. The owner has chosen to defer these controls until the GitHub plan is upgraded or the required private-repository administration features are otherwise available. None of controls 1–5 is implemented, complete, closed, or satisfied.
+The owner configured a classic branch-protection rule for `main`. GitHub reports that the rule is **NOT ENFORCED** because enforcement for this private repository requires moving it to a GitHub Team or Enterprise organization account. Therefore controls 1–5 are classified `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`; they must not be described as implemented, complete, closed, or satisfied. The repository remains private and no public-visibility workaround is authorized.
 
 ## 7. Repository-Side Change — Immutable Actions SHA Pinning
 
@@ -178,7 +178,7 @@ Note on validation scope: a SHA-pin change is a hosted-runner-only reference cha
 
 ## 8. Remote GitHub Changes
 
-Settings actually changed remotely: **NONE**
+Settings actually changed remotely: **A classic `main` branch-protection rule was configured by the owner.**
 
 Settings attempted but blocked: **NONE** — no attempt was made, because authenticated administrative tooling is unavailable. The Phase 5.5 CI gate is now verified `SUCCESS`, so tooling availability is the remaining blocker.
 
@@ -186,36 +186,36 @@ Remote control classification:
 
 | Control | Current State | Classification |
 | --- | --- | --- |
-| `main` branch protection | `DISABLED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Pull-request enforcement | Not enforced | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Required CI enforcement | `OFF` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Force-push restriction | Not restricted | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Branch deletion restriction | Not restricted | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Fork disablement | `ALLOWED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| `main` branch protection | Classic rule exists; GitHub reports `NOT ENFORCED` | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Pull-request enforcement | Not enforced | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Required CI enforcement | Not enforced | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Force-push restriction | Not enforced | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Branch deletion restriction | Not enforced | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Fork disablement | Not independently changed by this rule | `NOT AUTHORIZED — OWNER DECISION` |
 | Rulesets | Unavailable | `BLOCKED — PLATFORM / PLAN LIMITATION` (verified) |
 
 Settings not changed and still at their verified prior state:
 
 - repository visibility: `PRIVATE`
-- `main` branch protection: `DISABLED`
-- required status checks on `main`: `OFF`
+- classic `main` branch-protection rule: configured by owner; GitHub reports `NOT ENFORCED`
+- required status checks on `main`: not enforced
 - repository forking: `ALLOWED`
 - rulesets: `UNAVAILABLE UNDER CURRENT PRIVATE-REPOSITORY PLAN`
 - GitHub Releases: `NONE`
 
-No remote setting is reported as implemented. No update request was issued, so no remote state was re-read.
+No affected remote control is reported as enforced. No update request was issued, so no remote state was re-read.
 
 ### Remote implementation matrix
 
 | Control | Current | Target | Capability | Implementation State |
 | --- | --- | --- | --- | --- |
-| Main protection | `DISABLED` | Protected `main` using the strongest supported private-repository mechanism | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| PR requirement | Not enforced | PR required for normal `main` changes | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Approving review | Not enforced | Minimum 1 approving review where supported | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Required CI check | `OFF` | `Build and Test (Release)` required before normal `main` update | Branch-protection capability `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Force push | Not restricted | Prohibited on `main` where supported | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Branch deletion | Not restricted | Prohibited on `main` where supported | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| Forking | `ALLOWED` | Disable unless a specific controlled vendor workflow requires it | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Main protection | Classic rule exists; GitHub reports `NOT ENFORCED` | Protect `main` | Owner-verified rule; exact saved options not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| PR requirement | Not enforced | PR required for normal `main` changes | Covered by owner-configured rule; exact saved option not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Approving review | Not independently recorded | Review where supported | Exact saved option not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Required CI check | Not enforced | `Build and Test (Release)` required before normal `main` update | Covered by owner-configured rule; exact saved option not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Force push | Not enforced | Prohibited on `main` where supported | Covered by owner-configured rule; exact saved option not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Branch deletion | Not enforced | Prohibited on `main` where supported | Covered by owner-configured rule; exact saved option not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| Forking | `ALLOWED` | Disable unless a specific controlled vendor workflow requires it | Not established by the branch rule | `NOT AUTHORIZED — OWNER DECISION` |
 | Rulesets | Unavailable | Not the selected mechanism | `BLOCKED — PLAN LIMITATION` (verified) | `BLOCKED — PLAN LIMITATION` |
 | Immutable Actions SHA pinning | Pinned `v4` SHAs | Immutable SHA pins | Repository-side, supported | `IMPLEMENTED AND HOSTED-CI VALIDATED` |
 
@@ -223,13 +223,12 @@ No row is marked implemented without re-read evidence. Only the repository-side 
 
 ### Branch-protection capability
 
-Classification: `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`.
+Classification: `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`.
 
 - GitHub documentation states that protected branches for private repositories require GitHub Pro, GitHub Team, GitHub Enterprise Cloud, or GitHub Enterprise Server.
-- Whether the current account and repository plan satisfies that requirement could not be determined in this environment.
-- Authenticated administrative tooling is unavailable: `gh` is not installed, and no `GH_TOKEN` / `GITHUB_TOKEN` credential is present. None was requested, created, printed, or stored.
-- The repository is private, so unauthenticated capability inspection is not possible.
-- No capability claim is made in either direction. Making the repository public to obtain branch-protection functionality is not approved and was not done.
+- The owner verified that a classic `main` branch-protection rule exists and that GitHub reports it as `NOT ENFORCED`.
+- GitHub states that enforcement for this private repository requires moving it to a GitHub Team or Enterprise organization account.
+- The repository remains private. Making it public or transferring it to an organization is not authorized at this time.
 
 ### Required CI check context
 
@@ -250,14 +249,14 @@ Clarification: the workflow name and the required check/job context are not the 
 - Workflow name: `LabAuthServer CI`
 - Job/check context: `Build and Test (Release)`
 
-The owner-verified GitHub Actions jobs API identifies the successful job as `Build and Test (Release)`, which is the check context to use for future required-check configuration. The required status check is **not** configured; the setting remains `OFF` because required-check enforcement is `TEMPORARILY DEFERRED — OWNER DECISION`. The verified context itself is unchanged and remains `Build and Test (Release)`.
+The owner-verified GitHub Actions jobs API identifies the successful job as `Build and Test (Release)`, which is the check context associated with the configured rule. GitHub reports enforcement as **NOT ENFORCED** for this private repository. The verified context itself is unchanged and remains `Build and Test (Release)`.
 
 ### Forking control
 
 - Current: `ALLOWED`.
 - Approved target: disable unnecessary private forking unless a specific controlled vendor workflow requires it.
-- Authenticated admin tooling is unavailable to change the setting.
-- Classification: `TEMPORARILY DEFERRED — OWNER DECISION`.
+- This rule does not independently establish or change the repository forking setting.
+- Classification: `NOT AUTHORIZED — OWNER DECISION`.
 - Repository visibility was not changed. Forking governance is deferred only where it is not currently available through the required private-repository administration features.
 
 ## 9. Rollback Considerations
@@ -294,7 +293,7 @@ Blocking prerequisites:
 
 The Phase 5.5 hosted CI gate is now verified `SUCCESS` and is no longer a blocking prerequisite.
 
-The remote governance controls listed above are `TEMPORARILY DEFERRED — OWNER DECISION`. They are not implemented and must be revisited later.
+The configured remote governance controls are `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`. They are not enforced and must be revisited if the repository ownership model changes.
 
 ## 11. Platform and Tooling Limitations
 
@@ -329,13 +328,13 @@ No private key, signing key, GPG key, SSH key, password, token, credential, cust
 - [x] Behavior-preservation review performed.
 - [x] Remote GitHub settings change correctly withheld.
 - [x] Remote implementation matrix recorded.
-- [x] Branch-protection capability recorded as `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`.
+- [x] Classic `main` branch-protection rule recorded as configured by the owner and `NOT ENFORCED` by GitHub.
 - [x] Required CI check context verified and recorded as `Build and Test (Release)` (run #10 / `34675530766`, job ID `103504610220`, conclusion `SUCCESS`).
-- [ ] `main` branch protection implemented. (TEMPORARILY DEFERRED — OWNER DECISION)
-- [ ] Required CI status check implemented. (TEMPORARILY DEFERRED — OWNER DECISION)
-- [ ] Pull-request requirement enforced. (TEMPORARILY DEFERRED — OWNER DECISION)
-- [ ] Force-push prohibition implemented. (TEMPORARILY DEFERRED — OWNER DECISION)
-- [ ] Repository forking disabled. (TEMPORARILY DEFERRED — OWNER DECISION)
+- [ ] `main` branch protection enforced. (CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION)
+- [ ] Required CI status check enforced. (CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION)
+- [ ] Pull-request requirement enforced. (CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION)
+- [ ] Force-push prohibition enforced. (CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION)
+- [ ] Repository forking disabled. (NOT AUTHORIZED — OWNER DECISION)
 - [ ] Commit identity remediated.
 - [ ] Commit signing implemented.
 - [ ] Security contact resolved.
@@ -351,36 +350,36 @@ Phase 5.6 is **not complete**. Critical governance controls remain unimplemented
 
 ## 14. Current Status
 
-Phase 5.6 — IMPLEMENTATION IN PROGRESS. The repository-side immutable Actions SHA pinning control is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`). The required CI check context is verified as `Build and Test (Release)` (job ID `103504610220`); the required-check setting itself remains `OFF` and unconfigured. Remote GitHub governance controls are `TEMPORARILY DEFERRED — OWNER DECISION` until the owner chooses to upgrade the GitHub plan or otherwise gains access to the required private-repository administration features, and branch-protection capability remains `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`; commit identity, commit signing, and the contact and assignment items remain blocked by unresolved owner-supplied values. No GitHub setting was changed, the repository remained private, and no public-visibility workaround was used. Phase 5.6 is not fully complete. Phase 5.7 is not started.
+Phase 5.6 — IMPLEMENTATION IN PROGRESS. The repository-side immutable Actions SHA pinning control is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`). The required CI check context is verified as `Build and Test (Release)` (job ID `103504610220`); GitHub reports the configured classic rule as `NOT ENFORCED`. Remote GitHub governance controls are `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`; commit identity, commit signing, and the contact and assignment items remain blocked by unresolved owner-supplied values. The repository remains private, no public-visibility workaround was used, and no transfer is authorized at this time. Phase 5.6 is not fully complete. Phase 5.7 is in progress.
 
-## 15. TEMPORARILY DEFERRED — OWNER DECISION
+## 15. CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION
 
-Owner decision recorded on 2026-09-12:
+Owner-verified state recorded on 2026-09-12:
 
-> Private-repository branch protection and related GitHub governance controls are deferred until the owner chooses to upgrade the GitHub plan or otherwise gains access to the required private-repository administration features. The repository must remain private. No public-visibility workaround is authorized.
+> A classic branch-protection rule for `main` is configured by the owner, but GitHub reports that it is not enforced because this private repository must be moved to a GitHub Team or Enterprise organization account for enforcement. The repository must remain private. No public-visibility workaround or transfer is authorized at this time.
 
-Deferred controls — all `TEMPORARILY DEFERRED — OWNER DECISION`, none implemented:
+Affected controls — configured but not enforced:
 
 | # | Control | State |
 | --- | --- | --- |
-| 1 | Private-repository branch protection | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 2 | Pull-request requirement | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 3 | Approving-review requirement | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 4 | Required CI enforcement | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 5 | Force-push restriction | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 6 | Branch-deletion restriction | `TEMPORARILY DEFERRED — OWNER DECISION` |
-| 7 | Forking governance where not currently available | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 1 | Private-repository branch protection | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 2 | Pull-request requirement | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 3 | Approving-review requirement | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 4 | Required CI enforcement | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 5 | Force-push restriction | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 6 | Branch-deletion restriction | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
+| 7 | Forking governance | `NOT AUTHORIZED — OWNER DECISION` |
 
 Constraints and preserved facts:
 
 - The repository must remain `PRIVATE`. Making it public is not an authorized workaround for any deferred control.
 - Verified required CI context remains `Build and Test (Release)` (workflow `LabAuthServer CI`, job ID `103504610220`).
-- Current factual state is unchanged: `main` branch protection `DISABLED`, required status checks `OFF`, forking `ALLOWED`, repository `PRIVATE`.
+- Current factual state: classic `main` rule exists and is `NOT ENFORCED`; forking remains `ALLOWED`; repository remains `PRIVATE`.
 - Rulesets remain `BLOCKED — VERIFIED PLAN LIMITATION`, separate from this owner decision.
-- The deferred controls are **not** implemented, complete, closed, or satisfied.
-- These controls must be revisited before Phase 5.6 is treated as fully complete.
-- No GitHub setting was changed, and no public-visibility workaround was authorized or used.
+- The affected controls are **not** enforced, complete, closed, or satisfied.
+- These controls must be revisited if the repository ownership model changes.
+- No public-visibility workaround or ownership transfer was authorized or used.
 
 ## 16. Current Status (Deferral Note)
 
-Phase 5.6 is **not fully complete** while the controls in section 15 remain deferred. The deferral is an explicit owner decision, not an implementation result. Phase 5.7 is not started.
+Phase 5.6 is **not fully complete** while the controls in section 15 remain not enforced. Phase 5.7 is in progress.
