@@ -134,44 +134,43 @@ The approved value is vendor-controlled, monitored, suitable for evaluation and 
 
 ### D6 - Repository Administrator Assignments
 
-**Current status:** `OWNER POLICY APPROVED — EXACT NAMED ASSIGNMENTS STILL REQUIRED WHERE APPLICABLE`.
+**Current status:** `OWNER APPROVED — IMPLEMENTED`.
 
 | Role | Responsibility | Least-privilege boundary | Owner assignment |
 | --- | --- | --- | --- |
-| Repository owner / primary administrator | Final repository and business authority | May approve governance and ownership decisions; actions must be recorded | `OWNER VALUE REQUIRED` |
-| Backup administrator | Continuity for approved administrative operations | May apply explicitly approved settings; no independent business authority unless separately granted | `OWNER VALUE REQUIRED or NOT DESIGNATED` |
-| Actions/settings operator | Applies approved Actions and repository settings | Only the approved settings scope; no authority to change business policy | `OWNER VALUE REQUIRED or NOT DESIGNATED` |
-| Branch protection/ruleset operator | Applies approved branch controls where platform supports them | Only approved branch/ruleset scope; no visibility or ownership authority | `OWNER VALUE REQUIRED or NOT DESIGNATED` |
-| Collaborator/access operator | Manages approved collaborator access | Least privilege, recorded business reason, timely offboarding; no unapproved access grants | `OWNER VALUE REQUIRED or NOT DESIGNATED` |
+| Repository owner / primary administrator | Final repository and business authority | May approve governance and ownership decisions; actions must be recorded | `ALOT` |
+| Backup administrator | Continuity for approved administrative operations | May apply explicitly approved settings; no independent business authority unless separately granted | `NOT DESIGNATED` |
+| Actions/settings operator | Applies approved Actions and repository settings | Only the approved settings scope; no authority to change business policy | `ALOT` |
+| Branch protection/ruleset operator | Applies approved branch controls where platform supports them | Only approved branch/ruleset scope; no visibility or ownership authority | `ALOT` |
+| Collaborator/access operator | Manages approved collaborator access | Least privilege, recorded business reason, timely offboarding; no unapproved access grants | `ALOT` |
 
-**Approved policy:** The repository owner remains the primary authority. Only explicitly authorized administrators may alter Actions/settings, branch controls, or collaborators. Least privilege applies, and separation of approval and execution should be used where practical. A backup administrator is optional.
+**Approved policy:** The repository owner remains the primary authority. Only explicitly authorized administrators may alter Actions/settings, branch controls, or collaborators. Least privilege applies, and separation of approval and execution is required where practical. A backup administrator is not designated. The approved governance identity is `ALOT`; the repository account remains the existing `chriltolakhmer-glitch` GitHub owner account, and no permission change is authorized by this record.
 
 **Exact owner-input fields:**
 
-- `PRIMARY REPOSITORY ADMINISTRATOR: OWNER`
+- `PRIMARY REPOSITORY ADMINISTRATOR: ALOT`
 - `BACKUP ADMINISTRATOR: NOT DESIGNATED`
-- `WHO MAY ALTER ACTIONS / REPOSITORY SETTINGS: EXPLICITLY AUTHORIZED ADMINISTRATORS ONLY`
-- `WHO MAY ALTER BRANCH PROTECTION / RULESETS: EXPLICITLY AUTHORIZED ADMINISTRATORS ONLY`
-- `WHO MAY MANAGE COLLABORATORS: EXPLICITLY AUTHORIZED ADMINISTRATORS ONLY`
+- `ACTIONS / REPOSITORY SETTINGS OPERATOR: ALOT`
+- `BRANCH PROTECTION / RULESETS OPERATOR: ALOT`
+- `COLLABORATOR / ACCESS OPERATOR: ALOT`
 - `SEPARATION-OF-DUTIES RULE: REQUIRED WHERE PRACTICAL`
 
-No administrator, collaborator, or role assignment will be made by this packet.
+No administrator, collaborator, or role assignment is changed by this packet; the record documents the approved governance identity and responsibility boundaries only.
 
 ### D7 - Security Response Owner
 
-**Current status:** `OWNER POLICY APPROVED — EXACT NAMED IDENTITY STILL REQUIRED WHERE APPLICABLE`.
+**Current status:** `OWNER APPROVED — IMPLEMENTED`.
 
 The Security Response Owner is responsible for receiving or coordinating vulnerability reports, acknowledging intake, triaging severity, assigning remediation, coordinating disclosure timing, preserving confidential handling, and closing the incident with evidence. The role requires authority to coordinate security response, request engineering remediation, approve security-release handling, and escalate unresolved risk to the repository owner. It does not automatically grant repository administration or source-write access.
 
-**Approved policy:** The repository owner will initially act as Security Response Owner unless a dedicated trusted security operator is later assigned. The role has authority to coordinate response, request remediation, approve security-release handling, and escalate unresolved risk. It does not automatically grant GitHub permissions.
+**Approved policy:** `ALOT` is the approved Security Response Owner. The Security Response backup remains `NOT DESIGNATED`; repository admin access is required for the role; the security-release approval authority remains `ALOT`. This record does not change GitHub permissions or imply that this role independently authorizes a release. Actual tags, GitHub Releases, artifacts, or deployment still require separate release authorization.
 
 **Exact owner-input fields:**
 
-- `SECURITY RESPONSE OWNER: REPOSITORY OWNER — INITIAL POLICY`
+- `SECURITY RESPONSE OWNER: ALOT`
 - `SECURITY RESPONSE BACKUP: NOT DESIGNATED`
 - `REPOSITORY ADMIN ACCESS REQUIRED: YES`
-- `SECURITY RELEASE APPROVAL AUTHORITY: REPOSITORY OWNER — INITIAL POLICY`
-- If a personal identity is required by repository convention: `OWNER VALUE REQUIRED`
+- `SECURITY RELEASE APPROVAL AUTHORITY: ALOT`
 
 ## 4. Platform-Blocked Controls
 
@@ -192,9 +191,8 @@ The repository must remain private. Making it public is not a workaround and is 
 
 ## 5. Risks and Tradeoffs
 
-- D6–D7 exact named assignments remain the outstanding governance continuity gap; D3 signing is implemented.
+- D6 and D7 are implemented with the approved `ALOT` governance assignments, so the named-administration and response-owner continuity gap is resolved.
 - D4 and D5 are implemented with the approved shared-mailbox exception, so vulnerability intake and commercial/evaluation requests are operationally resolved.
-- Remaining named administrator and response-owner identities create continuity and response gaps even though the policy roles are approved.
 - Allowed forking increases private source-copy and access-cleanup risk, while disabling it may impede a controlled vendor workflow.
 - Platform-blocked branch controls continue to leave enforcement unavailable even if owner values are supplied.
 - The repository remains private and proprietary; no public workaround is authorized.
