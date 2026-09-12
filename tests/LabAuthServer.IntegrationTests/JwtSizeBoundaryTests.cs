@@ -287,7 +287,7 @@ public sealed class JwtSizeBoundaryTests(JwtSizeApiFactory factory) : IClassFixt
     private static byte[] Decode(string encoded) => Convert.FromBase64String(encoded.Replace('-', '+').Replace('_', '/') + new string('=', (4 - encoded.Length % 4) % 4));
 }
 
-public sealed class JwtSizeApiFactory : WebApplicationFactory<Program>
+public sealed class JwtSizeApiFactory : InfrastructureSafeApiFactory
 {
     public JwtSizeApiFactory() => ClientOptions.BaseAddress = new Uri("https://DC01.lab.local");
     public const string Issuer = "https://size-tests.example";
@@ -299,6 +299,7 @@ public sealed class JwtSizeApiFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        base.ConfigureWebHost(builder);
         builder.ConfigureTestServices(services =>
         {
             services.Configure<TokenOptions>(options =>
@@ -363,7 +364,7 @@ public sealed class JwtSizeApiFactory : WebApplicationFactory<Program>
         public Task<long?> WriteAsync(AuditEvent auditEvent, CancellationToken cancellationToken = default)
         {
             Interlocked.Increment(ref owner.AuditCalls);
-            return Task.FromResult<long?>(1);
+            return owner.Audit.WriteAsync(auditEvent, cancellationToken);
         }
     }
 }

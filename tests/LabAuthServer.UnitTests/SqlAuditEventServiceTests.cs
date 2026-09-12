@@ -35,14 +35,14 @@ public sealed class SqlAuditEventServiceTests
     }
 
     private static string ConnectionString =>
-        Environment.GetEnvironmentVariable("LABAUTHSERVER_SQL_AUDIT_TEST_CONNECTION") ??
-        "Server=localhost;Database=LabAuthServer;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Application Name=LabAuthServer.Phase12.Tests";
+        SqlTestConfiguration.RequireConnectionString(Environment.GetEnvironmentVariable);
 
-    [Fact]
+    [SqlInfrastructureFact]
+    [Trait("Category", "SqlInfrastructure")]
     public async Task WriteAsync_PersistsApprovedEventAndReturnsAuditEventId()
     {
         var correlationId = Guid.NewGuid();
-        var service = CreateService();
+        var service = CreateService(ConnectionString);
         var auditEvent = CreateEvent(correlationId);
 
         var auditEventId = await service.WriteAsync(auditEvent);
@@ -66,7 +66,8 @@ public sealed class SqlAuditEventServiceTests
     [Fact]
     public async Task WriteAsync_RejectsInvalidEventBeforeDatabaseAccess()
     {
-        var service = CreateService();
+        // Invalid events must be rejected before even reading connection configuration.
+        var service = new SqlAuditEventService(new ForbiddenAuditOptions(), NullLogger<SqlAuditEventService>.Instance);
         var auditEvent = CreateEvent(Guid.NewGuid()) with
         {
             EventTypeCode = "NOT_APPROVED",
@@ -81,11 +82,12 @@ public sealed class SqlAuditEventServiceTests
     }
 
     [Fact]
-    public async Task WriteAsync_WhenDatabaseUnavailableReturnsNull()
+    public async Task WriteAsync_WhenConnectionIsUnconfiguredReturnsNullWithoutNetworkAccess()
     {
         var options = Options.Create(new AuditOptions
         {
-            ConnectionString = "Server=invalid-phase12-host;Database=LabAuthServer;Integrated Security=True;Connect Timeout=1",
+            // SqlClient rejects an uninitialized connection locally; no DNS/socket/SQL target.
+            ConnectionString = string.Empty,
             CommandTimeoutSeconds = 1
         });
         var service = new SqlAuditEventService(options, NullLogger<SqlAuditEventService>.Instance);
@@ -95,10 +97,12 @@ public sealed class SqlAuditEventServiceTests
         Assert.Null(result);
     }
 
-    [Fact]
+    [SqlInfrastructureFact]
+    [Trait("Category", "SqlInfrastructure")]
     public async Task WriteAsync_ConcurrentEventsPersistWithIsolatedCorrelationIds()
     {
-        var service = CreateService();
+        var connectionString = ConnectionString;
+        var service = CreateService(connectionString);
         var events = Enumerable.Range(0, 4)
             .Select(_ => CreateEvent(Guid.NewGuid()))
             .ToArray();
@@ -107,12 +111,26 @@ public sealed class SqlAuditEventServiceTests
 
         Assert.All(ids, id => Assert.True(id > 0));
         Assert.Equal(ids.Length, ids.Distinct().Count());
+
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+        for (var index = 0; index < ids.Length; index++)
+        {
+            await using var command = new SqlCommand("SELECT CorrelationId FROM Audit.AuditEvents WHERE AuditEventId = @id", connection);
+            command.Parameters.Add("@id", System.Data.SqlDbType.BigInt).Value = ids[index]!.Value;
+            Assert.Equal(events[index].CorrelationId, Assert.IsType<Guid>(await command.ExecuteScalarAsync()));
+        }
     }
 
-    private static SqlAuditEventService CreateService() => new(
+    private sealed class ForbiddenAuditOptions : IOptions<AuditOptions>
+    {
+        public AuditOptions Value => throw new InvalidOperationException("Invalid events must not access database configuration.");
+    }
+
+    private static SqlAuditEventService CreateService(string connectionString) => new(
         Options.Create(new AuditOptions
         {
-            ConnectionString = ConnectionString,
+            ConnectionString = connectionString,
             CommandTimeoutSeconds = 5
         }),
         NullLogger<SqlAuditEventService>.Instance);

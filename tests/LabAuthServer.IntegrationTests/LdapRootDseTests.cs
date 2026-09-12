@@ -1,88 +1,57 @@
 using LabAuthServer.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc.Testing;
+using LabAuthServer.Infrastructure.ActiveDirectory;
+using LabAuthServer.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace LabAuthServer.IntegrationTests;
 
-public sealed class LdapRootDseTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class LdapRootDseTests
 {
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public LdapRootDseTests(WebApplicationFactory<Program> factory)
-    {
-        _factory = factory ?? throw new ArgumentNullException(nameof(factory));
-    }
-
     [Fact]
-    public async Task QueryRootDseAsync_ReturnsResultWithStatus()
+    public async Task QueryRootDse_WithoutHostCredentials_ReturnsSafeFailure()
     {
-        // Arrange
-        var client = _factory.CreateClient();
-        var scope = _factory.Services.CreateScope();
-        var ldapService = scope.ServiceProvider.GetRequiredService<ILdapService>();
-
-        // Act
-        var result = await ldapService.QueryRootDseAsync();
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.True(result.IsSuccess || result.ErrorMessage != null, "Result should either succeed or have an error message");
-    }
-
-    [Fact]
-    public async Task QueryRootDseAsync_WhenSuccessful_ReturnsAttributes()
-    {
-        // Arrange
-        var scope = _factory.Services.CreateScope();
-        var ldapService = scope.ServiceProvider.GetRequiredService<ILdapService>();
-
-        // Act
-        var result = await ldapService.QueryRootDseAsync();
-
-        // Assert
-        if (result.IsSuccess)
-        {
-            Assert.NotNull(result.Attributes);
-            Assert.NotEmpty(result.Attributes);
-        }
-        else
-        {
-            // If connectivity fails (e.g., DC not available), we still have a result
-            Assert.Null(result.Attributes);
-            Assert.NotNull(result.ErrorMessage);
-        }
-    }
-
-    [Fact]
-    public async Task QueryRootDseAsync_ReturnsNullAttributesOnFailure()
-    {
-        // Arrange
-        var scope = _factory.Services.CreateScope();
-        var ldapService = scope.ServiceProvider.GetRequiredService<ILdapService>();
-
-        // Act
-        var result = await ldapService.QueryRootDseAsync();
-
-        // Assert
-        if (!result.IsSuccess)
-        {
-            Assert.Null(result.Attributes);
-        }
-    }
-
-    [Fact]
-    public async Task QueryRootDseAsync_RespectsCancellation()
-    {
-        // Arrange
-        var scope = _factory.Services.CreateScope();
-        var ldapService = scope.ServiceProvider.GetRequiredService<ILdapService>();
-        var cts = new CancellationTokenSource(TimeSpan.Zero);
-
-        // Act
-        var result = await ldapService.QueryRootDseAsync(cts.Token);
-
-        // Assert
+        using var factory = new InfrastructureSafeApiFactory();
+        using var scope = factory.Services.CreateScope();
+        var result = await scope.ServiceProvider.GetRequiredService<ILdapService>().QueryRootDseAsync();
         Assert.False(result.IsSuccess);
-        Assert.NotNull(result.ErrorMessage);
+        Assert.Null(result.Attributes);
+        Assert.Equal("The directory service could not complete the Root DSE query.", result.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task QueryRootDse_WithoutServiceUsername_StopsBeforeCredentials()
+    {
+        var credentials = new ForbiddenCredentials();
+        var service = new LdapService(Options.Create(new LdapOptions { ServiceAccountUsername = string.Empty }),
+            credentials, NullLogger<LdapService>.Instance, new LdapConnectionFactory());
+        var result = await service.QueryRootDseAsync();
+        Assert.False(result.IsSuccess);
+        Assert.Null(result.Attributes);
+        Assert.Equal("The directory service could not complete the Root DSE query.", result.ErrorMessage);
+        Assert.Equal(0, credentials.Calls);
+    }
+
+    [Fact]
+    public async Task QueryRootDse_WhenAlreadyCancelled_ReturnsCancellationWithoutHostCredentials()
+    {
+        using var factory = new InfrastructureSafeApiFactory();
+        using var scope = factory.Services.CreateScope();
+        var result = await scope.ServiceProvider.GetRequiredService<ILdapService>()
+            .QueryRootDseAsync(new CancellationToken(canceled: true));
+        Assert.False(result.IsSuccess);
+        Assert.Null(result.Attributes);
+        Assert.Equal("The operation was cancelled.", result.ErrorMessage);
+    }
+
+    private sealed class ForbiddenCredentials : ILdapServiceAccountCredentialProvider
+    {
+        public int Calls { get; private set; }
+        public Task<string> GetPasswordAsync(CancellationToken cancellationToken = default)
+        {
+            Calls++;
+            throw new InvalidOperationException("Missing username must stop before credential access.");
+        }
     }
 }

@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace LabAuthServer.IntegrationTests;
 
-public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public sealed class HealthEndpointTests(InfrastructureSafeApiFactory factory)
+    : IClassFixture<InfrastructureSafeApiFactory>
 {
     [Fact]
     public async Task GetHealth_ReturnsHealthyResponse()

@@ -1,4 +1,10 @@
-# Phase 6 — Advanced Security / Enterprise Extensions
+# Phase 6 — Operational Assurance and First-Release Readiness
+
+Current roadmap: [Phase 6 plan](Phase-6-Plan.md). The owner authorized this reprioritization and [Phase 6.1 — Safe Automated Validation Boundaries](Phase-6.1-Safe-Automated-Validation-Boundaries.md) on 2026-09-12. Phases 6.2–6.7 are planning entries only. Completion means **READY TO REQUEST SEPARATE RELEASE AUTHORIZATION**; no release is authorized.
+
+## Superseded candidate roadmap — retained for traceability
+
+The prior advanced-security candidate scope below remains optional/deferred. It is not the current Phase 6 implementation order and grants no implementation authorization.
 
 Status: FUTURE. Every topic below is OPTIONAL pending a requirements decision. No implementation, provider, package, schema or delivery date is approved. [Master roadmap](../README.md).
 

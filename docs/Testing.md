@@ -1,8 +1,65 @@
 # Testing
 
+## Current validation boundary — Phase 6.1 (2026-09-12)
+
+Normal automated validation must not implicitly contact or mutate operational SQL Server, AD, protected host credentials or environment-specific infrastructure. [Phase 6.1 implementation and evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md).
+
+| Set | Selection | Release inventory |
+| --- | --- | ---: |
+| Deterministic/default | `Category!=SqlInfrastructure&Category!=LdapAcceptance` | 1,038 (783 UnitTests; 255 IntegrationTests) |
+| Real SQL persistence | `Category=SqlInfrastructure` | 2 UnitTests |
+| Real Root DSE acceptance | `Category=LdapAcceptance` | 1 IntegrationTests |
+
+Default validation passed 1,038/1,038, zero failures/skips, with the SQL target and both infrastructure opt-in flags absent. Three infrastructure cases are excluded by the default filter. Separately, the two SQL cases passed against a newly created disposable LocalDB instance/database `LabAuthServer_Phase61_20260912`; no real AD acceptance was performed. The total inventory is 1,041: 785 UnitTests and 256 IntegrationTests. Hosted-equivalent mandatory coverage is 1,040 tests (default plus SQL); real LDAP acceptance is separate.
+
+Unfiltered `dotnet test` with infrastructure flags absent is also safe by default: the two SQL cases and one LDAP acceptance case are visibly skipped, never silently reported as passing. A connection target alone does not enable SQL tests. Filters alone do not grant permission; explicitly enabling a category without its required target fails before infrastructure access.
+
+Ordinary API factories replace SQL audit persistence with thread-safe in-memory recording through the production `AuditEventValidator`. Validation failures remain inspectable even when production handlers catch audit exceptions. Host DPAPI/LDAP/certificate access is blocked by test registrations; scenario tests supply their existing synthetic keys and LDAP fakes. Environment license paths/trusted-key inputs are cleared in test options. Production code is unchanged.
+
+## Explicit SQL infrastructure validation
+
+Use only a disposable or explicitly authorized SQL target. **There is no localhost fallback.** Existing application databases must not be used implicitly, and these tests do not clean up audit history.
+
+Prepare the target using `database/Phase11/01_CreateDatabase.sql`, `02_CreateSchemasTables.sql` and `03_CreateAuditProcedures.sql` in order. Local verification should use a newly named LocalDB instance and a clearly test-specific database. The Phase 6.1 local run streamed the checked-in scripts with only the database name substituted in memory; no checked-in SQL was changed. CI uses `LabAuthServer` inside its disposable hosted LocalDB environment, not an operational server.
+
+In a dedicated shell, supply the approved connection through the environment (never paste credentials into source or logs):
+
+```powershell
+$env:LABAUTHSERVER_RUN_SQL_TESTS = '1'
+$env:LABAUTHSERVER_SQL_AUDIT_TEST_CONNECTION = '<EXPLICIT_AUTHORIZED_DISPOSABLE_CONNECTION>'
+dotnet test tests/LabAuthServer.UnitTests/LabAuthServer.UnitTests.csproj -c Release --no-build --no-restore --filter "Category=SqlInfrastructure"
+```
+
+Restore any prior process environment or close that dedicated shell afterward. Enablement without the connection fails both tests. Disabled infrastructure produces visible skips. The tests verify the writer procedure, returned audit ID and persisted fields, and four concurrent events with each persisted row matched to its own correlation ID.
+
+Invalid-event rejection stays deterministic: a throwing options provider proves validation precedes any connection-configuration access. The default persistence-failure test opens an unconfigured SqlClient connection, which fails locally and returns null through the unchanged writer. It performs no DNS/socket attempt and is not a live network-outage acceptance claim.
+
+## Explicit LDAP environment acceptance
+
+Ordinary validation does not require AD/DC connectivity. Existing cooperative LDAP logic, cancellation, deadline, admission and failure tests continue to use isolated seams. Default Root DSE checks exercise deterministic missing-credential, missing-username and cancellation behavior.
+
+The real Root DSE acceptance case requires an authorized Windows host, trusted LDAPS on 636 and every following process environment value; it never loads application defaults:
+
+- `LABAUTHSERVER_RUN_LDAP_ACCEPTANCE=1`
+- `LABAUTHSERVER_LDAP_TEST_HOST`: approved DC DNS hostname
+- `LABAUTHSERVER_LDAP_TEST_DOMAIN`: approved domain
+- `LABAUTHSERVER_LDAP_TEST_BASE_DN`: approved directory base DN
+- `LABAUTHSERVER_LDAP_TEST_USERNAME`: approved service-account identity
+- `LABAUTHSERVER_LDAP_TEST_PASSWORD_FILE`: explicit protected DPAPI file path, readable under the approved Windows identity
+
+```powershell
+dotnet test tests/LabAuthServer.IntegrationTests/LabAuthServer.IntegrationTests.csproj -c Release --no-build --no-restore --filter "Category=LdapAcceptance"
+```
+
+Missing target values fail before credentials are loaded. Unsuccessful directory connectivity is a failure, not an alternative passing outcome. Do not place plaintext credentials or returned directory attributes in reports. This check proves Root DSE connectivity only; real-user login/group/token acceptance remains separate. CI does not provision a directory and does not run this category.
+
+## CI classification
+
+The Windows workflow retains pinned Actions, SDK setup, restore, Release build and `contents: read`. It runs deterministic tests before SQL provisioning, then provisions disposable LocalDB using the existing scripts and explicitly runs both SQL persistence tests. The SQL TRX must contain two executed, passing tests; a missing, skipped or failing mandatory case fails CI. Update this explicit count deliberately if the SQL category grows. Test reports are temporary validation output, not release artifacts. No production signing material or LDAP credentials are added to CI.
+
 ## Toolchain
 
-- .NET SDK: `10.0.400`, pinned by `global.json`.
+- .NET SDK: `global.json` requests `10.0.400` with `latestPatch`; local Phase 6.1 validation selected `10.0.401`.
 - Target framework: `net10.0`.
 - Test framework: xUnit with the .NET test SDK.
 - Integration host: `Microsoft.AspNetCore.Mvc.Testing`.
@@ -12,17 +69,22 @@
 - `tests/LabAuthServer.UnitTests` covers application and infrastructure seams, configuration validation, LDAP boundaries, token issuance/signing/validation, role mapping, audit validation, and middleware behavior.
 - `tests/LabAuthServer.IntegrationTests` covers API/controller behavior, the ASP.NET Core request pipeline, protected-resource authorization, health behavior, authentication contracts, and selected environment/database boundaries.
 
-## Commands
+## Default environment-safe validation
 
 Run from the repository root:
 
 ```powershell
+Remove-Item Env:LABAUTHSERVER_RUN_SQL_TESTS, Env:LABAUTHSERVER_SQL_AUDIT_TEST_CONNECTION, Env:LABAUTHSERVER_RUN_LDAP_ACCEPTANCE -ErrorAction SilentlyContinue
 dotnet restore .\LabAuthServer.slnx
 dotnet build .\LabAuthServer.slnx -c Release --no-restore --nologo
-dotnet test .\LabAuthServer.slnx -c Release --no-build --nologo
+dotnet test LabAuthServer.slnx -c Release --no-build --no-restore --filter "Category!=SqlInfrastructure&Category!=LdapAcceptance"
 ```
 
-## Current result
+Use a dedicated shell if you need to preserve existing process environment values. No SQL connection target or real AD connectivity is required.
+
+## Historical results and coverage records
+
+The dated evidence below is retained for traceability. The Phase 6.1 category inventory and commands above supersede older statements about the current suite or environment requirements; broader historical documentation reconciliation belongs to Phase 6.4.
 
 Phase 2A final hard pending-waiter cap validation completed with **700 passed, 0 failed, and 0 skipped** tests (465 unit and 235 integration), including all prior JWT/HTTP and ingress-budget regressions. The independently rerun baseline at `6793324` was 188 passing tests. Release build: zero warnings and errors.
 

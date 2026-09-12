@@ -1,5 +1,17 @@
 # Project Status
 
+## Current update — Phase 6.1 safe automated validation (2026-09-12)
+
+**IMPLEMENTED AND LOCALLY VALIDATED.** [Phase 6 — Operational Assurance and First-Release Readiness](plans/Phase-6/Phase-6-Plan.md) and [Phase 6.1 implementation/evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md) are the current workstream. Later Phase 6 subphases are planning only.
+
+Release build: zero warnings/errors. Infrastructure-safe default tests: **1,038 passed (783 unit-project, 255 integration-project), zero failures/skips**, with SQL connection and infrastructure enable flags absent; three infrastructure cases excluded. Explicit disposable SQL validation: **2 passed**, zero failures/skips. Separate real LDAP acceptance: **1 case, not run**. Total inventory: 1,041; hosted-equivalent mandatory total: 1,040. The prior full baseline was 1,023 tests, confirmed by CI #39 on `0b6d1ee92220090fb5570323e30f10bfc2dd9ed5`.
+
+No localhost SQL fallback exists. Ordinary API fixtures use production-validated in-memory audit recording and block operational credentials/connections/key access. Real SQL and LDAP tests require explicit opt-in and target configuration. CI runs the default set before provisioning disposable SQL, then requires both real SQL tests to execute and pass. See [Testing](Testing.md) for exact commands and [Validation Status](Validation_Status.md) for evidence boundaries.
+
+Phase 5 owner-value/governance decisions remain complete; Phase 5.6 remains platform/ownership-model blocked. Professional review remains external/pending and no release is authorized. No production code/schema/runtime behavior, deployment or Phase 5 governance changed. Authorization fallback, ProtectedController audit handling, licensing semantics, issuer Release configuration and audit durability/retention remain later work.
+
+The earlier dated Phase 2/3 records below are retained as historical checkpoints, including their original counts and scope. This update supersedes their automated-test/current-workstream statements; it does not establish new live-environment acceptance or perform the broader Phase 6.4 documentation reconciliation.
+
 ## Latest required slice: hard pending-waiter cap
 
 2026-09-10: **IMPLEMENTED; PHASE 2A APPLICATION CODING = CLOSED.** The explicitly approved hard pending LDAP waiter cap defaults to 16, validates 1-128 and returns typed ResourceExhausted/503 before semaphore waiting when full. Existing active concurrency and cancellation/deadline contracts remain intact. Full suite: 700 passed, zero failures/skips; Release zero warnings/errors. [Final implementation, file inventory and closure](plans/Phase-2/Phase-2A-Hard-Pending-Waiter-Cap.md). No deployment, infrastructure, restart, commit or push occurred.

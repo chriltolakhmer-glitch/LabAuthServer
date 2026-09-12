@@ -39,6 +39,12 @@ jobs:
       - name: Build (Release)
         run: dotnet build LabAuthServer.slnx --configuration Release --no-restore
 
+      - name: Test deterministic boundaries (Release, no SQL or AD)
+        shell: pwsh
+        run: |
+          Remove-Item Env:LABAUTHSERVER_RUN_SQL_TESTS, Env:LABAUTHSERVER_SQL_AUDIT_TEST_CONNECTION, Env:LABAUTHSERVER_RUN_LDAP_ACCEPTANCE -ErrorAction SilentlyContinue
+          dotnet test LabAuthServer.slnx --configuration Release --no-build --no-restore --filter "Category!=SqlInfrastructure&Category!=LdapAcceptance" --logger "console;verbosity=normal"
+
       - name: Provision disposable SQL audit test database
         shell: pwsh
         run: |
@@ -47,7 +53,16 @@ jobs:
           sqlcmd -S "(localdb)\MSSQLLocalDB" -E -d LabAuthServer -b -i database\Phase11\02_CreateSchemasTables.sql
           sqlcmd -S "(localdb)\MSSQLLocalDB" -E -d LabAuthServer -b -i database\Phase11\03_CreateAuditProcedures.sql
 
-      - name: Test (Release)
+      - name: Test mandatory SQL persistence (Release)
+        shell: pwsh
         env:
+          LABAUTHSERVER_RUN_SQL_TESTS: '1'
           LABAUTHSERVER_SQL_AUDIT_TEST_CONNECTION: 'Server=(localdb)\MSSQLLocalDB;Database=LabAuthServer;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Application Name=LabAuthServer.CI.Tests'
-        run: dotnet test LabAuthServer.slnx --configuration Release --no-build --logger "console;verbosity=normal"
+        run: |
+          if ($env:LABAUTHSERVER_RUN_SQL_TESTS -ne '1' -or [string]::IsNullOrWhiteSpace($env:LABAUTHSERVER_SQL_AUDIT_TEST_CONNECTION)) { throw 'Explicit SQL test enablement and target are required.' }
+          $sqlResults = Join-Path $env:RUNNER_TEMP 'LabAuthServer-SqlTests'
+          dotnet test tests/LabAuthServer.UnitTests/LabAuthServer.UnitTests.csproj --configuration Release --no-build --no-restore --filter "Category=SqlInfrastructure" --logger "console;verbosity=normal" --logger "trx;LogFileName=sql-infrastructure.trx" --results-directory $sqlResults
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          [xml]$sqlReport = Get-Content -LiteralPath (Join-Path $sqlResults 'sql-infrastructure.trx')
+          $counters = $sqlReport.TestRun.ResultSummary.Counters
+          if ($counters.total -ne '2' -or $counters.passed -ne '2' -or $counters.executed -ne '2') { throw 'Both mandatory SQL persistence tests must execute and pass; missing/skipped tests fail CI.' }

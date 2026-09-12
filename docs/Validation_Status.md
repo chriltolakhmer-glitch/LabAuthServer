@@ -1,5 +1,27 @@
 # Validation Status
 
+## Current validation — Phase 6.1 (2026-09-12)
+
+Baseline verified clean on `main` at `0b6d1ee92220090fb5570323e30f10bfc2dd9ed5`; prior hosted CI #39 succeeded. [Phase 6.1 evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md) and [Testing commands](Testing.md) define the new safe execution boundary.
+
+| Local Release verification | Result |
+| --- | --- |
+| Restore/build, SDK 10.0.401 | PASS; zero warnings/errors |
+| Default unit-project tests, SQL target/enable flags absent | 783 passed, zero failed/skipped |
+| Default integration-project tests, same environment | 255 passed, zero failed/skipped |
+| Default aggregate | 1,038 passed; 3 infrastructure cases excluded |
+| Infrastructure selected but disabled | 2 SQL + 1 LDAP visibly skipped; no infrastructure access |
+| SQL enabled without target | Expected negative guard: 2 failures before connection construction |
+| LDAP enabled without target | Expected negative guard: 1 failure before DPAPI/LDAPS access |
+| Explicit SQL on new disposable LocalDB instance/database `LabAuthServer_Phase61_20260912` | 2 passed, zero failed/skipped; both TRX counters required by CI passed |
+| Real LDAP acceptance | NOT RUN; no real directory or protected credentials used |
+
+The intentional missing-target failures demonstrate guard behavior; they are not unresolved test defects. Default and explicit SQL positive validations passed. Inventory is 1,041 (785 unit-project + 256 integration-project), with 1,040 mandatory hosted-equivalent tests plus one separately opted-in LDAP acceptance case. The 18 added regression cases and reclassified existing cases do not remove cooperative LDAP/security coverage.
+
+No ordinary validation uses an implicit SQL target. Default API hosts isolate SQL audit, host credentials, native LDAP connections, certificate keys and environment license-file loading through test registrations. SQL invalid-event validation occurs before configuration access; the deterministic connection-failure test uses no configured target. Hosted CI has separate deterministic-before-provisioning and mandatory SQL stages. Exact-new-SHA hosted evidence will be reported after the authorized commit/push; CI #39 is baseline evidence only.
+
+Production behavior and schema are unchanged. Live real-user authentication, target permissions/capacity, audit retention and release acceptance remain separate. The older dated records below retain historical values and are superseded here only for current automated validation and test-infrastructure requirements.
+
 ## Latest hard-cap acceptance status
 
 2026-09-10: **IMPLEMENTED AND SOURCE-VALIDATED; APPLICATION CODING CLOSED.** Full suite: 700 passed (465 unit, 235 integration); 35 new waiter-cap tests, 64 existing concurrency tests, 424 targeted LDAP/cooperative tests. Zero failures/skips; Release zero warnings/errors. Atomic admission, exact classification, bounded audit, no downstream work, cancellation/deadline cleanup, capacity recovery and combined ingress/active/pending behavior pass deterministic tests. [Evidence and closure](plans/Phase-2/Phase-2A-Hard-Pending-Waiter-Cap.md). This does not establish production capacity or IIS/operational acceptance.

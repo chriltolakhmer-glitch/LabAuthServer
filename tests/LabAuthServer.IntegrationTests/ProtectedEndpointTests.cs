@@ -291,7 +291,7 @@ public sealed class ProtectedEndpointTests : IClassFixture<TestApiFactory>
     }
 }
 
-public sealed class TestApiFactory : WebApplicationFactory<Program>
+public sealed class TestApiFactory : InfrastructureSafeApiFactory
 {
     public TestApiFactory() => ClientOptions.BaseAddress = new Uri("https://DC01.lab.local");
     public const string ActiveKeyId = "integration-test-key";
@@ -302,6 +302,7 @@ public sealed class TestApiFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        base.ConfigureWebHost(builder);
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<IProtectedSigningKeyProvider>();
