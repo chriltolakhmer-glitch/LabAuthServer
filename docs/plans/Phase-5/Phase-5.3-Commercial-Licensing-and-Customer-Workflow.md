@@ -309,7 +309,7 @@ Do not request or collect:
 | --- | --- | --- | --- |
 | `<COMMERCIAL_CONTACT>` | Commercial and evaluation contact | `README.md`, `docs/Evaluation-Use.md`, `docs/Commercial-Licensing.md` | `chriltola.khmer@gmail.com` — `OWNER APPROVED — IMPLEMENTED` |
 | `<SECURITY_CONTACT>` | Vulnerability-reporting channel | `SECURITY.md` | `chriltola.khmer@gmail.com` — `OWNER APPROVED — IMPLEMENTED` |
-| `<COPYRIGHT_OWNER>` | Ownership identity | `COPYRIGHT.md` | `OWNER VALUE REQUIRED` |
+| `<COPYRIGHT_OWNER>` | Ownership identity | `COPYRIGHT.md` | `ALOT` — `OWNER APPROVED` |
 | `<APPROVED_DELIVERY_CHANNEL>` | Approved controlled license-delivery channel | This document | `OWNER APPROVED — POLICY; EXACT PROVIDER / CHANNEL TO BE SELECTED BEFORE FIRST EXTERNAL CUSTOMER DELIVERY` |
 | `<COMMERCIAL_APPROVAL_AUTHORITY>` | Named commercial approval authority | Future operational record | `ALOT` — `OWNER APPROVED` |
 | `<LICENSING_OPERATOR>` | Named authorized issuer/operator reference | Future operational record | `ALOT initially` — `OWNER APPROVED` |
@@ -345,4 +345,4 @@ This process document is not a final agreement, final license, legal opinion, or
 
 PHASE 5.3 — OWNER APPROVED — 2026-09-12
 
-The project owner approved the completed Phase 5.3 documentation on 2026-09-12. All 16 documentation completion criteria in section 19 are satisfied. Current and resolved values are the commercial contact, security contact, delivery-channel policy, Commercial Approval Authority, and Licensing Operator. `<COPYRIGHT_OWNER>`, the exact delivery provider/channel, and professional legal/business review remain unresolved or pending. No production signing or customer-license issuance occurred, and no commercial operation is authorized solely by this approval. The Phase 5.4 source document is currently ready for owner review; the earlier statement that Phase 5.4 was not authorized is historical context and is superseded by the current Phase 5.4 status in the master Phase 5 plan. Phase 5.4 is not owner-approved by this record.
+The project owner approved the completed Phase 5.3 documentation on 2026-09-12. All 16 documentation completion criteria in section 19 are satisfied. Resolved owner values are the commercial contact, security contact, copyright / rights-holder identity `ALOT`, delivery-channel policy, Commercial Approval Authority `ALOT`, and Licensing Operator `ALOT initially`. The exact delivery provider/channel, professional legal/business review, and other explicitly deferred operational, signing, and storage decisions remain pending. No production signing or customer-license issuance occurred, and no commercial operation is authorized solely by this approval. The Phase 5.4 source document is currently ready for owner review; the earlier statement that Phase 5.4 was not authorized is historical context and is superseded by the current Phase 5.4 status in the master Phase 5 plan. Phase 5.4 is not owner-approved by this record.

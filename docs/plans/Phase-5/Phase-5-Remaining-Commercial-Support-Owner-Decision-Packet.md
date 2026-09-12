@@ -13,16 +13,16 @@ It distinguishes:
 3. values that should remain deferred until actual commercial operation;
 4. items that require professional legal or business review.
 
-This packet does not implement commercial operation, issue a customer license, create a release, publish artifacts, deploy, change runtime behavior, or make legal claims. No legal identity, delivery provider, contractual promise, or support obligation is invented here.
+This packet does not implement commercial operation, issue a customer license, create a release, publish artifacts, deploy, change runtime behavior, or make legal claims. The owner-supplied identity is recorded for governance and documentation only; no delivery provider, contractual promise, or support obligation is invented here.
 
 ## 2. Verified baseline
 
 | Item | Verified value |
 | --- | --- |
 | Branch | `main` |
-| Current Git SHA | `ac915ddefcbe3395e09e4426a75cdb890484982c` |
-| Current HEAD commit | `Reconcile Phase 5 commercial decision reference` |
-| Hosted validation | `LabAuthServer CI`, run `#37`, run ID `34698559913`, head `ac915ddefcbe3395e09e4426a75cdb890484982c`, status `completed`, conclusion `success` |
+| Current Git SHA | `406472f56973d7c76a6d59ffe038071700d2fd6a` |
+| Current HEAD commit | `Record remaining Phase 5 commercial decisions` |
+| Hosted validation | `LabAuthServer CI`, run `#38`, run ID `34699192097`, head `406472f56973d7c76a6d59ffe038071700d2fd6a`, status `completed`, conclusion `success` |
 | Repository visibility | `PRIVATE` |
 | Release existence | `NO RELEASE EXISTS` |
 | Commercial operation | `NOT AUTHORIZED` |
@@ -37,12 +37,12 @@ Each decision records its current status, the recommendation, the rationale, the
 ### P5-C1 — Copyright / rights-holder identity
 
 - Decision: the exact individual or legal-entity name that should appear in `COPYRIGHT.md`.
-- Current status: `OWNER VALUE REQUIRED`.
-- Current placeholder: `<COPYRIGHT_OWNER>` in `COPYRIGHT.md`.
-- Recommendation: none. This is a legal identity field; no value is recommended.
-- Rationale: copyright ownership is a legal fact, not a governance convention. `ALOT` is a governance identity, `chriltolakhmer-glitch` is a platform account name, and `chriltola.khmer@gmail.com` is a contact address. None of these is automatically the legal copyright owner.
-- Boundary: do not infer `ALOT`, `chriltolakhmer-glitch`, `chriltola.khmer@gmail.com`, or any company or legal entity. The exact legal/rights-holder name must come from the owner. `COPYRIGHT.md` is not modified by this packet.
-- Exact owner-response field: `P5-C1 COPYRIGHT / RIGHTS-HOLDER IDENTITY:` (owner input required; intentionally left blank)
+- Current status: `OWNER APPROVED`.
+- Approved value: `ALOT`.
+- Current value in `COPYRIGHT.md`: `ALOT`.
+- Rationale: the project owner explicitly supplied `ALOT` as the exact display identity for the current asserted copyright / rights-holder governance record.
+- Legal boundary: this owner decision does not constitute legal advice, prove legal title by itself, replace professional legal review, create or transfer intellectual-property rights, or change contractual ownership rights under another written agreement.
+- Exact owner-response field: `P5-C1 COPYRIGHT / RIGHTS-HOLDER IDENTITY: ALOT`
 
 ### P5-C2 — Approved delivery channel
 
@@ -138,7 +138,7 @@ Each decision records its current status, the recommendation, the rationale, the
 
 | Placeholder / phrase | Classification |
 | --- | --- |
-| `<COPYRIGHT_OWNER>` in `COPYRIGHT.md` | Current unresolved value — see P5-C1 |
+| `<COPYRIGHT_OWNER>` in `COPYRIGHT.md` | Replaced by current owner-approved value `ALOT`; retained only as a historical placeholder reference where applicable |
 | `<APPROVED_DELIVERY_CHANNEL>` in the Phase 5.3 workflow and release summary | Owner-approved policy; exact provider/channel remains a prerequisite before first external customer delivery |
 | `<COMMERCIAL_APPROVAL_AUTHORITY>` in the Phase 5.3 placeholder register | Owner-approved assignment: `ALOT` |
 | `<LICENSING_OPERATOR>` in the Phase 5.3 placeholder register | Owner-approved assignment: `ALOT initially` |
@@ -176,7 +176,7 @@ Each decision records its current status, the recommendation, the rationale, the
 
 ## 7. Current-state reconciliation
 
-The Phase 5.3 contact values are already owner-approved and implemented, including the shared-mailbox exception. P5-C2 through P5-C6 are now owner-approved as recorded in this packet. P5-C1 remains the only exact owner-supplied identity value required; the exact delivery provider/channel and other operational, signing, storage, and professional-review items remain deferred or pending as listed above.
+The Phase 5.3 contact values are already owner-approved and implemented, including the shared-mailbox exception. P5-C1 through P5-C6 are now owner-approved as recorded in this packet. The exact delivery provider/channel and other operational, signing, storage, and professional-review items remain deferred or pending as listed above.
 
 ## 8. Non-authorizations
 
@@ -205,7 +205,7 @@ This packet does not authorize any of the following:
 ## 9. Approved Owner Decision Record / Remaining Owner Value
 
 ```text
-P5-C1 COPYRIGHT / RIGHTS-HOLDER IDENTITY:
+P5-C1 COPYRIGHT / RIGHTS-HOLDER IDENTITY: ALOT
 P5-C2 APPROVED DELIVERY CHANNEL POLICY: VENDOR-CONTROLLED PRIVATE DELIVERY CHANNEL; ACCESS LIMITED TO AUTHORIZED OPERATORS; RECIPIENT IDENTITY VERIFIED; DELIVERY EVENT AND RECEIPT RECORDED; EXACT PROVIDER / CHANNEL TO BE SELECTED BEFORE FIRST EXTERNAL CUSTOMER DELIVERY
 P5-C3 COMMERCIAL APPROVAL AUTHORITY: ALOT
 P5-C4 LICENSING OPERATOR / AUTHORIZED LICENSE ISSUER: ALOT initially
@@ -213,8 +213,8 @@ P5-C5 FORMAL SUPPORTED-VERSION DURATION: NO FIXED CALENDAR TERM; FUTURE COMMERCI
 P5-C6 LTS POLICY: NO LTS DESIGNATION UNTIL SEPARATELY APPROVED
 ```
 
-P5-C2 through P5-C6 are recorded as `OWNER APPROVED`. P5-C1 remains intentionally blank and `OWNER VALUE REQUIRED`.
+P5-C1 through P5-C6 are recorded as `OWNER APPROVED`. Professional legal/business review and future operational prerequisites remain pending.
 
 ## 10. Packet status
 
-`P5-C2 THROUGH P5-C6 OWNER APPROVED — P5-C1 COPYRIGHT / RIGHTS-HOLDER IDENTITY REMAINS OWNER VALUE REQUIRED — NO COMMERCIAL OPERATION AUTHORIZED`
+`P5-C1 THROUGH P5-C6 OWNER APPROVED — PROFESSIONAL LEGAL/BUSINESS REVIEW AND FUTURE OPERATIONAL PREREQUISITES REMAIN — NO COMMERCIAL OPERATION AUTHORIZED`
