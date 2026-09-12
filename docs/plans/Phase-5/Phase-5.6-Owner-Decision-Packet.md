@@ -20,7 +20,7 @@ Phase 5 remains `PHASE 5 IN PROGRESS — PHASE 5.6 REMAINS OPEN`. Phase 5.6 rema
 | Phase 5 status | `PHASE 5 IN PROGRESS — PHASE 5.6 REMAINS OPEN` |
 | Phase 5.6 status | `IMPLEMENTATION IN PROGRESS` |
 | Main governance state | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
-| Forking | `ALLOWED` (`allow_forking = true`); approved policy is disablement pending implementation |
+| Forking | `ALLOWED` (`allow_forking = true`); disablement is blocked by the repository ownership model |
 | Git identity | `unknown <Administrator@LAB.LOCAL>` |
 | Latest commit signature | `N` (unsigned) |
 | Security contact | `<SECURITY_CONTACT>` |
@@ -34,7 +34,7 @@ Completed Phase 5.6 control preserved by this packet: immutable GitHub Actions S
 
 ### D1 - Repository Forking
 
-**Current status:** `OWNER APPROVED — IMPLEMENTATION PENDING`.
+**Current status:** `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL`.
 
 **Current observed state:** Forking is `ALLOWED`.
 
@@ -42,23 +42,23 @@ Completed Phase 5.6 control preserved by this packet: immutable GitHub Actions S
 
 - Phase 5.5 section 5 records forking as `ALLOWED` and recommends disabling it unless a specific controlled vendor workflow requires forks.
 - Phase 5.5 section 13 states: `OWNER APPROVED - 2026-09-12. Forking should be disabled unless a specific controlled vendor workflow later requires it.` It also states that the current setting remains `ALLOWED` and disablement is a future operational action.
-- Phase 5.6 classifies the item as `OWNER DECISION REQUIRED` and records that no fork setting was changed.
+- The earlier Phase 5.6 record classified the item as `OWNER DECISION REQUIRED` and recorded that no fork setting was changed; the current owner-approved classification is now platform-blocked based on the verified API rejection.
 
-The owner has resolved the Phase 5.5 / Phase 5.6 consistency issue by confirming that the Phase 5.5 direction is the operative policy. The setting remains unchanged until a separately authorized implementation task.
+The owner has resolved the Phase 5.5 / Phase 5.6 consistency issue by confirming that the Phase 5.5 direction is the operative policy. An authenticated GitHub administrative attempt was made, but GitHub rejected it because private-forking changes are restricted to organization-owned private repositories. The setting remains unchanged at `ALLOWED`; authentication is not the blocker, and retrying the same API operation under the current ownership model will not resolve it.
 
 **Security benefit of disabling unnecessary private forking:** reduces additional private source copies, limits source-access cleanup obligations, and narrows proprietary-source exposure.
 
 **Operational downside:** may block legitimate controlled vendor or organization workflows that depend on forks. Retaining forks is operationally flexible but expands the number of private copies and access-removal obligations.
 
-**Platform / ownership consideration:** the current private personal-account/plan model already limits enforcement of branch controls. Forking is a separate repository setting, but changing it still requires an authorized GitHub administration path. A plan or ownership change must not be inferred from this packet.
+**Platform / ownership consideration:** the current personally owned private-repository model does not permit changing `allow_forking`; GitHub returned HTTP 422: `Allow forks setting can only be changed on org-owned private repositories`. Moving the private repository to an appropriate organization ownership model is a potential future resolution path requiring a separate explicit owner decision. No transfer is authorized here.
 
-**Approved policy:** Disable private forking unless a specific controlled vendor workflow later requires it. This records policy only and does not authorize the setting change.
+**Approved policy:** Disable private forking unless a specific controlled vendor workflow later requires it. The desired policy is approved, but implementation is blocked by the repository ownership model.
 
 **Exact owner selection:**
 
 - `OWNER DECISION: DISABLE PRIVATE FORKING`
 - `CONTROLLED WORKFLOW EXCEPTION: OWNER VALUE REQUIRED ONLY IF A FUTURE EXCEPTION IS REQUESTED`
-- `IMPLEMENTATION STATE: OWNER APPROVED — IMPLEMENTATION PENDING`
+- `IMPLEMENTATION STATE: OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL`
 
 ### D2 - Vendor-Controlled Git Commit Identity
 

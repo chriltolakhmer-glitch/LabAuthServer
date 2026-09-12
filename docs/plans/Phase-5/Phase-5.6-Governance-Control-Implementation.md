@@ -83,7 +83,7 @@ Owner-verified evidence for the prerequisite gate:
 
 The prerequisite CI gate is now satisfied on the CI-evidence side.
 
-However, GitHub governance settings were **NOT** changed in this pass, because authenticated repository-administration tooling remains unavailable in the implementation environment. A passing CI run is evidence, not a settings change; CI success alone implemented no control.
+The D1 setting change was attempted through authenticated GitHub administration and rejected by GitHub with HTTP 422 because private-repository forking changes are restricted to org-owned private repositories. The failed request changed no setting; authentication was available and is not the blocker.
 
 No tooling was installed, no token was requested, exposed, printed, or stored, and CI was not bypassed.
 
@@ -95,7 +95,7 @@ No tooling was installed, no token was requested, exposed, printed, or stored, a
 | 2 | Successful LabAuthServer CI required before `main` update | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | 3 | Force pushes prohibited on `main` | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | 4 | Strongest supported private-repository protection mechanism | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
-| 5 | Disable private forking | `OWNER APPROVED — IMPLEMENTATION PENDING` |
+| 5 | Disable private forking | `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL` |
 | 6 | Stable vendor-controlled commit identity | `OWNER POLICY APPROVED — EXACT IDENTITY VALUES STILL REQUIRED` |
 | 7 | Mandatory SSH commit signing for future official history | `OWNER APPROVED — IMPLEMENTATION BLOCKED BY KEY/CUSTODY VALUES` |
 | 8 | Immutable GitHub Actions SHA pinning | `COMPLETE — IMPLEMENTED AND HOSTED-CI VALIDATED` |
@@ -104,7 +104,7 @@ No tooling was installed, no token was requested, exposed, printed, or stored, a
 | 11 | Repository administration policy and named assignments | `OWNER POLICY APPROVED — EXACT NAMED ASSIGNMENTS STILL REQUIRED WHERE APPLICABLE` |
 | 12 | Security Response Owner policy and named identity | `OWNER POLICY APPROVED — EXACT NAMED IDENTITY STILL REQUIRED WHERE APPLICABLE` |
 
-The owner configured a classic branch-protection rule for `main`. GitHub reports that the rule is **NOT ENFORCED** because enforcement for this private repository requires moving it to a GitHub Team or Enterprise organization account. Therefore controls 1–4 are classified `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`; they must not be described as implemented, complete, closed, or satisfied. The owner confirmed the Phase 5.5 forking direction: private forking should be disabled unless a specific controlled vendor workflow later requires it. Implementation remains pending and the observed setting remains `ALLOWED`. The repository remains private and no public-visibility workaround is authorized.
+The owner configured a classic branch-protection rule for `main`. GitHub reports that the rule is **NOT ENFORCED** because enforcement for this private repository requires moving it to a GitHub Team or Enterprise organization account. Therefore controls 1–4 are classified `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`; they must not be described as implemented, complete, closed, or satisfied. The owner confirmed the Phase 5.5 forking direction: private forking should be disabled unless a specific controlled vendor workflow later requires it. An authenticated GitHub administrative attempt to set `allow_forking = false` was rejected with HTTP 422: `Allow forks setting can only be changed on org-owned private repositories`. D1 is therefore `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL`; the observed setting remains `ALLOWED`, authentication is not the blocker, and retrying the same operation under the current ownership model will not resolve it. The repository remains private and no public-visibility workaround or ownership transfer is authorized.
 
 ## 7. Repository-Side Change — Immutable Actions SHA Pinning
 
@@ -180,7 +180,7 @@ Note on validation scope: a SHA-pin change is a hosted-runner-only reference cha
 
 Settings actually changed remotely: **A classic `main` branch-protection rule was configured by the owner.**
 
-Settings attempted but blocked: **NONE** — no attempt was made, because authenticated administrative tooling is unavailable. The Phase 5.5 CI gate is now verified `SUCCESS`, so tooling availability is the remaining blocker.
+Settings attempted but blocked: **D1 private-forking disablement** — the authenticated API request was rejected by GitHub with HTTP 422 because `allow_forking` can only be changed on org-owned private repositories.
 
 Remote control classification:
 
@@ -191,7 +191,7 @@ Remote control classification:
 | Required CI enforcement | Not enforced | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | Force-push restriction | Not enforced | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | Branch deletion restriction | Not enforced | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
-| Fork disablement | Not independently changed by this rule | `NOT AUTHORIZED — OWNER DECISION` |
+| Fork disablement | API request rejected; `allow_forking = true` | `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL` |
 | Rulesets | Unavailable | `BLOCKED — PLATFORM / PLAN LIMITATION` (verified) |
 
 Settings not changed and still at their verified prior state:
@@ -203,7 +203,7 @@ Settings not changed and still at their verified prior state:
 - rulesets: `UNAVAILABLE UNDER CURRENT PRIVATE-REPOSITORY PLAN`
 - GitHub Releases: `NONE`
 
-No affected remote control is reported as enforced. No update request was issued, so no remote state was re-read.
+No affected remote control is reported as enforced. The D1 post-attempt state was independently read back as `private = true` and `allow_forking = true`.
 
 ### Remote implementation matrix
 
@@ -215,7 +215,7 @@ No affected remote control is reported as enforced. No update request was issued
 | Required CI check | Not enforced | `Build and Test (Release)` required before normal `main` update | Covered by owner-configured rule; exact saved option not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | Force push | Not enforced | Prohibited on `main` where supported | Covered by owner-configured rule; exact saved option not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | Branch deletion | Not enforced | Prohibited on `main` where supported | Covered by owner-configured rule; exact saved option not independently recorded | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
-| Forking | `ALLOWED` | Disable unless a specific controlled vendor workflow requires it | Not established by the branch rule | `NOT AUTHORIZED — OWNER DECISION` |
+| Forking | `ALLOWED` | Disable unless a specific controlled vendor workflow requires it | GitHub rejects the setting change for personally owned private repositories | `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL` |
 | Rulesets | Unavailable | Not the selected mechanism | `BLOCKED — PLAN LIMITATION` (verified) | `BLOCKED — PLAN LIMITATION` |
 | Immutable Actions SHA pinning | Pinned `v4` SHAs | Immutable SHA pins | Repository-side, supported | `IMPLEMENTED AND HOSTED-CI VALIDATED` |
 
@@ -256,8 +256,8 @@ The owner-verified GitHub Actions jobs API identifies the successful job as `Bui
 - Current: `ALLOWED`.
 - Approved target: disable unnecessary private forking unless a specific controlled vendor workflow requires it.
 - This rule does not independently establish or change the repository forking setting.
-- Classification: `NOT AUTHORIZED — OWNER DECISION`.
-- Repository visibility was not changed. Forking governance is deferred only where it is not currently available through the required private-repository administration features.
+- Classification: `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL`.
+- Repository visibility was not changed. Authentication is available; GitHub does not permit this setting change for the current personally owned private-repository model.
 
 ## 9. Rollback Considerations
 
@@ -276,7 +276,7 @@ Owner-approved and not yet executed:
 - require the LabAuthServer CI check before normal `main` updates
 - enforce the pull-request workflow for normal `main` changes
 - prohibit force pushes to `main`
-- implement the owner-approved private-forking policy unless a separately approved controlled exception is supplied
+- resolve the owner-approved private-forking policy through a separately authorized ownership-model decision; no retry is actionable under the current model
 - obtain the exact owner-supplied vendor Git identity values and apply the repository-local policy in a separately authorized task
 - obtain signing identity and key-custody values for the owner-approved SSH mechanism
 - document rotation/revocation ownership before enabling signing for official vendor/release history
@@ -287,13 +287,13 @@ Owner-approved and not yet executed:
 
 Blocking prerequisites:
 
-- authenticated GitHub administrative tooling must be available for any remote setting change
+- an organization-owned private-repository model is required before `allow_forking` can be changed; authentication is available and is not the D1 blocker
 - the GitHub plan must be upgraded, or the required private-repository administration features otherwise obtained, before the deferred remote controls can be attempted
 - exact identity, signing custody, contact, and named-assignment values must be supplied by the owner; they must not be invented
 
 The Phase 5.5 hosted CI gate is now verified `SUCCESS` and is no longer a blocking prerequisite.
 
-Current decision-record prerequisite: the externally supplied hosted result for workflow `LabAuthServer CI`, run `#20` / `34686970661`, reports `COMPLETED` / `SUCCESS` for head `d79734349ecbf7f0569299a38181675f09387d43`. Local `gh` is installed but unauthenticated, so this run was not independently queried from the private repository.
+Current decision-record prerequisite: the externally supplied hosted result for workflow `LabAuthServer CI`, run `#21` / `34687199205`, reports `COMPLETED` / `SUCCESS` for head `44b75036f68a767a92d78e608732c21b633c9b83`. The authenticated `gh` session is available; the documented D1 API attempt was rejected by the repository ownership model, not by authentication.
 
 The configured remote governance controls are `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION`. They are not enforced and must be revisited if the repository ownership model changes.
 
@@ -301,13 +301,13 @@ The configured remote governance controls are `CONFIGURED BUT NOT ENFORCED — P
 
 Two distinct limitations apply, and they must not be conflated.
 
-### Tooling limitation — authenticated GitHub administration unavailable
+### Tooling and platform distinction
 
 - GitHub CLI (`gh`) is installed and available in the implementation environment.
-- The CLI is not authenticated for this private repository; no authenticated GitHub administration is available in this environment.
+- The CLI is authenticated as the repository owner account, and authenticated GitHub administration is available.
 - No `GH_TOKEN` / `GITHUB_TOKEN` credential is present; none was requested, created, or stored.
-- The repository is private, so unauthenticated Actions-run and repository-settings inspection is not possible.
-- Effect: the remote governance controls (branch protection, PR requirement, required CI enforcement, force-push restriction, branch deletion restriction, fork disablement) were not changed in this reconciliation. Their actual enforcement remains governed by the verified private-repository ownership/plan limitation, not by CLI availability alone.
+- The D1 repository-setting request was rejected by GitHub with HTTP 422 because `allow_forking` can only be changed on org-owned private repositories.
+- Effect: D1 is blocked by the current private personal-account ownership model, not by CLI availability or authentication. Retrying the same request under the current ownership model is not actionable.
 
 ### Verified plan limitation — rulesets
 
@@ -339,7 +339,7 @@ No private key, signing key, GPG key, SSH key, password, token, credential, cust
 - [ ] Approving-review requirement enforced. (`BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION`; currently `CONFIGURED BUT NOT ENFORCED`)
 - [ ] Force-push prohibition enforced. (`BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION`; currently `CONFIGURED BUT NOT ENFORCED`)
 - [ ] Branch-deletion restriction enforced. (`BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION`; currently `CONFIGURED BUT NOT ENFORCED`)
-- [ ] Repository forking policy implemented. (`OWNER APPROVED — IMPLEMENTATION PENDING`; forking remains `ALLOWED`)
+- [ ] Repository forking disabled. (`OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL`; current state `ALLOWED`)
 - [ ] Exact Git identity values supplied and applied. (`OWNER POLICY APPROVED — EXACT IDENTITY VALUES STILL REQUIRED`)
 - [ ] SSH commit signing implemented. (`OWNER APPROVED — IMPLEMENTATION BLOCKED BY KEY/CUSTODY VALUES`)
 - [ ] Security contact value supplied. (`OWNER POLICY APPROVED — CONTACT VALUE REQUIRED`)
@@ -349,7 +349,7 @@ No private key, signing key, GPG key, SSH key, password, token, credential, cust
 - [x] Rollback considerations recorded.
 - [x] Remaining governance work recorded.
 - [x] No secret, key, or credential introduced.
-- [x] No remote governance setting change performed.
+- [x] No remote governance setting change performed; D1 API request was rejected without changing state.
 
 Phase 5.6 is **not complete**. Critical governance controls remain unimplemented.
 
@@ -373,13 +373,13 @@ Affected controls — configured but not enforced:
 | 4 | Required CI enforcement | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | 5 | Force-push restriction | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
 | 6 | Branch-deletion restriction | `CONFIGURED BUT NOT ENFORCED — PLATFORM / OWNERSHIP MODEL LIMITATION` |
-| 7 | Forking governance | `OWNER APPROVED — IMPLEMENTATION PENDING` |
+| 7 | Forking governance | `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL` |
 
 Constraints and preserved facts:
 
 - The repository must remain `PRIVATE`. Making it public is not an authorized workaround for any deferred control.
 - Verified required CI context remains `Build and Test (Release)` (workflow `LabAuthServer CI`, job ID `103504610220`).
-- Current factual state: classic `main` rule exists and is `NOT ENFORCED`; forking remains `ALLOWED` pending implementation of the approved policy; repository remains `PRIVATE`.
+- Current factual state: classic `main` rule exists and is `NOT ENFORCED`; forking remains `ALLOWED` because GitHub rejects the change under the current personally owned private-repository model; repository remains `PRIVATE`.
 - Rulesets remain `BLOCKED — VERIFIED PLAN LIMITATION`, separate from this owner decision.
 - The affected controls are **not** enforced, complete, closed, or satisfied.
 - These controls must be revisited if the repository ownership model changes.
@@ -401,7 +401,7 @@ Every incomplete Phase 5.6 item has a precise classification below. No row repre
 | Approving-review requirement | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` | The same enforced private-repository protection capability with the approved review requirement enabled. |
 | Force-push prohibition | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` | The same enforced private-repository protection capability that restricts force pushes. |
 | Branch-deletion restriction | `BLOCKED — PLATFORM / OWNERSHIP MODEL LIMITATION` | The same enforced private-repository protection capability that protects `main` from deletion. |
-| Repository forking policy | `OWNER APPROVED — IMPLEMENTATION PENDING` | Separately authorized implementation of disablement, unless a controlled exception is later supplied. |
+| Repository forking policy | `OWNER APPROVED — BLOCKED BY REPOSITORY OWNERSHIP MODEL` | The desired policy is approved, but GitHub requires an org-owned private repository before `allow_forking` can be changed. |
 | Commit identity | `OWNER POLICY APPROVED — EXACT IDENTITY VALUES STILL REQUIRED` | Owner-supplied stable vendor/operator name and email; do not rewrite history or change identity in this task. |
 | Commit-signing mechanism and enablement | `OWNER APPROVED — IMPLEMENTATION BLOCKED BY KEY/CUSTODY VALUES` | Owner-supplied signing identity, key custody/recovery owner, and rotation/revocation owner before SSH signing is configured. |
 | `<SECURITY_CONTACT>` | `OWNER POLICY APPROVED — CONTACT VALUE REQUIRED` | Owner-supplied approved security-reporting contact. |
