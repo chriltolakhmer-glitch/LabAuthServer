@@ -6,6 +6,8 @@ Phase 5.1 owner-approval closeout: [Phase-5.1-Commercial-Model-and-Decision-Gate
 
 Phase 5.1 is complete from the project-owner decision perspective. The repository remains private and controlled, public source release remains unauthorized, and Phase 5 is IN PROGRESS. Phase 5.2 is ready to begin, but must not publish the repository or create legally final terms without the required legal review and explicit approvals.
 
+Phase 5.2 status: PHASE 5.2 — OWNER REVIEW READY. See [Phase-5.2-Proprietary-Notices-and-Evaluation-Documentation.md](Phase-5.2-Proprietary-Notices-and-Evaluation-Documentation.md). This documentation/governance subphase prepares draft notices and evaluation/commercial process documents only; it does not authorize public release, external source distribution, final legal terms, deployment, or implementation changes. Phase 5.3 is not authorized.
+
 ## 1. Executive summary
 
 Phase 4 establishes the technical foundation for signed offline commercial licensing, but it does not define the business/legal package that governs how source is distributed, how evaluation use is permitted, how commercial use is sold, or how official vendor builds are distinguished from arbitrary source builds. Phase 5 addresses that gap.
@@ -37,14 +39,14 @@ This plan is traceable to the repository evidence and Phase 4 decisions currentl
 
 Evidence base in the repository:
 
-- [README.md](../../README.md) documents a signed offline license document and states that licensing is not wired into the running host yet.
-- [docs/Licensing.md](../../docs/Licensing.md) explicitly states: source-available limitations, offline-first design, no online activation, no machine binding, and the limitation that source control enables modification.
+- [README.md](../../../README.md) documents a signed offline license document wired into startup loading and validation, with restricted Community behavior for missing or invalid licenses.
+- [docs/Licensing.md](../../../docs/Licensing.md) explicitly states: source-available limitations, offline-first design, no online activation, no machine binding, and the limitation that source control enables modification.
 - [docs/plans/Phase-4/Phase-4-README.md](../Phase-4/Phase-4-README.md) records the approved architecture and states: “Licensing model: source-available + commercial technical license.”
 - [docs/plans/Phase-4/Phase-4.15-Final-Security-Review.md](../Phase-4/Phase-4.15-Final-Security-Review.md) confirms the source-available limitation and that technical enforcement cannot prevent a customer from modifying source or binaries.
 - [docs/plans/Phase-4/Phase-4.16-Production-Licensing-Readiness.md](../Phase-4/Phase-4.16-Production-Licensing-Readiness.md) confirms startup-only runtime loading, operator-controlled license file path, and the absence of hot reload or per-request revalidation.
 - [docs/plans/Phase-4/Phase-4.17-Implementation-and-Final-Sign-Off.md](../Phase-4/Phase-4.17-Implementation-and-Final-Sign-Off.md) defines the approved production license governance model, external register, offline issuance flow, and public-key-only server boundary.
-- [docs/Security.md](../../docs/Security.md) reinforces that licensing does not weaken authentication/authorization and clarifies the source-available limitation.
-- [.github/workflows/ci.yml](../../.github/workflows/ci.yml) shows CI is build/test only, with no secrets or production signing material.
+- [docs/Security.md](../../../docs/Security.md) reinforces that licensing does not weaken authentication/authorization and clarifies the source-available limitation.
+- [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) shows CI is build/test only, with no secrets or production signing material.
 
 Approved Phase 4 decisions relevant to Phase 5:
 
@@ -161,9 +163,11 @@ Cons:
 - Requires clear legal terms and enforcement processes.
 - Must avoid ambiguity between “code is public” and “right to use commercially is granted.”
 
-### Recommendation
+### Historical Recommendation
 
-The recommended model is Option A with explicit proprietary source-available terms, but only after legal review and explicit approval. This fits the documented project direction and the technical licensing baseline. The project should avoid pretending it is open source; it should state clearly that the source is available for inspection and evaluation under a proprietary license, not open-source licensing.
+The following public-repository recommendation is retained as historical planning content. It was superseded for the current baseline by the Phase 5.1 owner-approved decision: private / controlled source distribution initially.
+
+The historical recommendation was Option A with explicit proprietary source-available terms, but only after legal review and explicit approval. It is not the current approved distribution model. The current Phase 5.1 baseline is private / controlled source distribution initially. The project should avoid pretending it is open source; it should state clearly that any future source availability is governed by proprietary terms, not open-source licensing.
 
 ## 9. Recommended model
 
