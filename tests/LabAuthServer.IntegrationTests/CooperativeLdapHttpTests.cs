@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using LabAuthServer.Api.Controllers;
+using LabAuthServer.Api.Extensions;
 using LabAuthServer.Api.Requests;
 using LabAuthServer.Application.Auditing;
 using LabAuthServer.Application.DTOs;
@@ -17,8 +18,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -122,13 +126,28 @@ public sealed class CooperativeLdapHttpTests
     [InlineData(61)]
     public void InvalidAuthenticationDeadline_FailsStartup(int seconds)
     {
-        var scenario = new Scenario("none", "success");
-        using var factory = new JwtSizeApiFactory();
-        using var configured = Configure(factory, scenario);
-        using var invalid = configured.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
-            services.PostConfigure<LdapOptions>(options => options.AuthenticationTimeout = TimeSpan.FromSeconds(seconds))));
-        Assert.Throws<OptionsValidationException>(() => invalid.CreateClient());
-        Assert.Equal(0, scenario.Connections);
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [$"{LdapOptions.SectionName}:AuthenticationTimeout"] = seconds.ToString()
+            })
+            .Build();
+        using var services = new ServiceCollection()
+            .AddActiveDirectoryOptions(configuration, new TestHostEnvironment())
+            .BuildServiceProvider();
+
+        var exception = Assert.Throws<OptionsValidationException>(
+            () => _ = services.GetRequiredService<IOptions<LdapOptions>>().Value);
+
+        Assert.Equal(["The Active Directory configuration is invalid."], exception.Failures);
+    }
+
+    private sealed class TestHostEnvironment : IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = Environments.Development;
+        public string ApplicationName { get; set; } = typeof(CooperativeLdapHttpTests).Assembly.GetName().Name!;
+        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 
     [Theory]

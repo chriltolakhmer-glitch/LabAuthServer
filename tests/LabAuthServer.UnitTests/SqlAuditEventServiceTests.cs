@@ -34,7 +34,8 @@ public sealed class SqlAuditEventServiceTests
         Assert.DoesNotContain("Encrypt=False", connectionString, StringComparison.OrdinalIgnoreCase);
     }
 
-    private const string ConnectionString =
+    private static string ConnectionString =>
+        Environment.GetEnvironmentVariable("LABAUTHSERVER_SQL_AUDIT_TEST_CONNECTION") ??
         "Server=localhost;Database=LabAuthServer;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Application Name=LabAuthServer.Phase12.Tests";
 
     [Fact]

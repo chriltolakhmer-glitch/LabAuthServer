@@ -52,6 +52,13 @@ The final Phase 4 implementation is closed with accepted non-blocking conditions
 - P4-COND-02: hosted GitHub Actions validation should be observed and recorded after push
 - P4-COND-03: production monitoring and alerting must route validation failures without exposing sensitive license contents
 
+## Hosted CI remediation review (2026-09-12)
+
+- Hosted run `34669268162` failed because SQL audit persistence tests assumed a developer-local database and one LDAP startup-validation test depended on exception propagation through `WebApplicationFactory`/`DeferredHost`.
+- The SQL tests remain real persistence tests; CI now provisions disposable LocalDB from the controlled Phase 11 schema and stored-procedure scripts.
+- The LDAP test now exercises the production options registration directly and asserts `OptionsValidationException` with the production validation message.
+- Engineering closure remains pending the new hosted run; no Phase 5 implementation may begin before it passes.
+
 These conditions are tracked as closure conditions, not as implementation work items or code defects.
 
 ## Review rules

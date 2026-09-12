@@ -1,6 +1,6 @@
 # Phase 4.18 — Final Licensing Closure & Verification
 
-Status: CLOSED WITH ACCEPTED NON-BLOCKING CONDITIONS. This is the final evidence and governance closure record for the completed Phase 4 license implementation baseline. This phase does not introduce a new licensing feature, redesign the runtime model, or reopen the architecture. It reconciles the final repository evidence and records the accepted operational conditions that remain outside the application source tree.
+Status: ENGINEERING CLOSURE PENDING HOSTED CI REMEDIATION. This is the final evidence and governance record for the completed Phase 4 license implementation baseline. This remediation does not introduce a new licensing feature, redesign the runtime model, or reopen the architecture. It addresses test-harness portability exposed by the first hosted CI run.
 
 ## 1. Purpose
 
@@ -9,22 +9,42 @@ This phase exists to reconcile the final repo evidence and formally close the te
 The Phase 4 implementation was independently verified against the repository. The review confirms:
 
 - no new licensing capability was introduced in this closure phase
-- no licensing implementation defect was identified that required source changes
+- no licensing implementation defect was identified that required production source changes
 - the implementation remains aligned with the approved Phase 4 baseline
 - the remaining items are operational, evidence, and governance conditions rather than technical blockers
 
-## 2. Final Verdict
+## 2. Current Verdict
 
-PHASE 4 — CLOSED WITH ACCEPTED NON-BLOCKING CONDITIONS
+PHASE 4 — ENGINEERING CLOSURE PENDING
 
 This verdict reflects the verified repository state:
 
-- the technical implementation is complete
+- the technical implementation remains complete
 - no security blocker exists in the implemented licensing code
-- no required Phase 4 remediation remains in source, tests, or configuration
-- remaining conditions are operational/governance/evidence items that do not reopen the implementation
+- the required remediation is limited to test/CI portability and documentation accuracy
+- hosted CI closure remains pending a post-remediation hosted run
 
-## 3. Test Count Reconciliation
+## 3. Initial Hosted CI Finding
+
+The first hosted GitHub Actions run was independently verified after commit `e439d931926a71793003375397329b0cb84ca455`.
+
+- Workflow: `LabAuthServer CI`
+- Run ID: `34669268162`
+- Restore: PASS
+- Build: PASS, 0 warnings, 0 errors
+- Test: FAIL
+- Unit: 775 passed, 2 failed, 777 total
+- Integration: 243 passed, 3 failed, 246 total
+- Aggregate: 1,018 passed, 5 failed, 1,023 total
+
+The failures were test-environment portability issues, not licensing implementation failures:
+
+- SQL audit persistence tests assumed a developer-local `LabAuthServer` SQL database.
+- The LDAP timeout test depended on `WebApplicationFactory`/`DeferredHost` to surface a startup `OptionsValidationException`, which hosted CI masked as an `ObjectDisposedException`.
+
+The SQL tests are remediated by disposable LocalDB provisioning from the repository’s controlled Phase 11 schema/procedure scripts. The LDAP test is remediated by directly invoking the production `AddActiveDirectoryOptions` registration and resolving the validated options.
+
+## 4. Test Count Reconciliation
 
 The authoritative test inventory is the total of the two test projects in the solution:
 
@@ -46,7 +66,7 @@ This is a scope distinction, not a defect:
 
 Earlier apparent discrepancy reflected reporting from different scopes, not different test outcomes. No tests were missing, skipped, or intentionally hidden from the solution-level Release run.
 
-## 4. License Version 1 Signing Contract
+## 5. License Version 1 Signing Contract
 
 The current License Version 1 implementation is the frozen Phase 4 operational signing contract for this repository baseline.
 
@@ -70,7 +90,7 @@ The project does not claim the existence of a universal/general JSON canonicaliz
 
 Future changes to the signed representation must be treated as a versioned compatibility decision rather than an unreviewed implementation drift.
 
-## 5. Production Private-Key Governance
+## 6. Production Private-Key Governance
 
 ### Repository / application responsibilities
 
@@ -98,7 +118,7 @@ The following responsibilities remain intentionally external to the repository a
 
 This separation is intentional and correct. These external processes are operational governance responsibilities, not repository-implemented capabilities.
 
-## 6. Licensing Logging / Audit
+## 7. Licensing Logging / Audit
 
 The verified Phase 4 behavior is:
 
@@ -111,7 +131,7 @@ The verified Phase 4 behavior is:
 
 Production monitoring and alerting procedures remain an operations responsibility. The current runtime behavior is sufficient for Phase 4 closure and does not expose sensitive licensing content.
 
-## 7. CI Evidence
+## 8. CI Evidence
 
 Local CI-equivalent verification: PASS
 
@@ -123,11 +143,13 @@ This includes:
 - integration tests
 - full solution total = 1,023 passed, 0 failed, 0 skipped
 
-Hosted GitHub Actions verification: NOT YET INDEPENDENTLY CONFIRMED
+Hosted GitHub Actions verification before remediation: FAIL, run `34669268162`.
+
+Post-remediation hosted GitHub Actions verification: PENDING. The result must be recorded only after the new run for the remediation commit is observed.
 
 This is a non-blocking evidence condition. It does not mean the hosted workflow failed; it means the repository has not been independently observed in a hosted GitHub execution from this environment.
 
-## 8. Security Closure
+## 9. Security Closure
 
 The verified security findings are:
 
@@ -142,7 +164,7 @@ The verified security findings are:
 - licensing does not bypass authentication or authorization
 - no unexpected online licensing dependency exists
 
-## 9. Source-Available Limitation
+## 10. Source-Available Limitation
 
 The existing security limitation is preserved honestly and without overclaiming.
 
@@ -154,7 +176,7 @@ A party with:
 
 can modify an unofficial build and alter client-side licensing enforcement. The licensing design protects authenticity and entitlement enforcement in the unmodified official product, without claiming unbreakable DRM or a source-distributed system that is impossible to modify.
 
-## 10. Deferred Work
+## 11. Deferred Work
 
 The following remain intentionally deferred and are explicitly not Phase 4 closure defects:
 
@@ -171,18 +193,18 @@ The following remain intentionally deferred and are explicitly not Phase 4 closu
 
 These remain deferred as part of the approved Phase 4 baseline and do not reopen implementation.
 
-## 11. Accepted Non-Blocking Conditions
+## 12. Accepted Non-Blocking Conditions
 
 The following conditions are accepted and documented as non-blocking for Phase 4 closure:
 
 - P4-COND-01: Vendor must establish production private-key custody, backup, rotation, recovery, incident-response, and authorized-operator procedures before real production issuance.
-- P4-COND-02: At least one hosted GitHub Actions execution should be observed and recorded after the Phase 4 changes are pushed.
+- P4-COND-02: The post-remediation hosted GitHub Actions run must pass before engineering closure is declared.
 - P4-COND-03: Production operational monitoring should define how licensing validation failures are reviewed without exposing sensitive license contents.
 
 These conditions do not reopen Phase 4 implementation.
 
-## 12. Phase 5 Readiness
+## 13. Phase 5 Readiness
 
-READY FOR PHASE 5
+DO NOT BEGIN PHASE 5 IMPLEMENTATION WHILE HOSTED CI REMEDIATION IS PENDING.
 
 This readiness statement is qualified by the accepted operational conditions above, which remain tracked independently of the repository implementation itself.

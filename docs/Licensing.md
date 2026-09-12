@@ -77,7 +77,7 @@ If the license cannot be read, parsed or verified, validation fails closed with 
 
 The current implementation uses **RSA-PSS with SHA-256** for signature verification. The trusted key set carries public keys keyed by `keyId`. Verification uses only the public key; private key material is never present in the server, the repository or CI. The minimum accepted RSA key size is enforced in code (2048 bits); the exact published policy wording remains an open decision (see the Decision Log, O-06).
 
-The exact canonicalization profile, the signature envelope wording and the minimum accepted key-size policy are all preserved as open decisions in the Phase 4 plan; they are not silently decided here.
+The License Version 1 signing contract is FROZEN / READY. It is defined by the deterministic issuer serialization and exact payload-byte verification behavior implemented and validated by the project. This does not claim a universal JSON canonicalization standard; future changes to the signed representation require an explicit versioned compatibility decision.
 
 ## Trusted public keys
 
