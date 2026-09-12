@@ -2,7 +2,7 @@
 
 > IMPLEMENTATION IN PROGRESS — NOT COMPLETE
 
-Status: PHASE 5.6 — IMPLEMENTATION IN PROGRESS. This record documents the Phase 5.6 implementation pass for the owner-approved Phase 5.5 governance controls. The repository-side immutable GitHub Actions SHA pinning is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`). The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`, commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9`). No GitHub governance setting was changed, no branch protection was enabled, no ruleset was created, no fork setting was changed, no collaborator access was changed, and no signing mechanism was configured.
+Status: PHASE 5.6 — IMPLEMENTATION IN PROGRESS. This record documents the Phase 5.6 implementation pass for the owner-approved Phase 5.5 governance controls. The repository-side immutable GitHub Actions SHA pinning is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`, commit `8d0c0e9557d876b4219ecfebbb3e0d886cb11df9`). No GitHub governance setting was changed, no branch protection was enabled, no ruleset was created, no fork setting was changed, no collaborator access was changed, and no signing mechanism was configured. Remote private-repository GitHub governance controls are `TEMPORARILY DEFERRED — OWNER DECISION`; see section 15.
 
 ## 1. Purpose
 
@@ -91,11 +91,11 @@ No tooling was installed, no token was requested, exposed, printed, or stored, a
 
 | # | Approved Control | Classification |
 | --- | --- | --- |
-| 1 | Pull request required for normal `main` changes | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| 2 | Successful LabAuthServer CI required before `main` update | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| 3 | Force pushes prohibited on `main` | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| 4 | Strongest supported private-repository protection mechanism | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| 5 | Disable private forking | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
+| 1 | Pull request required for normal `main` changes | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 2 | Successful LabAuthServer CI required before `main` update | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 3 | Force pushes prohibited on `main` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 4 | Strongest supported private-repository protection mechanism | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 5 | Disable private forking | `TEMPORARILY DEFERRED — OWNER DECISION` |
 | 6 | Stable vendor-controlled commit identity | `BLOCKED — UNRESOLVED VALUE` |
 | 7 | Mandatory commit signing for future official history | `BLOCKED — UNRESOLVED SIGNING MECHANISM` |
 | 8 | Immutable GitHub Actions SHA pinning | `IMPLEMENTED AND HOSTED-CI VALIDATED` |
@@ -104,7 +104,7 @@ No tooling was installed, no token was requested, exposed, printed, or stored, a
 | 11 | Named repository administrator roles | `BLOCKED — UNRESOLVED ASSIGNMENT` |
 | 12 | Named Security Response Owner | `BLOCKED — UNRESOLVED ASSIGNMENT` |
 
-Controls 1–5 are classified `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED`. The Phase 5.5 CI gate is now verified `SUCCESS`, so tooling availability is the remaining blocker for these controls. These are **not** platform or plan limitations: traditional branch protection was not tested and rejected; only the authenticated administrative tooling required to attempt it was unavailable.
+Controls 1–5 are classified `TEMPORARILY DEFERRED — OWNER DECISION`. The Phase 5.5 CI gate is verified `SUCCESS`, so tooling availability is the remaining blocker for these controls. These are **not** platform or plan limitations: traditional branch protection was not tested and rejected; only the authenticated administrative tooling required to attempt it was unavailable. The owner has chosen to defer these controls until the GitHub plan is upgraded or the required private-repository administration features are otherwise available. None of controls 1–5 is implemented, complete, closed, or satisfied.
 
 ## 7. Repository-Side Change — Immutable Actions SHA Pinning
 
@@ -186,12 +186,12 @@ Remote control classification:
 
 | Control | Current State | Classification |
 | --- | --- | --- |
-| `main` branch protection | `DISABLED` | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| Pull-request enforcement | Not enforced | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| Required CI enforcement | `OFF` | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| Force-push restriction | Not restricted | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| Branch deletion restriction | Not restricted | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| Fork disablement | `ALLOWED` | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
+| `main` branch protection | `DISABLED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Pull-request enforcement | Not enforced | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Required CI enforcement | `OFF` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Force-push restriction | Not restricted | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Branch deletion restriction | Not restricted | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Fork disablement | `ALLOWED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
 | Rulesets | Unavailable | `BLOCKED — PLATFORM / PLAN LIMITATION` (verified) |
 
 Settings not changed and still at their verified prior state:
@@ -209,13 +209,13 @@ No remote setting is reported as implemented. No update request was issued, so n
 
 | Control | Current | Target | Capability | Implementation State |
 | --- | --- | --- | --- | --- |
-| Main protection | `DISABLED` | Protected `main` using the strongest supported private-repository mechanism | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
-| PR requirement | Not enforced | PR required for normal `main` changes | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
-| Approving review | Not enforced | Minimum 1 approving review where supported | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
-| Required CI check | `OFF` | `Build and Test (Release)` required before normal `main` update | Branch-protection capability `NOT VERIFIED` | `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED` |
-| Force push | Not restricted | Prohibited on `main` where supported | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
-| Branch deletion | Not restricted | Prohibited on `main` where supported | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
-| Forking | `ALLOWED` | Disable unless a specific controlled vendor workflow requires it | `NOT VERIFIED` | `PENDING — AUTHENTICATED ADMIN TOOLING` |
+| Main protection | `DISABLED` | Protected `main` using the strongest supported private-repository mechanism | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| PR requirement | Not enforced | PR required for normal `main` changes | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Approving review | Not enforced | Minimum 1 approving review where supported | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Required CI check | `OFF` | `Build and Test (Release)` required before normal `main` update | Branch-protection capability `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Force push | Not restricted | Prohibited on `main` where supported | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Branch deletion | Not restricted | Prohibited on `main` where supported | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| Forking | `ALLOWED` | Disable unless a specific controlled vendor workflow requires it | `NOT VERIFIED` | `TEMPORARILY DEFERRED — OWNER DECISION` |
 | Rulesets | Unavailable | Not the selected mechanism | `BLOCKED — PLAN LIMITATION` (verified) | `BLOCKED — PLAN LIMITATION` |
 | Immutable Actions SHA pinning | Pinned `v4` SHAs | Immutable SHA pins | Repository-side, supported | `IMPLEMENTED AND HOSTED-CI VALIDATED` |
 
@@ -250,15 +250,15 @@ Clarification: the workflow name and the required check/job context are not the 
 - Workflow name: `LabAuthServer CI`
 - Job/check context: `Build and Test (Release)`
 
-The owner-verified GitHub Actions jobs API identifies the successful job as `Build and Test (Release)`, which is the check context to use for future required-check configuration. The required status check is **not** configured by this phase; the setting remains `OFF`.
+The owner-verified GitHub Actions jobs API identifies the successful job as `Build and Test (Release)`, which is the check context to use for future required-check configuration. The required status check is **not** configured; the setting remains `OFF` because required-check enforcement is `TEMPORARILY DEFERRED — OWNER DECISION`. The verified context itself is unchanged and remains `Build and Test (Release)`.
 
 ### Forking control
 
 - Current: `ALLOWED`.
 - Approved target: disable unnecessary private forking unless a specific controlled vendor workflow requires it.
 - Authenticated admin tooling is unavailable to change the setting.
-- Classification: `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED`.
-- Repository visibility was not changed.
+- Classification: `TEMPORARILY DEFERRED — OWNER DECISION`.
+- Repository visibility was not changed. Forking governance is deferred only where it is not currently available through the required private-repository administration features.
 
 ## 9. Rollback Considerations
 
@@ -289,9 +289,12 @@ Owner-approved and not yet executed:
 Blocking prerequisites:
 
 - authenticated GitHub administrative tooling must be available for any remote setting change
+- the GitHub plan must be upgraded, or the required private-repository administration features otherwise obtained, before the deferred remote controls can be attempted
 - commit identity, commit-signing mechanism, and contact values must be supplied by the owner; they must not be invented
 
 The Phase 5.5 hosted CI gate is now verified `SUCCESS` and is no longer a blocking prerequisite.
+
+The remote governance controls listed above are `TEMPORARILY DEFERRED — OWNER DECISION`. They are not implemented and must be revisited later.
 
 ## 11. Platform and Tooling Limitations
 
@@ -328,11 +331,11 @@ No private key, signing key, GPG key, SSH key, password, token, credential, cust
 - [x] Remote implementation matrix recorded.
 - [x] Branch-protection capability recorded as `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`.
 - [x] Required CI check context verified and recorded as `Build and Test (Release)` (run #10 / `34675530766`, job ID `103504610220`, conclusion `SUCCESS`).
-- [ ] `main` branch protection implemented.
-- [ ] Required CI status check implemented.
-- [ ] Pull-request requirement enforced.
-- [ ] Force-push prohibition implemented.
-- [ ] Repository forking disabled.
+- [ ] `main` branch protection implemented. (TEMPORARILY DEFERRED — OWNER DECISION)
+- [ ] Required CI status check implemented. (TEMPORARILY DEFERRED — OWNER DECISION)
+- [ ] Pull-request requirement enforced. (TEMPORARILY DEFERRED — OWNER DECISION)
+- [ ] Force-push prohibition implemented. (TEMPORARILY DEFERRED — OWNER DECISION)
+- [ ] Repository forking disabled. (TEMPORARILY DEFERRED — OWNER DECISION)
 - [ ] Commit identity remediated.
 - [ ] Commit signing implemented.
 - [ ] Security contact resolved.
@@ -348,4 +351,36 @@ Phase 5.6 is **not complete**. Critical governance controls remain unimplemented
 
 ## 14. Current Status
 
-Phase 5.6 — IMPLEMENTATION IN PROGRESS. The repository-side immutable Actions SHA pinning control is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`). The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`). The required CI check context is verified as `Build and Test (Release)` (job ID `103504610220`); the required-check setting itself remains `OFF` and unconfigured. Remote GitHub governance controls remain `PENDING — AUTHENTICATED GITHUB ADMIN TOOLING REQUIRED`, and branch-protection capability remains `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`; commit identity, commit signing, and the contact and assignment items remain blocked by unresolved owner-supplied values. No GitHub setting was changed and the repository remained private. Phase 5.7 is not started.
+Phase 5.6 — IMPLEMENTATION IN PROGRESS. The repository-side immutable Actions SHA pinning control is committed, pushed, and hosted-CI validated at commit `966fe71733e6bb8bbdce5c41267da88c1b4571ae` (run #10 / `34675530766`, conclusion `SUCCESS`); the Phase 5.6 documentation commit is hosted-CI validated at run #11 / `34676441908`, conclusion `SUCCESS`. The Phase 5.5 prerequisite gate was verified `SUCCESS` (run #9 / `34674729292`). The required CI check context is verified as `Build and Test (Release)` (job ID `103504610220`); the required-check setting itself remains `OFF` and unconfigured. Remote GitHub governance controls are `TEMPORARILY DEFERRED — OWNER DECISION` until the owner chooses to upgrade the GitHub plan or otherwise gains access to the required private-repository administration features, and branch-protection capability remains `NOT VERIFIED — AUTHENTICATED ADMIN INSPECTION REQUIRED`; commit identity, commit signing, and the contact and assignment items remain blocked by unresolved owner-supplied values. No GitHub setting was changed, the repository remained private, and no public-visibility workaround was used. Phase 5.6 is not fully complete. Phase 5.7 is not started.
+
+## 15. TEMPORARILY DEFERRED — OWNER DECISION
+
+Owner decision recorded on 2026-09-12:
+
+> Private-repository branch protection and related GitHub governance controls are deferred until the owner chooses to upgrade the GitHub plan or otherwise gains access to the required private-repository administration features. The repository must remain private. No public-visibility workaround is authorized.
+
+Deferred controls — all `TEMPORARILY DEFERRED — OWNER DECISION`, none implemented:
+
+| # | Control | State |
+| --- | --- | --- |
+| 1 | Private-repository branch protection | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 2 | Pull-request requirement | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 3 | Approving-review requirement | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 4 | Required CI enforcement | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 5 | Force-push restriction | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 6 | Branch-deletion restriction | `TEMPORARILY DEFERRED — OWNER DECISION` |
+| 7 | Forking governance where not currently available | `TEMPORARILY DEFERRED — OWNER DECISION` |
+
+Constraints and preserved facts:
+
+- The repository must remain `PRIVATE`. Making it public is not an authorized workaround for any deferred control.
+- Verified required CI context remains `Build and Test (Release)` (workflow `LabAuthServer CI`, job ID `103504610220`).
+- Current factual state is unchanged: `main` branch protection `DISABLED`, required status checks `OFF`, forking `ALLOWED`, repository `PRIVATE`.
+- Rulesets remain `BLOCKED — VERIFIED PLAN LIMITATION`, separate from this owner decision.
+- The deferred controls are **not** implemented, complete, closed, or satisfied.
+- These controls must be revisited before Phase 5.6 is treated as fully complete.
+- No GitHub setting was changed, and no public-visibility workaround was authorized or used.
+
+## 16. Current Status (Deferral Note)
+
+Phase 5.6 is **not fully complete** while the controls in section 15 remain deferred. The deferral is an explicit owner decision, not an implementation result. Phase 5.7 is not started.
