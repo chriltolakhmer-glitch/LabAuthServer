@@ -65,10 +65,10 @@ The baseline remains the verified owner-accepted state already recorded for the 
 
 - Decision: Operational retention policy for release records.
 - Current status: `OWNER DECISION REQUIRED`.
-- Recommended choice: Adopt a conservative operational retention policy of `retain for the supported lifetime of the release plus a defined additional period`, with the explicit note that the exact legal / contractual retention period remains `LEGAL / CONTRACTUAL RETENTION REQUIREMENT — PROFESSIONAL REVIEW PENDING`.
+- Recommended choice: `Retain release records for the supported lifetime of the release and indefinitely thereafter until an approved legal/business retention policy supersedes this rule.` This is an operational preservation rule, not legal advice. Release records are relatively small governance and provenance records, and indefinite preservation avoids destroying the evidence trail before legal or business retention requirements are finalized. A later approved legal/business policy may replace this operational default. This rule does not require retaining private keys, credentials, customer licenses, or unrelated customer data.
 - Rationale: The repository does not contain a professional legal review establishing a binding legal retention period. An operational retention policy is therefore appropriate now, while acknowledging that future legal or contractual policy may supersede it. This is conservative, auditable, and realistic for a controlled vendor process without pretending the legal answer is known.
-- Tradeoffs: Indefinite retention is simple but may be unnecessarily expensive and broad; a short fixed multi-year period is simpler to operate but may conflict with a later legal requirement. A supported-lifetime-plus-buffer model is a prudent default until legal review is completed.
-- Exact owner-approval field: `P54-D5 RELEASE RECORD RETENTION: OPERATIONAL RETENTION POLICY = SUPPORT LIFETIME PLUS DEFINED BUFFER; LEGAL / CONTRACTUAL RETENTION REQUIREMENT = PROFESSIONAL REVIEW PENDING`
+- Tradeoffs: A shorter fixed retention window may be easier to administer but risks destroying provenance evidence before a legal or business requirement is finalized. Extending preservation indefinitely for the minimal governance records is a conservative default while the legal/business policy remains pending.
+- Exact owner-approval field: `P54-D5 RELEASE RECORD RETENTION: RETAIN FOR SUPPORTED LIFETIME AND INDEFINITELY THEREAFTER UNTIL SUPERSEDED BY APPROVED LEGAL/BUSINESS RETENTION POLICY; LEGAL / CONTRACTUAL RETENTION REQUIREMENT = PROFESSIONAL REVIEW PENDING`
 
 ### P54-D6 — Release approval / separation of duties
 
@@ -132,7 +132,7 @@ P54-D1 RELEASE IDENTIFIER FORMAT: LAS-vMAJOR.MINOR.PATCH-<shortsha>
 P54-D2 RELEASE CHANNEL TAXONOMY: Internal / Evaluation / Production (freeze current taxonomy)
 P54-D3 MANIFEST STORAGE POLICY: VENDOR-CONTROLLED PRIVATE STORAGE; ACCESS LIMITED TO AUTHORIZED RELEASE OPERATORS; IMMEDIATE LOCATION / PROVIDER TO BE SELECTED BEFORE FIRST REAL RELEASE
 P54-D4 RELEASE REGISTER STORAGE POLICY: POLICY APPROVED; STORAGE PRODUCT / LOCATION = OWNER VALUE REQUIRED BEFORE FIRST REAL RELEASE
-P54-D5 RELEASE RECORD RETENTION: OPERATIONAL RETENTION POLICY = SUPPORT LIFETIME PLUS DEFINED BUFFER; LEGAL / CONTRACTUAL RETENTION REQUIREMENT = PROFESSIONAL REVIEW PENDING
+P54-D5 RELEASE RECORD RETENTION: RETAIN FOR SUPPORTED LIFETIME AND INDEFINITELY THEREAFTER UNTIL SUPERSEDED BY APPROVED LEGAL/BUSINESS RETENTION POLICY; LEGAL / CONTRACTUAL RETENTION REQUIREMENT = PROFESSIONAL REVIEW PENDING
 P54-D6 RELEASE ROLES / SEPARATION OF DUTIES: Release Operator = ALOT; Release Approval Authority = ALOT initially; Distribution Operator = ALOT initially; Security Response Owner = ALOT; separation of duties = REQUIRED WHERE PRACTICAL; second-person review only when another authorized reviewer is available; absence of second reviewer MUST BE RECORDED
 ```
 
