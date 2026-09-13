@@ -1,6 +1,12 @@
 # Project Status
 
-## Current update — Phase 6.8 release authorization gate (2026-09-13)
+## Current update — Phase 6.9 first-release owner authorization packet (2026-09-13)
+
+**OWNER DECISION PACKET PREPARED AND LOCALLY VALIDATED; NO AUTHORIZATION RECORDED.** Phase 6.9 records the current readiness decision: build and tests are ready, licensing is ready with limitations, and environment, operations, legal/business, and release custody remain pending. The packet contains the owner decision form but does not approve or execute release activity.
+
+No release, tag, artifact publication, deployment, customer license issuance, or production environment change occurred. See [Phase 6.9 First-Release Owner Authorization](plans/Phase-6/Phase-6-9-First-Release-Owner-Authorization.md). Approval is required before any release action.
+
+## Previous update — Phase 6.8 release authorization gate (2026-09-13)
 
 **DECISION GATE PREPARED AND LOCALLY VALIDATED; NO RELEASE AUTHORIZED.** Phase 6.8 consolidates completed evidence from Phases 6.1 and 6.3 through 6.7, the final release checklist, remaining owner decisions, and a blank go/no-go authorization form. Build/test evidence is repository-only; environment, operational, security, legal/business, delivery, custody, and rollback gates remain open where evidence or owners are missing.
 
