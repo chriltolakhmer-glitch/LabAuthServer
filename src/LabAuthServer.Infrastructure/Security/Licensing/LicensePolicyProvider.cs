@@ -6,61 +6,93 @@ using Microsoft.Extensions.Options;
 namespace LabAuthServer.Infrastructure.Security.Licensing;
 
 /// <summary>
-/// Loads and validates the configured license file once at construction and exposes the
-/// resulting policy (Phase 4.16). The lifecycle is deliberately simple and deterministic:
-/// the license is loaded and validated when the provider is built (application startup),
-/// and a replacement requires an application reload/restart. Any missing, unreadable,
-/// oversized, malformed, untrusted, expired or otherwise invalid license yields
-/// <see cref="LicensePolicy.Restricted"/>; the provider never throws for a licensing
-/// condition and never weakens authentication or security controls. Only security and
-/// operational metadata is logged; license content, payloads, signatures and key material
-/// are never logged.
+/// Loads and validates the configured license file at construction, then re-evaluates the
+/// validated document's expiration on every policy access. Any missing, unreadable, oversized,
+/// malformed, untrusted, expired or otherwise invalid license yields
+/// <see cref="LicensePolicy.Restricted"/>; the provider never throws for a licensing condition
+/// and never weakens authentication or security controls. Only security and operational metadata
+/// is logged; license content, payloads, signatures and key material are never logged.
 /// </summary>
 public sealed class LicensePolicyProvider : ILicensePolicyProvider
 {
-    private readonly ILicensePolicy _policy;
+    private readonly ILicensePolicy _initialPolicy;
+    private readonly LicenseDocument? _validatedDocument;
+    private readonly ILicenseExpirationEvaluator _expirationEvaluator;
+    private readonly ILogger<LicensePolicyProvider> _logger;
 
     public LicensePolicyProvider(
         IOptions<LicenseValidationOptions> options,
         ILicenseFileReader fileReader,
         ILicenseValidator validator,
-        ILogger<LicensePolicyProvider> logger)
+        ILogger<LicensePolicyProvider> logger,
+        ILicenseExpirationEvaluator? expirationEvaluator = null,
+        ILicenseClock? clock = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(fileReader);
         ArgumentNullException.ThrowIfNull(validator);
         ArgumentNullException.ThrowIfNull(logger);
 
-        var settings = options.Value;
-        var read = fileReader.Read(settings.LicenseFilePath, settings.MaximumLicenseFileBytes);
+        _logger = logger;
+        _expirationEvaluator = expirationEvaluator ?? new LicenseExpirationEvaluator(clock ?? new SystemLicenseClock());
+        _validatedDocument = null;
 
-        if (!read.Succeeded)
+        try
         {
-            logger.LogWarning(
-                "License not loaded: {LicenseFileReadStatus}. Entering restricted Community mode.",
-                read.Status);
-            _policy = LicensePolicy.Restricted;
-            return;
-        }
+            var settings = options.Value;
+            var read = fileReader.Read(settings.LicenseFilePath, settings.MaximumLicenseFileBytes);
 
-        var result = validator.Validate(read.Content);
-        if (!result.IsValid)
+            if (!read.Succeeded)
+            {
+                logger.LogWarning(
+                    "License not loaded: {LicenseFileReadStatus}. Entering restricted Community mode.",
+                    read.Status);
+                _initialPolicy = LicensePolicy.Restricted;
+                return;
+            }
+
+            var result = validator.Validate(read.Content);
+            if (!result.IsValid || result.Policy is null)
+            {
+                logger.LogWarning(
+                    "License validation failed: status {LicenseStatus}, reason {LicenseReason}. Entering restricted Community mode.",
+                    result.Status,
+                    result.Reason);
+                _initialPolicy = LicensePolicy.Restricted;
+                return;
+            }
+
+            _validatedDocument = result.Policy;
+            _initialPolicy = LicensePolicy.FromDocument(result.Policy);
+            logger.LogInformation(
+                "License loaded and validated. Edition {LicenseEdition}, restricted {IsRestricted}.",
+                _initialPolicy.Edition,
+                _initialPolicy.IsRestricted);
+        }
+        catch (Exception ex)
         {
-            logger.LogWarning(
-                "License validation failed: status {LicenseStatus}, reason {LicenseReason}. Entering restricted Community mode.",
-                result.Status,
-                result.Reason);
-            _policy = LicensePolicy.Restricted;
-            return;
+            logger.LogWarning(ex, "License initialization failed. Entering restricted Community mode.");
+            _initialPolicy = LicensePolicy.Restricted;
         }
-
-        _policy = LicensePolicy.FromValidationResult(result);
-        logger.LogInformation(
-            "License loaded and validated. Edition {LicenseEdition}, restricted {IsRestricted}.",
-            _policy.Edition,
-            _policy.IsRestricted);
     }
 
     /// <inheritdoc />
-    public ILicensePolicy GetPolicy() => _policy;
+    public ILicensePolicy GetPolicy()
+    {
+        if (_validatedDocument is null)
+        {
+            return _initialPolicy;
+        }
+
+        var expiration = _expirationEvaluator.Evaluate(_validatedDocument);
+        if (expiration.IsExpired || expiration.IsNotYetValid)
+        {
+            _logger.LogWarning(
+                "License is no longer active at runtime: {LicenseExpirationState}. Entering restricted Community mode.",
+                expiration.State);
+            return LicensePolicy.Restricted;
+        }
+
+        return _initialPolicy;
+    }
 }

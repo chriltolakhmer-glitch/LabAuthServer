@@ -6,31 +6,34 @@ namespace LabAuthServer.Infrastructure.Security.Licensing;
 /// <summary>
 /// Builds the trusted public-key set from configuration (Phase 4.16). Only PEM-encoded
 /// public keys are accepted; private-key PEM blocks are rejected so no private material
-/// can be provisioned into the server. Invalid entries are skipped rather than throwing,
-/// so a misconfigured key cannot crash startup.
+/// can be provisioned into the server. Invalid entries are skipped and reported as an
+/// invalid key set rather than throwing, so a misconfigured key cannot grant a license.
 /// </summary>
 public static class TrustedKeySetFactory
 {
     private const string PrivateKeyMarker = "PRIVATE KEY";
 
     /// <summary>Populates <paramref name="provider"/> from the configured trusted keys.</summary>
-    public static void Populate(
+    public static bool Populate(
         InMemoryTrustedLicenseKeyProvider provider,
         IEnumerable<TrustedLicenseKeyOptions> keys)
     {
         ArgumentNullException.ThrowIfNull(provider);
         ArgumentNullException.ThrowIfNull(keys);
+        var configurationValid = true;
 
         foreach (var entry in keys)
         {
             if (string.IsNullOrWhiteSpace(entry.KeyId) || string.IsNullOrWhiteSpace(entry.PublicKey))
             {
+                configurationValid = false;
                 continue;
             }
 
             // Reject any PEM block that carries private material outright.
             if (entry.PublicKey.Contains(PrivateKeyMarker, StringComparison.OrdinalIgnoreCase))
             {
+                configurationValid = false;
                 continue;
             }
 
@@ -43,12 +46,18 @@ public static class TrustedKeySetFactory
             }
             catch (CryptographicException)
             {
-                // Skip an unparsable key; fail closed by simply not trusting it.
+                configurationValid = false;
             }
             catch (ArgumentException)
             {
-                // Skip an invalid key identifier; fail closed.
+                configurationValid = false;
+            }
+            catch (InvalidOperationException)
+            {
+                configurationValid = false;
             }
         }
+
+        return configurationValid;
     }
 }

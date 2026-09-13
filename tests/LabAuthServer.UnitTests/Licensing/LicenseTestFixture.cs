@@ -166,7 +166,7 @@ public sealed class LicenseTestFixture : IDisposable
     {
         public FixedClock(DateTimeOffset now) => UtcNow = now;
 
-        public DateTimeOffset UtcNow { get; }
+        public DateTimeOffset UtcNow { get; set; }
     }
 
     /// <summary>Signing-key provider over an ephemeral in-memory key.</summary>

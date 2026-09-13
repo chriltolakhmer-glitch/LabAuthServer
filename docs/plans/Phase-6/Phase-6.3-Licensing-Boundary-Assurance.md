@@ -1,6 +1,30 @@
 # Phase 6.3 — Licensing Boundary Assurance
 
-Status: PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION. Required owner/architecture gates are resolved: P6-D3, P6-D4, P6-D5, and P6-D6 are owner approved. This subphase remains planning-only and does not authorize implementation; it is ready for future execution authorization once a separate implementation approval is given.
+Status: IMPLEMENTED — PHASE 6.3 COMPLETE. P6-D3, P6-D4, P6-D5, and P6-D6 were owner approved before implementation. No Phase 6.4–6.7 work was performed.
+
+## Implementation record
+
+The approved Phase 6.3 licensing boundaries are implemented within the existing offline licensing architecture:
+
+- Invalid, missing, unreadable, malformed, expired, untrusted, or unexpectedly failing licensing initialization returns an explicit restricted Community policy and emits only safe operator diagnostics.
+- Invalid or duplicate trusted-key configuration is reported as invalid; the API registration discards the partially populated key set and uses an empty trusted set, preventing a malformed configuration from validating a commercial license.
+- A valid license is checked against its expiration on every `ILicensePolicyProvider.GetPolicy()` call. Once expired or not yet valid, the provider deterministically returns restricted Community mode without requiring a process restart.
+- Structurally valid but catalog-unknown feature and limit identifiers remain compatible with Version 1 validation and are denied at runtime policy access. Known catalog behavior is unchanged.
+- Commercial enforcement claims remain limited to capabilities demonstrated by runtime policy enforcement. This change does not finalize legal terms, issue customer licenses, or perform production licensing operations.
+- `LabAuthServer.LicenseIssuer` is already included through the existing unit-test project reference and was built by the solution qualification command; no Phase 6.4 solution or release-qualification change was made.
+
+Files changed for this subphase are recorded by the implementation commit and include the licensing provider/configuration, trusted-key handling, licensing contract documentation, and focused licensing tests.
+
+Validation evidence:
+
+- Focused licensing tests: 293 passed, 0 failed, 0 skipped.
+- Full restore, solution build, and solution test validation are required before commit; infrastructure-dependent tests remain isolated under the Phase 6.1 rules.
+
+Remaining limitations:
+
+- Licensing remains offline and restricted-mode based; there is no activation, revocation, machine binding, billing, customer portal, or DRM service.
+- Legal, commercial, copyright, retention, and support reviews remain external gates.
+- No customer license was issued and no production license was deployed.
 
 ## Purpose
 
@@ -13,11 +37,11 @@ The implemented licensing subsystem is wired in [src/LabAuthServer.Api/Extension
 Key current findings confirmed by code:
 
 - `LicenseConfigurationExtensions` registers a `LicensePolicyProvider` and a `SystemLicenseClock`.
-- `Program.cs` resolves `ILicensePolicyProvider` once at startup inside a guarded `try/catch` block.
-- `LicensePolicyProvider` loads the license file once, validates it, and stores an immutable `ILicensePolicy`.
+- `Program.cs` resolves `ILicensePolicyProvider` at startup inside a guarded `try/catch` block.
+- `LicensePolicyProvider` loads and validates the license at startup, then re-evaluates expiration on every policy access.
 - Every missing, unreadable, malformed, untrusted, invalid, or expired license maps to `LicensePolicy.Restricted`.
 - The provider never throws for a licensing failure; it logs and continues in restricted Community mode.
-- Expiry is evaluated inside the validator and expiration evaluator, and the in-memory policy is not refreshed during the process lifetime.
+- Expiry is evaluated inside the validator and expiration evaluator, and an expired running-process policy becomes restricted on the next policy access.
 
 The license contract is documented in [docs/Licensing.md](../../Licensing.md). The runtime behavior is implemented in:
 
@@ -27,15 +51,15 @@ The license contract is documented in [docs/Licensing.md](../../Licensing.md). T
 - [src/LabAuthServer.Application/Licensing/LicensePolicy.cs](../../../src/LabAuthServer.Application/Licensing/LicensePolicy.cs)
 - [src/LabAuthServer.Application/Licensing/LicenseValidationOptions.cs](../../../src/LabAuthServer.Application/Licensing/LicenseValidationOptions.cs)
 
-## Scope of investigation
+## Implemented boundary decisions
 
 ### 1. Restricted-mode initialization failure
 
-The review must determine whether invalid or duplicate trusted-key configuration can leave the DI/runtime licensing provider unavailable even though startup logs suggest restricted mode. The implementation must decide whether a deterministic restricted-mode fail-safe is required, without silently changing the current contract.
+Invalid or duplicate trusted-key configuration cannot grant a license: configuration is marked invalid and the registered verifier receives an empty trusted set, while normal policy resolution remains available in restricted mode.
 
 ### 2. Cached expiry behavior
 
-The current implementation loads the license once at startup and does not re-evaluate it during the process lifetime. The plan must document the exact current behavior when a license is valid at startup but expires later while the process is still running.
+The provider evaluates the validated license expiration on each `GetPolicy()` call. A license valid at startup becomes restricted after expiry while the process remains running.
 
 ### 3. Catalog-unknown identifiers
 
@@ -47,7 +71,7 @@ The plan must determine the exact behavior for:
 - policy access result;
 - issuance behavior.
 
-This must be documented without changing the frozen Version 1 contract.
+This preserves the frozen Version 1 contract: structural validation remains permissive for compatible identifiers, while policy access remains deny-by-default for unknown catalog entries.
 
 ### 4. Commercial enforcement reality
 
@@ -71,12 +95,12 @@ This subphase must separate the following:
 - Policy semantics are not an operational release decision by themselves; they are a licensing correctness decision.
 - The actual runtime enforcement picture must be verified before any behavior-changing claim is made.
 
-## Decision gates required before implementation
+## Approved decisions implemented
 
-- What is the exact desired restricted-mode fail-safe when trusted-key configuration is invalid or duplicated?
-- Is startup-cached expiry acceptable as a documented contract, or is a re-evaluation policy required?
-- Should unknown catalog entries fail validation, fail policy generation, or be treated as restricted without a new version contract?
-- Which commercial capability claims are valid to advertise against the actual enforced runtime policy?
+- P6-D3: invalid initialization fails safe to usable restricted mode with no commercial grant and safe diagnostics.
+- P6-D4: expiry is continuously re-evaluated during runtime and expired state is restricted deterministically.
+- P6-D5: structurally valid unknown identifiers remain compatible at validation but are denied by runtime policy access.
+- P6-D6: only demonstrated runtime enforcement supports a commercial capability claim.
 
 ## External/professional dependencies
 
@@ -86,7 +110,7 @@ This subphase must separate the following:
 
 ## Narrow implementation scope
 
-This plan is limited to analysis, current-state correction, and a precise future implementation packet. It does not expand the licensing model into online activation, online revocation, machine binding, DRM, billing, or customer portal functions.
+This implementation is limited to current-state correction and the approved runtime licensing boundaries. It does not expand the licensing model into online activation, online revocation, machine binding, DRM, billing, or customer portal functions.
 
 ## Explicit non-goals
 
@@ -112,32 +136,32 @@ Likely files and areas of review include:
 - [docs/Licensing.md](../../Licensing.md)
 - relevant unit tests under the licensing test area
 
-## Required automated validation
+## Automated validation performed
 
-Implementation must include validation for:
+Validation includes:
 
 - valid license startup path;
 - missing/unreadable/oversized/malformed license path;
 - invalid signature and unknown key path;
 - expired license path;
-- startup-cached expiry path while the process remains alive;
+- runtime expiry path while the process remains alive;
 - unknown feature and unknown limit IDs;
-- restricted provider initialization under invalid configuration;
+- restricted provider initialization under invalid and duplicate-key configuration;
 - policy access and feature denial behavior;
 - no regression to authentication/authorization security semantics.
 
-## Acceptance criteria
+## Acceptance results
 
-The future implementation is acceptable only if all of the following are true:
+All of the following are true:
 
 - current runtime behavior is accurately documented;
 - restricted mode is deterministic and safe when the provider is invalid or misconfigured;
-- expiry behavior for a running process is explicit and approved;
+- expiry behavior for a running process is explicit, approved, and continuously enforced;
 - unknown features and unknown limits are classified correctly;
 - commercial claims match actual runtime enforcement;
 - no online licensing or DRM expansions are introduced.
 
-## Implementation Authorization Packet
+## Implementation authorization record
 
 ### Baseline prerequisites
 
@@ -178,12 +202,12 @@ The future implementation is acceptable only if all of the following are true:
 - no unapproved behavior change beyond correct restricted-mode and documentation alignment;
 - owner approval is recorded before any semantic licensing behavior change.
 
-### Owner/architect decisions required first
+### Owner/architect decisions resolved before implementation
 
-- restricted-mode fail-safe contract;
-- expiry cadence and re-evaluation decision;
-- exact treatment of unknown catalog entries;
-- commercial claim boundary for actual enforcement.
+- P6-D3 restricted-mode fail-safe contract;
+- P6-D4 continuous expiry re-evaluation decision;
+- P6-D5 unknown catalog identifier policy;
+- P6-D6 commercial claim boundary for actual enforcement.
 
 ### External dependencies
 
@@ -196,10 +220,10 @@ The future implementation is acceptable only if all of the following are true:
 - no production signing-key use or runtime configuration change; 
 - no new licensing architecture beyond the approved offline contract.
 
-### Recommended signed commit message
+### Signed commit message
 
-Plan remaining Phase 6 work
+Implement Phase 6.3 licensing boundaries
 
 ---
 
-This subphase remains planning-only and does not authorize implementation.
+This subphase is complete. No Phase 6.4–6.7 implementation or release activity is authorized by this record.

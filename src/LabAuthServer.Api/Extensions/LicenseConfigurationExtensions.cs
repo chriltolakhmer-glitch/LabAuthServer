@@ -6,7 +6,8 @@ namespace LabAuthServer.Api.Extensions;
 /// <summary>
 /// Wires the offline license subsystem (Phase 4.16): the bounded file reader, the
 /// public-only trusted key set, the strict parser, the RSA-PSS verifier, the validator and
-/// the policy provider that loads and validates the license once at startup. Registration
+/// the policy provider that loads and validates the license at startup and re-evaluates expiry
+/// during policy access. Registration
 /// fails closed: with no configured keys or license the policy is restricted Community.
 /// No private key is required or read.
 /// </summary>
@@ -34,7 +35,16 @@ public static class LicenseConfigurationExtensions
                 .Value;
 
             var provider = new InMemoryTrustedLicenseKeyProvider();
-            TrustedKeySetFactory.Populate(provider, options.TrustedKeys);
+            if (!TrustedKeySetFactory.Populate(provider, options.TrustedKeys))
+            {
+                serviceProvider
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("LabAuthServer.Licensing")
+                    .LogWarning("Trusted license key configuration is invalid; entering restricted Community mode.");
+                provider.Dispose();
+                provider = new InMemoryTrustedLicenseKeyProvider();
+            }
+
             return new RsaPssLicenseSignatureVerifier(provider);
         });
 

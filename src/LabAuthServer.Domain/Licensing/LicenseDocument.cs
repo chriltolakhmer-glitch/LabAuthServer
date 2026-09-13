@@ -28,10 +28,10 @@ public sealed record LicenseDocument
     /// <summary>UTC expiry instant, or <c>null</c> for a perpetual license.</summary>
     public DateTimeOffset? ExpiresAt { get; init; }
 
-    /// <summary>Explicit feature identifiers granted by the license. Unknown identifiers are default-deny at validation.</summary>
+    /// <summary>Explicit feature identifiers granted by the license. Unknown identifiers are denied at policy access.</summary>
     public IReadOnlyList<string> Features { get; init; } = Array.Empty<string>();
 
-    /// <summary>License limits keyed by a known limit identifier, for example a maximum-user count.</summary>
+    /// <summary>License limits keyed by identifier, with unknown identifiers denied at policy access.</summary>
     public IReadOnlyDictionary<string, int> Limits { get; init; } = new Dictionary<string, int>();
 
     /// <summary>True when the license has no expiry instant (perpetual license).</summary>

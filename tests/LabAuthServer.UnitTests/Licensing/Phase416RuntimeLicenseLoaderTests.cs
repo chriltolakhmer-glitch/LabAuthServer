@@ -42,10 +42,11 @@ public sealed class Phase416RuntimeLicenseLoaderTests : IDisposable
         var provider = new InMemoryTrustedLicenseKeyProvider();
         provider.Add(trustedKeyId, trustedPublicKey);
 
+        var clock = new LicenseTestFixture.FixedClock(now ?? LicenseTestFixture.IssuedAt);
         var validator = new LicenseValidator(
             new JsonLicenseDocumentParser(),
             new RsaPssLicenseSignatureVerifier(provider),
-            new LicenseTestFixture.FixedClock(now ?? LicenseTestFixture.IssuedAt));
+            clock);
 
         var options = Options.Create(new LicenseValidationOptions
         {
@@ -53,7 +54,7 @@ public sealed class Phase416RuntimeLicenseLoaderTests : IDisposable
             MaximumLicenseFileBytes = maximumBytes
         });
 
-        return new LicensePolicyProvider(options, new BoundedLicenseFileReader(), validator, logger ?? new CapturingLogger());
+        return new LicensePolicyProvider(options, new BoundedLicenseFileReader(), validator, logger ?? new CapturingLogger(), clock: clock);
     }
 
     [Fact]
@@ -149,6 +150,57 @@ public sealed class Phase416RuntimeLicenseLoaderTests : IDisposable
         var provider = BuildProvider(path, publicKey, now: new DateTimeOffset(2026, 9, 11, 0, 0, 0, TimeSpan.Zero));
 
         Assert.True(provider.GetPolicy().IsRestricted);
+    }
+
+    [Fact]
+    public void LicenseThatExpiresWhileProcessRuns_BecomesRestrictedOnNextPolicyAccess()
+    {
+        using var signingKey = _fixture.CreateKey();
+        using var publicKey = _fixture.CreatePublicOnly(signingKey);
+        var clock = new LicenseTestFixture.FixedClock(LicenseTestFixture.IssuedAt);
+        var path = WriteLicenseFile(_fixture.Issue(
+            signingKey,
+            issuedAt: LicenseTestFixture.IssuedAt,
+            expiresAt: LicenseTestFixture.IssuedAt.AddHours(1)));
+        var trustedKeys = new InMemoryTrustedLicenseKeyProvider();
+        trustedKeys.Add(LicenseTestFixture.DefaultKeyId, publicKey);
+        var validator = new LicenseValidator(
+            new JsonLicenseDocumentParser(),
+            new RsaPssLicenseSignatureVerifier(trustedKeys),
+            clock);
+        var provider = new LicensePolicyProvider(
+            Options.Create(new LicenseValidationOptions
+            {
+                LicenseFilePath = path,
+                MaximumLicenseFileBytes = 64 * 1024
+            }),
+            new BoundedLicenseFileReader(),
+            validator,
+            new CapturingLogger(),
+            clock: clock);
+
+        Assert.False(provider.GetPolicy().IsRestricted);
+        clock.UtcNow = LicenseTestFixture.IssuedAt.AddHours(1).AddSeconds(1);
+
+        Assert.True(provider.GetPolicy().IsRestricted);
+    }
+
+    [Fact]
+    public void StructurallyValidUnknownIdentifiers_AreValidatedButDeniedAtPolicyAccess()
+    {
+        using var signingKey = _fixture.CreateKey();
+        using var publicKey = _fixture.CreatePublicOnly(signingKey);
+        var path = WriteLicenseFile(_fixture.Issue(
+            signingKey,
+            features: new[] { "future.unknown.feature" },
+            limits: new Dictionary<string, int> { ["future.unknown.limit"] = 10 }));
+
+        var provider = BuildProvider(path, publicKey);
+        var policy = provider.GetPolicy();
+
+        Assert.False(policy.IsRestricted);
+        Assert.False(policy.IsFeatureEnabled("future.unknown.feature"));
+        Assert.False(policy.TryGetLimit("future.unknown.limit", out _));
     }
 
     [Fact]
@@ -280,6 +332,22 @@ public sealed class Phase416RuntimeLicenseLoaderTests : IDisposable
 
         Assert.NotNull(provider.TryGetPublicKey("public-key"));
         Assert.Null(provider.TryGetPublicKey("not-a-key"));
+    }
+
+    [Fact]
+    public void TrustedKeySetFactory_DuplicateIdentifierReportsInvalidConfiguration()
+    {
+        using var signingKey = _fixture.CreateKey();
+        var publicPem = signingKey.ExportSubjectPublicKeyInfoPem();
+        var provider = new InMemoryTrustedLicenseKeyProvider();
+
+        var result = TrustedKeySetFactory.Populate(provider, new[]
+        {
+            new TrustedLicenseKeyOptions { KeyId = "duplicate", PublicKey = publicPem },
+            new TrustedLicenseKeyOptions { KeyId = "duplicate", PublicKey = publicPem }
+        });
+
+        Assert.False(result);
     }
 
     /// <inheritdoc />
