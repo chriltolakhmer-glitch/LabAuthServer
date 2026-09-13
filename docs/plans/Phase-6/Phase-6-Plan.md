@@ -1,6 +1,6 @@
 # Phase 6 — Operational Assurance and First-Release Readiness
 
-Status: OWNER-APPROVED GOVERNANCE PACKET RECORDED. Phase 6.1 is implemented and verified by exact hosted CI; Phase 6.4 is implemented and locally validated; Phase 6.5 design is implemented and locally validated; Phase 6.6 acceptance design is prepared and locally validated. Phase 6.2, 6.3, and 6.7 remain outside this implementation and require their own authorization. P6-D1 through P6-D6 and P6-D14 are owner approved; P6-D7 through P6-D13 remain intentionally deferred; P6-I1 is implemented through explicit issuer Release qualification. [Phase index](README.md).
+Status: OWNER-APPROVED GOVERNANCE PACKET RECORDED. Phase 6.1 is implemented and verified by exact hosted CI; Phase 6.4 is implemented and locally validated; Phase 6.5 design is implemented and locally validated; Phase 6.6 acceptance design is prepared and locally validated; Phase 6.7 readiness assessment is prepared and locally validated. Phase 6.2 and 6.3 remain outside this implementation and require their own authorization. P6-D1 through P6-D6 and P6-D14 are owner approved; P6-D7 through P6-D13 remain intentionally deferred; P6-I1 is implemented through explicit issuer Release qualification. [Phase index](README.md).
 
 ## Objective and exit state
 
@@ -30,7 +30,7 @@ Phase 6 completion means READY TO REQUEST SEPARATE RELEASE AUTHORIZATION. It doe
 | [6.4](Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) | Release-Build and Documentation Reconciliation | IMPLEMENTED / LOCALLY VALIDATED; NO RELEASE AUTHORIZED | 6.1; P6-I1 |
 | [6.5](Phase-6.5-Audit-and-Operational-Acceptance-Design.md) | Audit and Operational Acceptance Design | IMPLEMENTED DESIGN; OPERATIONAL DECISIONS DEFERRED | 6.1; owner/DBA/ops decisions remain deferred via P6-D7–D13 |
 | [6.6](Phase-6.6-Target-Environment-Acceptance.md) | Target-Environment Acceptance | ACCEPTANCE DESIGN PREPARED; NO TARGET ACCEPTED | 6.2–6.5 outcomes and approved environment access |
-| [6.7](Phase-6.7-First-Release-Prerequisite-Readiness.md) | First-Release Prerequisite Readiness | PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION OR RELEASE | 6.2–6.6 evidence and external gates; P6-D14 owner approved |
+| [6.7](Phase-6.7-First-Release-Prerequisite-Readiness.md) | First-Release Prerequisite Readiness | READINESS ASSESSMENT PREPARED; NO RELEASE AUTHORIZED | 6.2–6.6 evidence and external gates; P6-D14 owner approved |
 
 ## Dependency order and safe parallelism
 
