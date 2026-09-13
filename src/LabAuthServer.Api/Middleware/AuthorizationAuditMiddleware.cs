@@ -28,7 +28,7 @@ public sealed class AuthorizationAuditMiddleware : IMiddleware
         {
             var correlation = CorrelationContext.Get(context);
             var subject = context.User.FindFirst("sub")?.Value;
-            var identityOmitted = subject is { Length: > 256 };
+            var identityOmitted = subject is { Length: > AuditEventValidator.MaximumIdentityLength };
             await _auditEventService.WriteAsync(new AuditEvent
             {
                 EventTypeCode = AuditEventTypes.AccessDenied,

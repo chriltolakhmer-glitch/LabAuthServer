@@ -6,6 +6,8 @@ namespace LabAuthServer.Application.Auditing;
 
 public static class AuditEventValidator
 {
+    public const int MaximumIdentityLength = 256;
+
     private static readonly HashSet<string> SensitivePropertyNames = new(StringComparer.OrdinalIgnoreCase)
     {
         "password", "token", "accessToken", "refreshToken", "authorization", "headers",
@@ -21,8 +23,8 @@ public static class AuditEventValidator
         if (!AuditEventTypes.All.Contains(auditEvent.EventTypeCode)) failures.Add("Event type is not approved.");
         if (auditEvent.CorrelationId == Guid.Empty) failures.Add("Correlation ID is required.");
         CheckLength(auditEvent.RequestId, 128, nameof(auditEvent.RequestId), failures);
-        CheckLength(auditEvent.Username, 256, nameof(auditEvent.Username), failures);
-        CheckLength(auditEvent.Subject, 256, nameof(auditEvent.Subject), failures);
+        CheckLength(auditEvent.Username, MaximumIdentityLength, nameof(auditEvent.Username), failures);
+        CheckLength(auditEvent.Subject, MaximumIdentityLength, nameof(auditEvent.Subject), failures);
         CheckLength(auditEvent.Role, 64, nameof(auditEvent.Role), failures);
         CheckLength(auditEvent.Endpoint, 256, nameof(auditEvent.Endpoint), failures);
         CheckLength(auditEvent.HttpMethod, 16, nameof(auditEvent.HttpMethod), failures);

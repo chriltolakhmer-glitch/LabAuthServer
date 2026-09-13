@@ -43,13 +43,15 @@ public sealed class ProtectedController : ControllerBase
         try
         {
             var correlation = CorrelationContext.Get(HttpContext);
+            var subject = User.FindFirst("sub")?.Value;
+            var identityOmitted = subject is { Length: > AuditEventValidator.MaximumIdentityLength };
             await _auditEventService.WriteAsync(new AuditEvent
             {
                 EventTypeCode = AuditEventTypes.AccessGranted,
                 CorrelationId = correlation.CorrelationId,
                 RequestId = correlation.RequestId,
-                Username = User.FindFirst("sub")?.Value,
-                Subject = User.FindFirst("sub")?.Value,
+                Username = identityOmitted ? null : subject,
+                Subject = identityOmitted ? null : subject,
                 Role = User.FindFirst("role")?.Value,
                 Endpoint = "/api/v1/protected",
                 HttpMethod = Request.Method,
@@ -57,7 +59,8 @@ public sealed class ProtectedController : ControllerBase
                 Success = true,
                 ClientIp = HttpContext.Connection.RemoteIpAddress?.ToString(),
                 ServerName = Environment.MachineName,
-                ApplicationVersion = typeof(Program).Assembly.GetName().Version?.ToString()
+                ApplicationVersion = typeof(Program).Assembly.GetName().Version?.ToString(),
+                DetailsJson = identityOmitted ? "{\"identityOmitted\":true}" : null
             }, HttpContext.RequestAborted).ConfigureAwait(false);
         }
         catch (Exception)

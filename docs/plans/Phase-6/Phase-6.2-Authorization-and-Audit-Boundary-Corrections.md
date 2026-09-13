@@ -1,6 +1,37 @@
 # Phase 6.2 — Authorization and Audit Boundary Corrections
 
-Status: PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION. Required owner/architecture gates are resolved: P6-D1 and P6-D2 are owner approved. This subphase remains planning-only and does not authorize implementation; it is ready for future execution authorization once a separate implementation approval is given.
+Status: IMPLEMENTED — PHASE 6.2 COMPLETE. P6-D1 and P6-D2 were owner approved before implementation. No Phase 6.3–6.7 work was performed.
+
+## Implementation record
+
+The approved Phase 6.2 boundaries are implemented without changing the authentication architecture or database schema:
+
+- `FallbackPolicy` now uses the existing authenticated-user `DefaultPolicy`, while explicit `[AllowAnonymous]` endpoints remain public and explicit role policies remain unchanged.
+- Unmatched routes retain normal 404 routing behavior; bearer challenge and forbid behavior remains 401 and 403 respectively.
+- Successful protected-access audit events preserve the request and event when the subject exceeds the 256-character identity limit by omitting both identity fields and recording `identityOmitted: true` in `DetailsJson`.
+- The audit identity limit is shared through `AuditEventValidator.MaximumIdentityLength`; the validator and SQL parameter boundaries remain unchanged.
+
+Files changed for this subphase:
+
+- `src/LabAuthServer.Api/Extensions/TokenConfigurationExtensions.cs`
+- `src/LabAuthServer.Api/Controllers/ProtectedController.cs`
+- `src/LabAuthServer.Api/Middleware/AuthorizationAuditMiddleware.cs`
+- `src/LabAuthServer.Application/Auditing/AuditEventValidator.cs`
+- `tests/LabAuthServer.IntegrationTests/ProtectedEndpointTests.cs`
+- `tests/LabAuthServer.IntegrationTests/AuditBoundaryRegressionTests.cs`
+- this Phase 6.2 implementation record
+
+Validation evidence:
+
+- Protected endpoint tests cover unauthenticated 401, insufficient-role 403, and successful Reader access.
+- Health remains anonymously accessible, unmatched routes remain 404, and the configured fallback policy requires authenticated users.
+- Successful protected access is tested at 256 and 257-character subject lengths; oversized identity values are omitted without rejecting the request, and the identity-omitted indicator is validated through the same pre-SQL validator used by the test audit service.
+- `dotnet restore` succeeded; `dotnet build LabAuthServer.slnx --no-restore` succeeded; `dotnet test LabAuthServer.slnx --no-build --no-restore` completed with 1,043 passed, 0 failed, and 3 skipped.
+
+Remaining limitations:
+
+- Audit persistence remains best effort; loss tolerance, retention, monitoring, and SQL-outage policy remain deferred to Phase 6.5.
+- License, release-qualification, environment-acceptance, and first-release work remain outside Phase 6.2.
 
 ## Purpose
 
@@ -44,15 +75,12 @@ The implementation must decide and enforce a narrow, explicit contract for how t
 
 This subphase depends on Phase 6.1 for safe validation boundaries and on the approved behavior of the JWT/authentication layer. It does not change the authentication architecture, certificate flow, or the token issuance format.
 
-## Decision gates required before implementation
+## Resolved decision gates
 
-The following must be resolved by the owner or architect before behavior changes are allowed:
+The following gates were resolved by the owner before implementation:
 
-- What is the desired fallback contract for a route that is neither public nor explicitly protected?
-- Should the application default to 401 for absent/invalid authentication and 403 for valid-but-unauthorized users?
-- Should unmatched routes intentionally be 404, or should they also be covered by an explicit auth policy?
-- What is the exact desired behavior for security-sensitive endpoints with explicit `[Authorize]` vs explicit named role policies?
-- Should successful access with an oversized subject be omitted to null or reduced to a bounded alias, while preserving the rest of the event?
+- P6-D1: authenticated by default; explicit public endpoints use `[AllowAnonymous]`; mapped unannotated endpoints require authentication; unmatched routes retain 404; authentication challenge is 401 and insufficient authorization is 403.
+- P6-D2: preserve authorized access; omit oversized username/subject values; record a safe identity-omitted indicator; preserve the remainder of the audit event.
 
 ## External/professional dependencies
 
@@ -62,7 +90,7 @@ The following must be resolved by the owner or architect before behavior changes
 
 ## Narrow implementation scope
 
-The future implementation may change only the following:
+The completed implementation changed only the following:
 
 - authorization policy configuration and route boundary contract;
 - explicit public endpoint allowlist behavior for controllers/endpoints;
@@ -92,9 +120,9 @@ Likely file candidates include:
 - [src/LabAuthServer.Infrastructure/Auditing/SqlAuditEventService.cs](../../../src/LabAuthServer.Infrastructure/Auditing/SqlAuditEventService.cs)
 - test projects covering controller authorization and audit boundary behavior
 
-## Required automated validation
+## Automated validation performed
 
-Implementation must include:
+The implementation includes:
 
 - endpoint exposure tests for public vs protected routes;
 - default/deny and fallback-policy decision tests if the contract is codified;
@@ -104,9 +132,9 @@ Implementation must include:
 - boundary tests at exactly 256 and 257 characters;
 - no regression in login audit behavior, denied-access audit behavior, or valid authorization flow.
 
-## Acceptance criteria
+## Acceptance results
 
-The future implementation is acceptable only if all of the following are true:
+All of the following are true:
 
 - the contract for fallback authorization is explicit and approved;
 - public endpoints remain public and protected endpoints remain protected;
@@ -115,7 +143,7 @@ The future implementation is acceptable only if all of the following are true:
 - the audit event remains valid and bounded by the current 256-character SQL validator;
 - regression tests cover exact supported boundaries and the associated failure windows.
 
-## Implementation Authorization Packet
+## Implementation authorization record
 
 ### Baseline prerequisites
 
@@ -158,11 +186,10 @@ The future implementation is acceptable only if all of the following are true:
 - audit event remains valid at the supported size limit;
 - successful access does not produce invalid SQL-bound identity data.
 
-### Owner/architect decisions required first
+### Owner/architect decisions resolved before implementation
 
-- fallback contract for unannotated endpoints;
-- 401 vs 403 decision for authentication and authorization conditions;
-- acceptable audit omission convention for oversized subject.
+- P6-D1 approved fallback contract for unannotated endpoints and 401/403 behavior;
+- P6-D2 approved omission convention for oversized successful-access identity values.
 
 ### External dependencies
 
@@ -174,10 +201,10 @@ The future implementation is acceptable only if all of the following are true:
 - no authentication architecture change beyond default/fallback acceptance contract;
 - no license or database schema changes.
 
-### Recommended signed commit message
+### Signed commit message
 
-Plan remaining Phase 6 work
+Implement Phase 6.2 authorization and audit boundaries
 
 ---
 
-This subphase remains planning-only and does not authorize implementation.
+This subphase is complete. No Phase 6.3–6.7 implementation or release activity is authorized by this record.

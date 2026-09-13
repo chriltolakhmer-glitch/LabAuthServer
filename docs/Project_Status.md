@@ -8,7 +8,7 @@ Release build: zero warnings/errors. Infrastructure-safe default tests: **1,038 
 
 No localhost SQL fallback exists. Ordinary API fixtures use production-validated in-memory audit recording and block operational credentials/connections/key access. Real SQL and LDAP tests require explicit opt-in and target configuration. CI runs the default set before provisioning disposable SQL, then requires both real SQL tests to execute and pass. See [Testing](Testing.md) for exact commands and [Validation Status](Validation_Status.md) for evidence boundaries.
 
-Phase 5 owner-value/governance decisions remain complete; Phase 5.6 remains platform/ownership-model blocked. Professional review remains external/pending and no release is authorized. No production code/schema/runtime behavior, deployment or Phase 5 governance changed. Authorization fallback, ProtectedController audit handling, licensing semantics, issuer Release configuration and audit durability/retention remain later work.
+Phase 5 owner-value/governance decisions remain complete; Phase 5.6 remains platform/ownership-model blocked. Professional review remains external/pending and no release is authorized. Phase 6.2 authorization fallback and successful-access audit identity boundaries are implemented and validated; Phase 6.3 licensing semantics, Phase 6.4 issuer Release configuration, and Phase 6.5–6.7 work remain later work.
 
 The earlier dated Phase 2/3 records below are retained as historical checkpoints, including their original counts and scope. This update supersedes their automated-test/current-workstream statements; it does not establish new live-environment acceptance or perform the broader Phase 6.4 documentation reconciliation.
 

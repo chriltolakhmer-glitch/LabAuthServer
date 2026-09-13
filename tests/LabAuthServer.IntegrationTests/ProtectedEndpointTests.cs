@@ -7,6 +7,8 @@ using LabAuthServer.Api.Extensions;
 using LabAuthServer.Application.Constants;
 using LabAuthServer.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -32,6 +34,31 @@ public sealed class ProtectedEndpointTests : IClassFixture<TestApiFactory>
         var response = await _factory.CreateClient().GetAsync("/api/v1/protected");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetHealth_RemainsAnonymous()
+    {
+        var response = await _factory.CreateClient().GetAsync("/api/v1/health");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetUnmatchedRoute_RemainsNotFound()
+    {
+        var response = await _factory.CreateClient().GetAsync("/api/v1/not-a-real-endpoint");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public void AuthorizationFallback_RequiresAuthenticatedUsers()
+    {
+        var options = _factory.Services.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
+
+        Assert.NotNull(options.FallbackPolicy);
+        Assert.Contains(options.FallbackPolicy!.Requirements, requirement => requirement is DenyAnonymousAuthorizationRequirement);
     }
 
     [Fact]

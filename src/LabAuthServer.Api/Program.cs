@@ -64,6 +64,16 @@ app.UseMiddleware<CorrelationMiddleware>();
 app.UseHsts();
 app.UseHttpsRedirection();
 app.UseRouting();
+app.Use(async (context, next) =>
+{
+    if (context.GetEndpoint() is null)
+    {
+        context.Response.StatusCode = StatusCodes.Status404NotFound;
+        return;
+    }
+
+    await next().ConfigureAwait(false);
+});
 app.UseMiddleware<GeneralHeaderSizeMiddleware>();
 app.UseMiddleware<RequestBodySizeMiddleware>();
 app.UseRateLimiter();

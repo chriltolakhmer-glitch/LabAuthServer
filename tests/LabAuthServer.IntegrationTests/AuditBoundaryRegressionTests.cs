@@ -116,6 +116,43 @@ public sealed class AuditBoundaryRegressionTests
         Assert.Equal(recorded.CorrelationId.ToString("D"), Assert.Single(response.Headers.GetValues("X-Correlation-ID")));
     }
 
+    [Theory]
+    [InlineData(256, false)]
+    [InlineData(257, true)]
+    public async Task SuccessfulProtectedAccess_PreservesRequestAndBoundsAuditIdentity(int length, bool identityOmitted)
+    {
+        var audit = new ValidatingAudit();
+        using var factory = new JwtSizeApiFactory();
+        using var configured = factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IAuditEventService>();
+            services.AddSingleton<IAuditEventService>(audit);
+        }));
+        using var scope = configured.Services.CreateScope();
+        var issuer = scope.ServiceProvider.GetRequiredService<ITokenService>();
+        var subject = new string('a', length);
+        var token = await issuer.IssueAsync(new TokenIssuanceRequest
+        {
+            Subject = subject,
+            Roles = ["Reader"],
+            Scopes = []
+        });
+        using var client = configured.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+
+        using var response = await client.GetAsync("/api/v1/protected");
+
+        Assert.Equal(200, (int)response.StatusCode);
+        Assert.Empty(audit.Failures);
+        var recorded = Assert.Single(audit.Events, value => value.EventTypeCode == AuditEventTypes.AccessGranted);
+        Assert.Equal(identityOmitted, recorded.Username is null && recorded.Subject is null);
+        if (identityOmitted)
+        {
+            using var details = JsonDocument.Parse(recorded.DetailsJson!);
+            Assert.True(details.RootElement.GetProperty("identityOmitted").GetBoolean());
+        }
+    }
+
     private sealed class ValidatingAudit : IAuditEventService
     {
         public List<string> Failures { get; } = [];

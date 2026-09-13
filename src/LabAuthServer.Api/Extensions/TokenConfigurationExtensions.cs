@@ -70,6 +70,7 @@ public static class TokenConfigurationExtensions
             options.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
                 .RequireAuthenticatedUser()
                 .Build();
+            options.FallbackPolicy = options.DefaultPolicy;
 
             options.AddPolicy(AuthorizationPolicies.RequireReader, policy =>
                 policy.RequireAuthenticatedUser()
