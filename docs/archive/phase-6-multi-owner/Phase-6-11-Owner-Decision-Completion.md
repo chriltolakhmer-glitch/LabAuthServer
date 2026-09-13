@@ -1,3 +1,5 @@
+> Historical multi-owner workflow, superseded 2026-09-13 by the [solo developer release checklist](../../plans/Phase-6/Release-Checklist.md). Original decisions, pending items, and results below are retained as history, not future release gates.
+
 # Phase 6.11 — Owner Decision Completion and Release Gate Review
 
 Status: OWNER DECISION COMPLETION WORKFLOW PREPARED; NO RELEASE AUTHORIZATION RECORDED.
@@ -31,7 +33,7 @@ The current validation record establishes repository and controlled validation b
 - Test isolation prevents ordinary validation from reaching operational SQL, LDAP, credentials, certificate private keys, or environment license files.
 - Audit retention, archival, purge automation, SQL Agent scheduling, and production monitoring remain outside the implemented repository scope.
 
-Evidence references: [Validation Status](../../Validation_Status.md), [Phase 6.1](Phase-6.1-Safe-Automated-Validation-Boundaries.md), [Phase 6.3](Phase-6.3-Licensing-Boundary-Assurance.md), [Phase 6.4](Phase-6.4-Release-Build-and-Documentation-Reconciliation.md), [Phase 6.5](Phase-6.5-Audit-and-Operational-Acceptance-Design.md), and [Phase 6.6](Phase-6.6-Target-Environment-Acceptance.md).
+Evidence references: [Validation Status](../../Validation_Status.md), [Phase 6.1](../../plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md), [Phase 6.3](../../plans/Phase-6/Phase-6.3-Licensing-Boundary-Assurance.md), [Phase 6.4](../../plans/Phase-6/Phase-6.4-Release-Build-and-Documentation-Reconciliation.md), [Phase 6.5](Phase-6.5-Audit-and-Operational-Acceptance-Design.md), and [Phase 6.6](Phase-6.6-Target-Environment-Acceptance.md).
 
 ### Current CI, build, and test state
 

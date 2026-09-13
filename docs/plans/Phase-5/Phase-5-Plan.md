@@ -1,5 +1,7 @@
 # Phase 5 — Evaluation Distribution, Proprietary Source Licensing, and Commercial Governance
 
+Release-process update (2026-09-13): future releases follow [ALOT's six-check release workflow](../Phase-6/Release-Checklist.md). Its release gates supersede the multi-owner release prerequisites below; commercial terms, license issuance, and repository visibility retain their separate scope.
+
 Status: PHASE 5 IN PROGRESS — PHASE 5.6 D4-D7 IMPLEMENTED. Phase 5.1 and the completed documentation/governance subphases are owner-approved as recorded below, and Phase 5.6 D4, D5, D6, and D7 are now owner-approved and implemented. No source-code changes, production configuration changes, deployment actions, repository-publication actions, or code signing/secret generation are authorized by this plan.
 
 Phase 5.1 owner-approval closeout: [Phase-5.1-Commercial-Model-and-Decision-Gates.md](Phase-5.1-Commercial-Model-and-Decision-Gates.md). All eight decision gates are `OWNER APPROVED — 2026-09-12`. Legal approval remains `PENDING — PROFESSIONAL LEGAL REVIEW` where applicable; no final legal terms are created by this update.
@@ -54,12 +56,12 @@ This plan is traceable to the repository evidence and Phase 4 decisions currentl
 Evidence base in the repository:
 
 - [README.md](../../../README.md) documents a signed offline license document wired into startup loading and validation, with restricted Community behavior for missing or invalid licenses.
-- [docs/Licensing.md](../../../docs/Licensing.md) explicitly states: source-available limitations, offline-first design, no online activation, no machine binding, and the limitation that source control enables modification.
+- [docs/Licensing.md](../../Licensing.md) explicitly states: source-available limitations, offline-first design, no online activation, no machine binding, and the limitation that source control enables modification.
 - [docs/plans/Phase-4/Phase-4-README.md](../Phase-4/Phase-4-README.md) records the approved architecture and states: “Licensing model: source-available + commercial technical license.”
 - [docs/plans/Phase-4/Phase-4.15-Final-Security-Review.md](../Phase-4/Phase-4.15-Final-Security-Review.md) confirms the source-available limitation and that technical enforcement cannot prevent a customer from modifying source or binaries.
 - [docs/plans/Phase-4/Phase-4.16-Production-Licensing-Readiness.md](../Phase-4/Phase-4.16-Production-Licensing-Readiness.md) confirms startup-only runtime loading, operator-controlled license file path, and the absence of hot reload or per-request revalidation.
 - [docs/plans/Phase-4/Phase-4.17-Implementation-and-Final-Sign-Off.md](../Phase-4/Phase-4.17-Implementation-and-Final-Sign-Off.md) defines the approved production license governance model, external register, offline issuance flow, and public-key-only server boundary.
-- [docs/Security.md](../../../docs/Security.md) reinforces that licensing does not weaken authentication/authorization and clarifies the source-available limitation.
+- [docs/Security.md](../../Security.md) reinforces that licensing does not weaken authentication/authorization and clarifies the source-available limitation.
 - [.github/workflows/ci.yml](../../../.github/workflows/ci.yml) shows CI is build/test only, with no secrets or production signing material.
 
 Approved Phase 4 decisions relevant to Phase 5:

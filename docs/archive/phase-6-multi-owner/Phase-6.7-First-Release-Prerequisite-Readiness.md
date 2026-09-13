@@ -1,3 +1,5 @@
+> Historical multi-owner workflow, superseded 2026-09-13 by the [solo developer release checklist](../../plans/Phase-6/Release-Checklist.md). Original decisions, pending items, and results below are retained as history, not future release gates.
+
 # Phase 6.7 — First-Release Prerequisite Readiness
 
 Status: READINESS ASSESSMENT AND DECISION PACKAGE; NO RELEASE AUTHORIZED.
@@ -43,7 +45,7 @@ Phase 5.4 and Phase 5.7 remain the governing records. Their approved decisions a
 | Release channels and delivery | `Internal`, `Evaluation`, and `Production` taxonomy is approved. Controlled private delivery is approved as policy; exact provider/channel is not selected. | A channel label is not a delivery authorization. Exact delivery provider/channel remains a blocker. |
 | Tag policy | Future official tags use `vMAJOR.MINOR.PATCH` and must point to the approved commit. P6-D14 approves signed release tags as policy, with an approved procedure and verification process still required. | No tag may be created during Phase 6.7. |
 
-The source records remain authoritative: [Phase 5.4](../Phase-5/Phase-5.4-Official-Build-Provenance-and-Release-Manifest-Design.md), [Phase 5.4 owner decisions](../Phase-5/Phase-5.4-Remaining-Owner-Decision-Packet.md), and [Phase 5.7](../Phase-5/Phase-5.7-Release-Governance-and-Supported-Version-Policy.md).
+The source records remain authoritative: [Phase 5.4](../../plans/Phase-5/Phase-5.4-Official-Build-Provenance-and-Release-Manifest-Design.md), [Phase 5.4 owner decisions](../../plans/Phase-5/Phase-5.4-Remaining-Owner-Decision-Packet.md), and [Phase 5.7](../../plans/Phase-5/Phase-5.7-Release-Governance-and-Supported-Version-Policy.md).
 
 ## 4. Technical release blockers
 
@@ -160,4 +162,4 @@ dotnet test LabAuthServer.slnx --no-build --no-restore
 
 Validation proves repository behavior only. This package makes no source, runtime, dependency, database, deployment, workflow, or repository-setting change. It does not create a release, tag, manifest artifact, signed artifact, customer license, deployment, production environment change, or Phase 5.6 modification.
 
-The governing inputs are [Phase 5.4](../Phase-5/Phase-5.4-Official-Build-Provenance-and-Release-Manifest-Design.md), [Phase 5.4 owner decisions](../Phase-5/Phase-5.4-Remaining-Owner-Decision-Packet.md), [Phase 5.7](../Phase-5/Phase-5.7-Release-Governance-and-Supported-Version-Policy.md), [Phase 6 owner decisions](Phase-6-Owner-Decision-Packet.md), [Phase 6.3](Phase-6.3-Licensing-Boundary-Assurance.md), [Phase 6.4](Phase-6.4-Release-Build-and-Documentation-Reconciliation.md), [Phase 6.5](Phase-6.5-Audit-and-Operational-Acceptance-Design.md), and [Phase 6.6](Phase-6.6-Target-Environment-Acceptance.md).
+The governing inputs are [Phase 5.4](../../plans/Phase-5/Phase-5.4-Official-Build-Provenance-and-Release-Manifest-Design.md), [Phase 5.4 owner decisions](../../plans/Phase-5/Phase-5.4-Remaining-Owner-Decision-Packet.md), [Phase 5.7](../../plans/Phase-5/Phase-5.7-Release-Governance-and-Supported-Version-Policy.md), [Phase 6 owner decisions](Phase-6-Owner-Decision-Packet.md), [Phase 6.3](../../plans/Phase-6/Phase-6.3-Licensing-Boundary-Assurance.md), [Phase 6.4](../../plans/Phase-6/Phase-6.4-Release-Build-and-Documentation-Reconciliation.md), [Phase 6.5](Phase-6.5-Audit-and-Operational-Acceptance-Design.md), and [Phase 6.6](Phase-6.6-Target-Environment-Acceptance.md).

@@ -1,5 +1,9 @@
 # LabAuthServer implementation roadmap
 
+## Current Phase 6 release workflow (2026-09-13)
+
+Phase 6 now uses [ALOT's solo developer release checklist](Phase-6/Release-Checklist.md). Its six checks replace the historical multi-owner release gates. The planning baseline and older phase descriptions below retain their original context; current implementation and validation are maintained in Project Status and Validation Status.
+
 Planning baseline: 2026-09-06, commit `6793324` on `main`. The initial working tree was clean and the local tracking reference showed `main` aligned with `origin/main`; no remote fetch was performed.
 
 These documents are planning deliverables, not authorization to implement or deploy. Only Markdown under `docs/plans/` is changed by this task. No application, test, configuration, database, deployment, archive, image, or generated build artifact belongs in this change.
@@ -11,7 +15,7 @@ These documents are planning deliverables, not authorization to implement or dep
 | 3 | Advanced Authentication & Token Lifecycle | FUTURE | [Phase 3](Phase-3/README.md) |
 | 4 | Identity Federation & Standards | FUTURE | [Phase 4](Phase-4/README.md) |
 | 5 | Enterprise Operations & Scalability | FUTURE | [Phase 5](Phase-5/README.md) |
-| 6 | Advanced Security / Enterprise Extensions | FUTURE | [Phase 6](Phase-6/README.md) |
+| 6 | Solo Developer Releases | ACTIVE — ALOT | [Phase 6](Phase-6/README.md) |
 
 COMPLETE means delivered at the recorded baseline, not independently certified in production. PLANNED means a proposed implementation sequence needing its stated decisions resolved. FUTURE means candidate scope without implementation approval. OPTIONAL identifies a candidate that may never be selected; it is not a required dependency.
 

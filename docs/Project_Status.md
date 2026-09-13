@@ -1,46 +1,70 @@
 # Project Status
 
-## Current update — Phase 6.10 owner decision resolution (2026-09-13)
+## Current update — v1.0.0 package smoke checks (2026-09-13)
+
+**SMOKE INCOMPLETE; NO TAG CREATED.** The unchanged prepared package was cleanly extracted and started with external configuration under the current Administrator identity on a loopback-only HTTPS endpoint. Trusted HTTPS health 200/Healthy, anonymous protected 401, invalid-token rejection and SQL audit persistence, encrypted SQL connectivity, and LDAPS TLS validation passed. This does not establish IIS-identity or successful real-user authentication acceptance.
+
+Real-user login, DPAPI decryption, JWT issuance and authenticated role access remain unverified. ALOT requested manual password entry, but automatic approval review blocked the interactive prompt command; no password was collected. The temporary packaged application process was stopped. Artifact SHA256 and all 51 extracted file hashes remain unchanged. No source, live configuration, artifact, tag, publication or deployment change occurred.
+
+Results: `C:\Apps\LabAuthServer\Releases\v1.0.0-preparation-20260913-212903\Smoke-Test-Report.md`; the local release record retains an incomplete smoke checkbox. Complete the real-user authentication checks before preparing the tag command. The lightweight workflow remains in effect.
+
+## Current update — first solo release preparation (2026-09-13)
+
+**PREPARED LOCALLY; SMOKE TEST AND GIT TAG PENDING.** ALOT's proposed `v1.0.0` API package was built from a clean export of commit `784fa96b9436aee315fae2d7e669a2650dbff794` using the current solo developer checklist. Restore/Release build passed with zero warnings/errors; required default tests passed **1,046/1,046** (786 unit, 260 integration), zero failures/skips. SQL/LDAP infrastructure categories were excluded.
+
+Package, verified SHA256 file, release notes, release record, and validation logs are retained locally at `C:\Apps\LabAuthServer\Releases\v1.0.0-preparation-20260913-212903`. Package: `LabAuthServer-1.0.0.zip` (4,983,016 bytes); SHA256: `564f5be016e7f679c32751c4f30488b8482ca57ccec8207c81802a8aee73f6a0`. All 51 extracted package files matched staging by hash. The package requires external configuration; environment-specific appsettings were excluded.
+
+ALOT's remaining steps are the extracted-package HTTPS smoke test and, after it passes, Git tag creation at the recorded source SHA. No tag, publication, deployment, commit, push, license issuance, or application-code change occurred. Existing documentation-only changes remain uncommitted; the historical governance workflow was not restored. This preparation does not claim a completed release.
+
+## Current update — Phase 6 solo developer release governance (2026-09-13)
+
+**SOLO DEVELOPER WORKFLOW ADOPTED.** ALOT is the sole release owner. The [release checklist](plans/Phase-6/Release-Checklist.md) is the complete gate for future releases: Release build passes, tests pass, artifact package exists, SHA256 checksum exists and matches, smoke test passes, and Git tag created. External owner acknowledgements, legal approval, operations approval, rollback committees, and artifact custody workflows are no longer release blockers.
+
+The [multi-owner workflow archive](archive/phase-6-multi-owner/README.md) preserves the previous roadmap, evidence packets, approvals, eight untracked drafts, and stopped preflight. Earlier dated governance statements below are historical and superseded by this update; pending evidence has not been retroactively completed. The new workflow does not erase technical limitations or change application code, architecture, dependencies, or test isolation.
+
+This change updates documentation only. No release package, checksum, smoke test, tag, publication, deployment, or license issuance is claimed. Validation results for this refactor are recorded in [Validation Status](Validation_Status.md).
+
+## Historical update — Phase 6.10 owner decision resolution (2026-09-13)
 
 **GOVERNANCE CHECKLIST PREPARED AND LOCALLY VALIDATED; NO RELEASE AUTHORIZATION RECORDED.** Phase 6.10 reviews the Phase 6.9 owner packet, preserves all pending blockers, and provides risk-acceptance and final-authorization forms. No unresolved item was converted into approval; build/tests remain ready while environment, operations, legal/business, and release custody remain pending.
 
-No release, tag, artifact publication, deployment, customer license issuance, or production environment change occurred. See [Phase 6.10 Owner Decision Resolution](plans/Phase-6/Phase-6-10-Owner-Decision-Resolution.md). The checklist is governance-only.
+No release, tag, artifact publication, deployment, customer license issuance, or production environment change occurred. See [Phase 6.10 Owner Decision Resolution](archive/phase-6-multi-owner/Phase-6-10-Owner-Decision-Resolution.md). The checklist is governance-only.
 
 ## Previous update — Phase 6.9 first-release owner authorization packet (2026-09-13)
 
 **OWNER DECISION PACKET PREPARED AND LOCALLY VALIDATED; NO AUTHORIZATION RECORDED.** Phase 6.9 records the current readiness decision: build and tests are ready, licensing is ready with limitations, and environment, operations, legal/business, and release custody remain pending. The packet contains the owner decision form but does not approve or execute release activity.
 
-No release, tag, artifact publication, deployment, customer license issuance, or production environment change occurred. See [Phase 6.9 First-Release Owner Authorization](plans/Phase-6/Phase-6-9-First-Release-Owner-Authorization.md). Approval is required before any release action.
+No release, tag, artifact publication, deployment, customer license issuance, or production environment change occurred. See [Phase 6.9 First-Release Owner Authorization](archive/phase-6-multi-owner/Phase-6-9-First-Release-Owner-Authorization.md). Approval is required before any release action.
 
 ## Previous update — Phase 6.8 release authorization gate (2026-09-13)
 
 **DECISION GATE PREPARED AND LOCALLY VALIDATED; NO RELEASE AUTHORIZED.** Phase 6.8 consolidates completed evidence from Phases 6.1 and 6.3 through 6.7, the final release checklist, remaining owner decisions, and a blank go/no-go authorization form. Build/test evidence is repository-only; environment, operational, security, legal/business, delivery, custody, and rollback gates remain open where evidence or owners are missing.
 
-No release, tag, artifact publication, deployment, customer license issuance, or production environment change occurred. See [Phase 6.8 Release Authorization Gate](plans/Phase-6/Phase-6.8-Release-Authorization-Gate.md). Phase 6.8 does not authorize release activity.
+No release, tag, artifact publication, deployment, customer license issuance, or production environment change occurred. See [Phase 6.8 Release Authorization Gate](archive/phase-6-multi-owner/Phase-6.8-Release-Authorization-Gate.md). Phase 6.8 does not authorize release activity.
 
 ## Previous update — Phase 6.7 first-release prerequisite readiness (2026-09-13)
 
 **READINESS ASSESSMENT PREPARED AND LOCALLY VALIDATED; NO RELEASE AUTHORIZED.** Phase 6.7 now separates completed repository prerequisites, approved release-governance policies, remaining owner decisions, operational blockers, legal/business blockers, and deferred capabilities. The repository is not ready to request first-release authorization: target-environment evidence, operational ownership, exact provider/custody selections, professional review, signing decisions, and release rehearsal remain open.
 
-No release, tag, artifact publication, deployment, customer license issuance, certificate operation, production environment change, repository-setting change, or Phase 5.6 modification occurred. See [Phase 6.7 First-Release Prerequisite Readiness](plans/Phase-6/Phase-6.7-First-Release-Prerequisite-Readiness.md). Phase 6.7 completion does not authorize release activity.
+No release, tag, artifact publication, deployment, customer license issuance, certificate operation, production environment change, repository-setting change, or Phase 5.6 modification occurred. See [Phase 6.7 First-Release Prerequisite Readiness](archive/phase-6-multi-owner/Phase-6.7-First-Release-Prerequisite-Readiness.md). Phase 6.7 completion does not authorize release activity.
 
 ## Previous update — Phase 6.6 target-environment acceptance design (2026-09-13)
 
 **IMPLEMENTED DESIGN AND LOCALLY VALIDATED.** Phase 6.6 now defines the evidence gate for Windows/IIS hosting, SQL Server, Active Directory/LDAP, TLS/certificates, configuration ownership, and operational handoff. It records current implementation assumptions and requires target evidence before any environment may be called accepted. Target environment owner, SQL operational owner, AD owner, certificate owner, capacity thresholds, and related operational decisions remain **TBD**; no names or thresholds were invented.
 
-No production deployment, IIS installation change, AD/domain change, SQL production change, certificate operation, release creation, customer onboarding, runtime behavior change, database migration, or Phase 5.6 modification occurred. See [Phase 6.6 Target-Environment Acceptance](plans/Phase-6/Phase-6.6-Target-Environment-Acceptance.md). Phase 6.7 remains outside this implementation.
+No production deployment, IIS installation change, AD/domain change, SQL production change, certificate operation, release creation, customer onboarding, runtime behavior change, database migration, or Phase 5.6 modification occurred. See [Phase 6.6 Target-Environment Acceptance](archive/phase-6-multi-owner/Phase-6.6-Target-Environment-Acceptance.md). Phase 6.7 remains outside this implementation.
 
 ## Previous update — Phase 6.5 operational acceptance design (2026-09-13)
 
 **IMPLEMENTED DESIGN AND LOCALLY VALIDATED.** Phase 6.5 now records the observed audit durability, SQL outage, retention, monitoring, and liveness behavior plus the evidence contract for acceptance. P6-D7 through P6-D11 remain intentionally deferred pending owner, operations, DBA, architecture, legal/compliance, and target-environment input as applicable. No operational owners, retention periods, alert thresholds, readiness checks, retries, queues, or monitoring integrations were invented or implemented.
 
-The current application remains best-effort for SQL audit persistence: failures are logged and do not replace the primary response, but no replay guarantee exists. `/api/v1/health` remains dependency-independent liveness. Retention/purge and production monitoring are not implemented. See [Phase 6.5 Audit and Operational Acceptance Design](plans/Phase-6/Phase-6.5-Audit-and-Operational-Acceptance-Design.md) for decisions, placeholders, and evidence requirements.
+The current application remains best-effort for SQL audit persistence: failures are logged and do not replace the primary response, but no replay guarantee exists. `/api/v1/health` remains dependency-independent liveness. Retention/purge and production monitoring are not implemented. See [Phase 6.5 Audit and Operational Acceptance Design](archive/phase-6-multi-owner/Phase-6.5-Audit-and-Operational-Acceptance-Design.md) for decisions, placeholders, and evidence requirements.
 
 Phase 6.6 environment acceptance and Phase 6.7 first-release readiness remain outside this implementation. No release, deployment, monitoring rollout, database migration, customer operation, or Phase 5.6 change occurred.
 
 ## Previous update — Phase 6.4 release qualification (2026-09-13)
 
-**IMPLEMENTED AND LOCALLY VALIDATED.** [Phase 6 — Operational Assurance and First-Release Readiness](plans/Phase-6/Phase-6-Plan.md), [Phase 6.1 implementation/evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md), [Phase 6.2 authorization/audit boundaries](plans/Phase-6/Phase-6.2-Authorization-and-Audit-Boundary-Corrections.md), [Phase 6.3 licensing boundaries](plans/Phase-6/Phase-6.3-Licensing-Boundary-Assurance.md), and [Phase 6.4 release qualification](plans/Phase-6/Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) are recorded in the current workstream. Phase 6.5–6.7 remain outside this implementation. The Release solution explicitly covers `LabAuthServer.LicenseIssuer`; the API publish profile remains a separate local packaging path. The governance-only owner decision packet is prepared in [Phase 6 — Owner and Architecture Decision Packet](plans/Phase-6/Phase-6-Owner-Decision-Packet.md); no release is authorized.
+**IMPLEMENTED AND LOCALLY VALIDATED.** [Phase 6 — Operational Assurance and First-Release Readiness](plans/Phase-6/Phase-6-Plan.md), [Phase 6.1 implementation/evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md), [Phase 6.2 authorization/audit boundaries](plans/Phase-6/Phase-6.2-Authorization-and-Audit-Boundary-Corrections.md), [Phase 6.3 licensing boundaries](plans/Phase-6/Phase-6.3-Licensing-Boundary-Assurance.md), and [Phase 6.4 release qualification](plans/Phase-6/Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) are recorded in the current workstream. Phase 6.5–6.7 remain outside this implementation. The Release solution explicitly covers `LabAuthServer.LicenseIssuer`; the API publish profile remains a separate local packaging path. The governance-only owner decision packet is prepared in [Phase 6 — Owner and Architecture Decision Packet](archive/phase-6-multi-owner/Phase-6-Owner-Decision-Packet.md); no release is authorized.
 
 Release build: zero warnings/errors. Infrastructure-safe default tests: **1,038 passed (783 unit-project, 255 integration-project), zero failures/skips**, with SQL connection and infrastructure enable flags absent; three infrastructure cases excluded. Explicit disposable SQL validation: **2 passed**, zero failures/skips. Separate real LDAP acceptance: **1 case, not run**. Total inventory: 1,041; hosted-equivalent mandatory total: 1,040. The prior full baseline was 1,023 tests, confirmed by CI #39 on `0b6d1ee92220090fb5570323e30f10bfc2dd9ed5`.
 

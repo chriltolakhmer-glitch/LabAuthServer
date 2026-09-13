@@ -1,5 +1,17 @@
 # Validation Status
 
+## Current validation — solo developer release governance (2026-09-13)
+
+Documentation-only refactor: future releases use [ALOT's six-check release checklist](plans/Phase-6/Release-Checklist.md). Earlier multi-owner approvals and evidence gaps are [archived](archive/phase-6-multi-owner/README.md) and no longer block future releases. Historical validation results below retain their original scope.
+
+- `dotnet restore LabAuthServer.slnx`: PASS.
+- `dotnet build LabAuthServer.slnx -c Release --no-restore --nologo`: PASS, zero warnings/errors.
+- `dotnet test LabAuthServer.slnx -c Release --no-build --no-restore -m:1 --filter "Category!=SqlInfrastructure&Category!=LdapAcceptance" --nologo`: PASS, **1,046 tests** (786 unit-project, 260 integration-project), zero failures/skips in the selected set.
+- SQL target and SQL/LDAP enable flags were removed in the validation process. Infrastructure categories were excluded, not counted as passing; no new live SQL/LDAP acceptance or hosted CI result is claimed.
+- Current workflow and archived-document relative Markdown links checked; three pre-existing target-environment filename typos corrected during relocation. `git diff --check`: PASS.
+
+No application code, tests, configuration, dependencies, or infrastructure changed. This validates the documentation refactor; no release package, checksum, smoke test, Git tag, publication, deployment, or customer license was produced. The release checklist remains a blank template.
+
 ## Current validation — Phase 6.4 (2026-09-13)
 
 The Phase 6.4 baseline gate was verified clean on `main` at `f1999839d455e852b487f302416a35ccbc52338e`, with hosted `LabAuthServer CI` run #44 completed successfully. [Phase 6.4 evidence](plans/Phase-6/Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) and [Testing commands](Testing.md) define the current qualification boundary.

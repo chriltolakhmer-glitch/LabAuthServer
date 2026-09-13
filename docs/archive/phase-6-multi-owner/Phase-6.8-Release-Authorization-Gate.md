@@ -1,3 +1,5 @@
+> Historical multi-owner workflow, superseded 2026-09-13 by the [solo developer release checklist](../../plans/Phase-6/Release-Checklist.md). Original decisions, pending items, and results below are retained as history, not future release gates.
+
 # Phase 6.8 — Release Authorization Gate
 
 Status: DECISION GATE PREPARED; NO RELEASE AUTHORIZED.

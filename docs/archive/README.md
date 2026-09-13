@@ -1,5 +1,7 @@
 # Historical Documentation Archive
 
+The [Phase 6 multi-owner release workflow](phase-6-multi-owner/README.md) is archived as of 2026-09-13. Future releases follow the [solo developer checklist](../plans/Phase-6/Release-Checklist.md), owned by ALOT.
+
 This directory preserves project history that is not authoritative for the current implementation.
 
 Archived records include design approvals, implementation-phase notes, deployment evidence, validation snapshots, and historical baselines. They may contain older implementation states, test counts, proposed designs, or environment-specific details that were accurate only at the time of writing.

@@ -1,3 +1,5 @@
+> Historical multi-owner workflow, superseded 2026-09-13 by the [solo developer release checklist](../../plans/Phase-6/Release-Checklist.md). Original decisions, pending items, and results below are retained as history, not future release gates.
+
 # Phase 6.15 — Final Release Execution Package
 
 Status: FINAL CONSOLIDATED PACKAGE PREPARED; RELEASE EXECUTION NOT AUTHORIZED.

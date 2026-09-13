@@ -1,3 +1,5 @@
+> Historical multi-owner workflow, superseded 2026-09-13 by the [solo developer release checklist](../../plans/Phase-6/Release-Checklist.md). Original decisions, pending items, and results below are retained as history, not future release gates.
+
 # Phase 6.12 — Final Release Decision Record
 
 Status: OWNER APPROVAL RECORDED FOR PREPARATION ONLY; NO RELEASE EXECUTION AUTHORIZED.
@@ -48,7 +50,7 @@ Phase 6.3 licensing boundary behavior is recorded as implemented and verified, i
 - Legal/business review, customer-facing terms, and support commitments remain pending.
 - No release authorization, tag, artifact publication, deployment, customer delivery, or license issuance has occurred.
 
-Evidence references: [Project Status](../../Project_Status.md), [Validation Status](../../Validation_Status.md), [Phase 6.3](Phase-6.3-Licensing-Boundary-Assurance.md), [Phase 6.4](Phase-6.4-Release-Build-and-Documentation-Reconciliation.md), [Phase 6.11](Phase-6-11-Owner-Decision-Completion.md), and [Phase 6 Plan](Phase-6-Plan.md).
+Evidence references: [Project Status](../../Project_Status.md), [Validation Status](../../Validation_Status.md), [Phase 6.3](../../plans/Phase-6/Phase-6.3-Licensing-Boundary-Assurance.md), [Phase 6.4](../../plans/Phase-6/Phase-6.4-Release-Build-and-Documentation-Reconciliation.md), [Phase 6.11](Phase-6-11-Owner-Decision-Completion.md), and [Phase 6 Plan](Phase-6-Plan.md).
 
 ## 3. Completed approvals
 
