@@ -1,6 +1,12 @@
 # Project Status
 
-## Current update — Phase 6.5 operational acceptance design (2026-09-13)
+## Current update — Phase 6.6 target-environment acceptance design (2026-09-13)
+
+**IMPLEMENTED DESIGN AND LOCALLY VALIDATED.** Phase 6.6 now defines the evidence gate for Windows/IIS hosting, SQL Server, Active Directory/LDAP, TLS/certificates, configuration ownership, and operational handoff. It records current implementation assumptions and requires target evidence before any environment may be called accepted. Target environment owner, SQL operational owner, AD owner, certificate owner, capacity thresholds, and related operational decisions remain **TBD**; no names or thresholds were invented.
+
+No production deployment, IIS installation change, AD/domain change, SQL production change, certificate operation, release creation, customer onboarding, runtime behavior change, database migration, or Phase 5.6 modification occurred. See [Phase 6.6 Target-Environment Acceptance](plans/Phase-6/Phase-6.6-Target-Environment-Acceptance.md). Phase 6.7 remains outside this implementation.
+
+## Previous update — Phase 6.5 operational acceptance design (2026-09-13)
 
 **IMPLEMENTED DESIGN AND LOCALLY VALIDATED.** Phase 6.5 now records the observed audit durability, SQL outage, retention, monitoring, and liveness behavior plus the evidence contract for acceptance. P6-D7 through P6-D11 remain intentionally deferred pending owner, operations, DBA, architecture, legal/compliance, and target-environment input as applicable. No operational owners, retention periods, alert thresholds, readiness checks, retries, queues, or monitoring integrations were invented or implemented.
 
