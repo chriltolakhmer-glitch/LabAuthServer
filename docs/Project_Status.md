@@ -1,6 +1,14 @@
 # Project Status
 
-## Current update — Phase 6.4 release qualification (2026-09-13)
+## Current update — Phase 6.5 operational acceptance design (2026-09-13)
+
+**IMPLEMENTED DESIGN AND LOCALLY VALIDATED.** Phase 6.5 now records the observed audit durability, SQL outage, retention, monitoring, and liveness behavior plus the evidence contract for acceptance. P6-D7 through P6-D11 remain intentionally deferred pending owner, operations, DBA, architecture, legal/compliance, and target-environment input as applicable. No operational owners, retention periods, alert thresholds, readiness checks, retries, queues, or monitoring integrations were invented or implemented.
+
+The current application remains best-effort for SQL audit persistence: failures are logged and do not replace the primary response, but no replay guarantee exists. `/api/v1/health` remains dependency-independent liveness. Retention/purge and production monitoring are not implemented. See [Phase 6.5 Audit and Operational Acceptance Design](plans/Phase-6/Phase-6.5-Audit-and-Operational-Acceptance-Design.md) for decisions, placeholders, and evidence requirements.
+
+Phase 6.6 environment acceptance and Phase 6.7 first-release readiness remain outside this implementation. No release, deployment, monitoring rollout, database migration, customer operation, or Phase 5.6 change occurred.
+
+## Previous update — Phase 6.4 release qualification (2026-09-13)
 
 **IMPLEMENTED AND LOCALLY VALIDATED.** [Phase 6 — Operational Assurance and First-Release Readiness](plans/Phase-6/Phase-6-Plan.md), [Phase 6.1 implementation/evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md), [Phase 6.2 authorization/audit boundaries](plans/Phase-6/Phase-6.2-Authorization-and-Audit-Boundary-Corrections.md), [Phase 6.3 licensing boundaries](plans/Phase-6/Phase-6.3-Licensing-Boundary-Assurance.md), and [Phase 6.4 release qualification](plans/Phase-6/Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) are recorded in the current workstream. Phase 6.5–6.7 remain outside this implementation. The Release solution explicitly covers `LabAuthServer.LicenseIssuer`; the API publish profile remains a separate local packaging path. The governance-only owner decision packet is prepared in [Phase 6 — Owner and Architecture Decision Packet](plans/Phase-6/Phase-6-Owner-Decision-Packet.md); no release is authorized.
 

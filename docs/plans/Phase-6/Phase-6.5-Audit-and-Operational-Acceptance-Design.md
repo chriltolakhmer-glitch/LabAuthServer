@@ -1,191 +1,130 @@
 # Phase 6.5 — Audit and Operational Acceptance Design
 
-Status: PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION.
+Status: IMPLEMENTED DESIGN; OPERATIONAL ACCEPTANCE AND OWNER DECISIONS REMAIN OPEN.
 
-## Purpose
+## Purpose and boundary
 
-Define the operational acceptance and risk policy for audit persistence, retention, monitoring, and readiness before any production or first-release authorization decision is made. This is a design-first subphase; it does not implement logging, queues, or monitoring platforms.
+This document defines the operational contract and evidence required for audit durability and observability. It does not implement a queue, retry policy, metrics exporter, alert integration, readiness endpoint, retention job, SQL change, deployment, or customer operation. No operational owner is inferred from the repository.
 
-## Current confirmed behavior
+Phase 6.5 is complete as a design package only. Phase 6.6 target-environment acceptance and Phase 6.7 first-release readiness remain outside this work.
 
-The current repository implements SQL audit persistence through the SQL writer and validation path, but it does not implement retention, purge, archival, or SQL Agent automation. The repo currently distinguishes application liveness from environment-dependent availability but has not yet established a formal operational acceptance standard for audit persistence outages or retention decisions.
+## Current implementation evidence
 
-## Required decision gates
+| Area | Current behavior | Evidence boundary |
+| --- | --- | --- |
+| Audit validation | `AuditEventValidator` rejects invalid or sensitive events before SQL configuration/connection use. | Unit tests and application audit contracts |
+| Audit persistence | `SqlAuditEventService` calls only `Audit.usp_WriteAuditEvent` with typed parameters and a bounded command timeout. | Infrastructure code and SQL scripts |
+| Failure behavior | Database and command failures are caught, logged, and returned as `null`; there is no retry, durable queue, replay path, or failure counter. | `SqlAuditEventService` and middleware tests |
+| Request impact | Callers await the write and pass `RequestAborted`; a failed write does not replace the primary response, but connection/command wait can add latency up to the configured timeout. Cancellation can prevent persistence. | Audit documentation, service implementation, and tests |
+| Logging | Console/debug providers are enabled. Audit failures are emitted as structured-template error/warning messages without passwords, tokens, authorization headers, raw LDAP data, or exception dumps. | `Program`, audit service, and middleware |
+| Health | `GET /api/v1/health` is anonymous and returns `200 Healthy` as application liveness. It does not check SQL, LDAP, certificate-store access, licensing, or audit durability. | `Program` and `HealthEndpointTests` |
+| Metrics/monitoring | No application metrics, audit backlog, alert integration, or monitoring platform configuration is implemented. | Repository-wide source review |
+| Retention | Retention, archival, purge, backup policy, restore testing, and SQL Agent scheduling are not implemented by the repository. | `Database.md`, SQL scripts, and current status docs |
 
-### Audit loss policy
+## P6-D7 — Audit loss tolerance
 
-The owner must decide:
+**Current contract:** audit persistence is best effort. A persistence outage may lose an event; the application does not retain it for replay. This is an observed behavior, not an approved loss budget.
 
-- how much audit loss is acceptable when SQL persistence fails;
-- whether best-effort logging is an acceptable operational risk;
-- whether audit loss must be explicitly monitored and reported.
+**Required decision:** owner and operations/DBA input must define whether any loss is acceptable and the maximum tolerated loss, expressed at minimum as an event count or time window. They must also define escalation when the tolerance is exceeded. Until approved, audit durability is an open acceptance gate and must not be described as guaranteed.
 
-### Request latency policy
+**Required evidence:** inject SQL unavailability and cancellation, record attempted/successful/failed events, request outcomes, elapsed time, and log correlation IDs; demonstrate the agreed escalation path without exposing sensitive data.
 
-The owner, with operations input, must decide:
+## P6-D8 — Audit latency and SQL outage policy
 
-- what request latency is acceptable when audit persistence is synchronous;
-- whether the application should continue in degraded mode or fail closed on audit outage.
+**Observed behavior:** audit writes are awaited on the request path where invoked, have no retry, and use the configured five-second maximum command timeout. The primary response is not replaced solely because persistence returns `null`; an audit attempt can still delay completion, and cancellation can prevent the write.
 
-### Database outage handling
+**Decision gate:** owner plus operations/DBA must approve all of the following:
 
-The operation design must distinguish:
+- the maximum audit latency budget and whether it is included in endpoint SLOs;
+- whether degraded operation remains best effort or any event class must fail closed;
+- whether a future retry/outbox/replay design is required, including its durability and capacity contract;
+- the operator-visible condition and escalation when SQL is unavailable.
 
-- application request behavior;
-- logging and monitoring behavior;
-- alert ownership;
-- audit loss and replay possibilities.
+No retry or weaker audit guarantee is introduced by this phase.
 
-### Retention and purge ownership
+**Required evidence:** healthy SQL, unavailable SQL, timeout, cancellation, and recovery scenarios with request status, latency, audit outcome, logs, and correlation. The evidence must prove that no secret or token is logged and must distinguish an audit failure from an application failure.
 
-The design must identify explicit responsibilities for:
+## P6-D9 — Retention and storage responsibility
 
-- retention period;
-- purge process;
-- storage growth monitoring;
-- backup and restore coverage;
-- separation of application audit data from release evidence and governance records.
+No legal or contractual retention period is selected. No purge, archive, SQL Agent schedule, backup policy, restore test, or storage-growth control is implemented.
 
-### Monitoring and alert ownership
+| Decision | Required owner/input | Acceptance evidence |
+| --- | --- | --- |
+| Retention period and exceptions | Owner + legal/compliance review as applicable | Approved written policy |
+| Audit database storage ownership | DBA / database service owner: **TBD** | Named owner and access boundary |
+| Purge/archive execution and approval | DBA/operations owner: **TBD** | Reviewed procedure, schedule, and failure escalation |
+| Backup and restore coverage | DBA: **TBD** | Restore evidence and recovery target decisions |
+| Growth monitoring and thresholds | Operations/DBA: **TBD** | Capacity baseline, threshold, and alert route |
 
-This subphase must define who owns the following alerts:
+Application audit data must remain distinct from release evidence and governance records. No retention claim is accepted until these decisions and evidence exist.
 
-- audit persistence failure;
-- SQL availability;
-- LDAP availability if appropriate;
-- certificate/key expiry;
-- license restricted-mode status.
+## P6-D10 — Monitoring and alert design
 
-### Readiness semantics
+Monitoring is a requirement, not an implemented capability. No production alert is configured by this repository and no owner is assigned.
 
-The team must determine whether `/health` remains pure liveness or whether a separate readiness endpoint is justified. This is a required owner/architect decision before changing available behavior semantics.
+Required measurements are:
 
-## Dependencies on earlier work
+- audit events attempted, persisted, failed, and cancelled, by event category;
+- audit write latency, timeout count, and SQL outage duration;
+- request outcome and latency for affected endpoints, without recording credentials or token material;
+- SQL connectivity/procedure availability and audit table growth/capacity;
+- liveness and, if approved, readiness state;
+- LDAP authentication failure/timeout rates;
+- certificate/key validity horizon and license restricted-mode state.
 
-- Phase 6.1 establishes safe validation boundaries.
-- Phase 6.2 defines the authorization and audit identity boundary.
-- Phase 6.3 defines licensing risk and restricted-mode design.
-- Phase 6.4 reconciles documentation and build status.
+Required alert categories and placeholders:
 
-## External / professional / operational dependencies
+| Alert category | Trigger/threshold | Owner | Status |
+| --- | --- | --- | --- |
+| Audit persistence failure/loss | Approved D7 threshold | Operations: **TBD** | Not configured |
+| SQL availability/latency | Approved D8 threshold | DBA/operations: **TBD** | Not configured |
+| Storage growth/retention | Approved D9 threshold | DBA: **TBD** | Not configured |
+| LDAP failure/timeout | Approved environment threshold | Operations: **TBD** | Not configured |
+| Certificate/key expiry | Approved lead time | Security/platform: **TBD** | Not configured |
+| Restricted license mode | Approved operational response | Owner/operations: **TBD** | Not configured |
 
-- DBA input for SQL outage, retention, and purge design.
-- operations ownership for alerting and response.
-- architecture sign-off for readiness semantics.
-- no vendor-specific monitoring platform is selected in this planning step.
+Thresholds, notification channels, escalation time, and on-call ownership require external approval. The repository must not claim these controls exist.
 
-## Narrow implementation scope
+## P6-D11 — Liveness/readiness contract
 
-This plan governs design decisions only. It does not implement:
+**Current contract:** `/api/v1/health` is pure application liveness. It is anonymous, static, and dependency-independent. It must remain suitable for process/route checks and must not be redefined silently to fail because SQL, LDAP, or certificate access is unavailable.
 
-- durable outbox;
-- message queue;
-- Kafka;
-- Redis;
-- distributed tracing platform;
-- monitoring vendor solution;
-- infrastructure automation.
+**Recommended contract for owner/architect approval:** retain `/api/v1/health` for liveness and, only if deployment requires dependency gating, add a separately specified readiness endpoint with explicit dependency checks, timeouts, status semantics, and startup behavior. Readiness must not cause destructive retries or expose secrets.
 
-## Explicit non-goals
+No readiness endpoint or health dependency check is added in Phase 6.5. Approval and target-environment evidence are required before changing deployment behavior.
 
-- no preselected operational platform;
-- no forced outbox or queue architecture;
-- no monitoring-vendor lock-in;
-- no change to the current application behavior without owner approval.
+## Operational acceptance evidence package
 
-## Expected files/components
+Acceptance must include:
 
-Likely design inputs include:
+1. Source-to-contract review confirming the behavior table above.
+2. Automated audit validation and failure-boundary results from the required repository commands.
+3. Controlled SQL outage, timeout, cancellation, and recovery evidence with correlation and latency data.
+4. Approved D7-D11 decisions, named owners or explicit owner placeholders, thresholds, escalation, and retention/backup evidence.
+5. A review record showing that no release, deployment, production monitoring rollout, database migration, customer operation, or Phase 5.6 change occurred.
 
-- operational docs in [docs/Operations.md](../../Operations.md)
-- [docs/AuditLogging.md](../../AuditLogging.md)
-- [docs/Database.md](../../Database.md)
-- [docs/Project_Status.md](../../Project_Status.md)
-- related SQL audit and middleware code
+The evidence package is not target-environment acceptance and does not authorize Phase 6.6 or 6.7.
 
-## Required automated validation
+## Validation performed for this design
 
-This subphase is mainly design and decision validation, but any future implementation must include:
+The baseline gate was verified before implementation:
 
-- audit failure and fallback behavior tests;
-- latency boundary test coverage, if behavior remains synchronous;
-- alert and monitoring requirement specification review;
-- readiness-vs-liveness decision review.
+- `HEAD` and `origin/main`: `9fd3dc1ddc82942f72d9f509295e9ec2b9a2c691`;
+- commit: `Implement Phase 6.4 release qualification`;
+- hosted `LabAuthServer CI`: run `34729638947`, completed, success, same head SHA.
 
-## Acceptance criteria
+The required local validation remains:
 
-The future implementation is acceptable only if:
+```powershell
+dotnet restore
+dotnet build LabAuthServer.slnx -c Release --no-restore
+dotnet test LabAuthServer.slnx --no-build --no-restore
+```
 
-- audit loss is explicitly and acceptably bounded;
-- outage behavior is separated for application request path, logging, monitoring, and retention;
-- ownership for retention and alerting is assigned;
-- readiness semantics are approved before server deployment or release-readiness claims.
+This phase changes documentation only; no runtime test is added because no runtime behavior changed.
 
-## Implementation Authorization Packet
+## Deferred decisions and non-authorizations
 
-### Baseline prerequisites
+P6-D7, P6-D8, P6-D9, P6-D10, and P6-D11 remain deferred pending owner, operations, DBA, architecture, legal/compliance, and target-environment input as applicable. No operational owner is invented here.
 
-- Phase 6.1 verification is complete.
-- Technical boundaries for authorization and licensing are known.
-- The operational ownership model is identified.
-
-### Exact implementation scope
-
-- audit loss and latency policy;
-- SQL outage behavior design;
-- retention, purge, backup, and growth ownership plan;
-- monitoring and alert requirements;
-- liveness vs readiness decision.
-
-### Explicit non-goals
-
-- queue/outbox implementation;
-- platform selection;
-- monitoring vendor selection;
-- distributed tracing design.
-
-### Expected files/components
-
-- operations design docs;
-- audit and SQL outage decision notes;
-- monitoring threshold and ownership matrix.
-
-### Tests/validation
-
-- design-review validation;
-- operational acceptance scenarios;
-- regression checks against the current audit mechanism.
-
-### Acceptance criteria
-
-- documented decision gates exist for each operational risk;
-- no release or deployment claim is made while the decision remains open.
-
-### Owner/architect decisions required first
-
-- audit loss tolerance;
-- latency budget;
-- SQL outage handling policy;
-- retention and purge ownership;
-- readiness semantics;
-- monitoring ownership and thresholds.
-
-### External dependencies
-
-- DBA input;
-- operations owner approval;
-- platform or vendor selection only if later required.
-
-### Safety boundaries
-
-- no product release without approved operational loss and retention policy;
-- no outbox or queue architecture introduced without explicit decision;
-- no monitoring vendor lock-in in this planning step.
-
-### Recommended signed commit message
-
-Plan remaining Phase 6 work
-
----
-
-This subphase remains planning-only and does not authorize implementation.
+This phase does not authorize Phase 6.6 environment acceptance, Phase 6.7 first-release readiness, release creation, deployment, customer delivery, production monitoring rollout, external alert configuration, SQL infrastructure change, retention deletion jobs, or any Phase 5.6 change.
