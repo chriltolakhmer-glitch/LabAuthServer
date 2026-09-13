@@ -1,6 +1,6 @@
 # Phase 6 — Operational Assurance and First-Release Readiness
 
-Status: OWNER-APPROVED GOVERNANCE PACKET RECORDED. Phase 6.1 is implemented and verified by exact hosted CI; Phase 6.4 is implemented and locally validated; Phase 6.5 design is implemented and locally validated; Phase 6.6 acceptance design is prepared and locally validated; Phase 6.7 readiness assessment is prepared and locally validated; Phase 6.8 release authorization gate is prepared and locally validated; Phase 6.9 owner authorization packet is prepared and locally validated with no authorization recorded. Phase 6.2 and 6.3 remain outside this implementation and require their own authorization. P6-D1 through P6-D6 and P6-D14 are owner approved; P6-D7 through P6-D13 remain intentionally deferred; P6-I1 is implemented through explicit issuer Release qualification. [Phase index](README.md).
+Status: OWNER-APPROVED GOVERNANCE PACKET RECORDED. Phase 6.1 is implemented and verified by exact hosted CI; Phase 6.4 is implemented and locally validated; Phase 6.5 design is implemented and locally validated; Phase 6.6 acceptance design is prepared and locally validated; Phase 6.7 readiness assessment is prepared and locally validated; Phase 6.8 release authorization gate is prepared and locally validated; Phase 6.9 owner authorization packet is prepared and locally validated with no authorization recorded; Phase 6.10 owner decision resolution is prepared and locally validated as governance-only. Phase 6.2 and 6.3 remain outside this implementation and require their own authorization. P6-D1 through P6-D6 and P6-D14 are owner approved; P6-D7 through P6-D13 remain intentionally deferred; P6-I1 is implemented through explicit issuer Release qualification. [Phase index](README.md).
 
 ## Objective and exit state
 
@@ -33,6 +33,7 @@ Phase 6 completion means READY TO REQUEST SEPARATE RELEASE AUTHORIZATION. It doe
 | [6.7](Phase-6.7-First-Release-Prerequisite-Readiness.md) | First-Release Prerequisite Readiness | READINESS ASSESSMENT PREPARED; NO RELEASE AUTHORIZED | 6.2–6.6 evidence and external gates; P6-D14 owner approved |
 | [6.8](Phase-6.8-Release-Authorization-Gate.md) | Release Authorization Gate | DECISION GATE PREPARED; NO RELEASE AUTHORIZED | 6.1 and 6.3–6.7 evidence; owner approval required |
 | [6.9](Phase-6-9-First-Release-Owner-Authorization.md) | First-Release Owner Authorization | DECISION PACKET PREPARED; NO AUTHORIZATION RECORDED | 6.8 gate review; explicit owner decision required |
+| [6.10](Phase-6-10-Owner-Decision-Resolution.md) | Owner Decision Resolution | GOVERNANCE CHECKLIST PREPARED; NO AUTHORIZATION RECORDED | Phase 6.9 review; owner decisions remain explicit |
 
 ## Dependency order and safe parallelism
 
