@@ -1,6 +1,12 @@
 # Project Status
 
-## Current update — Phase 6.7 first-release prerequisite readiness (2026-09-13)
+## Current update — Phase 6.8 release authorization gate (2026-09-13)
+
+**DECISION GATE PREPARED AND LOCALLY VALIDATED; NO RELEASE AUTHORIZED.** Phase 6.8 consolidates completed evidence from Phases 6.1 and 6.3 through 6.7, the final release checklist, remaining owner decisions, and a blank go/no-go authorization form. Build/test evidence is repository-only; environment, operational, security, legal/business, delivery, custody, and rollback gates remain open where evidence or owners are missing.
+
+No release, tag, artifact publication, deployment, customer license issuance, or production environment change occurred. See [Phase 6.8 Release Authorization Gate](plans/Phase-6/Phase-6.8-Release-Authorization-Gate.md). Phase 6.8 does not authorize release activity.
+
+## Previous update — Phase 6.7 first-release prerequisite readiness (2026-09-13)
 
 **READINESS ASSESSMENT PREPARED AND LOCALLY VALIDATED; NO RELEASE AUTHORIZED.** Phase 6.7 now separates completed repository prerequisites, approved release-governance policies, remaining owner decisions, operational blockers, legal/business blockers, and deferred capabilities. The repository is not ready to request first-release authorization: target-environment evidence, operational ownership, exact provider/custody selections, professional review, signing decisions, and release rehearsal remain open.
 
