@@ -1,6 +1,6 @@
 # Testing
 
-## Current validation boundary — Phase 6.1 (2026-09-12)
+## Current validation boundary — Phase 6.4 (2026-09-13)
 
 Normal automated validation must not implicitly contact or mutate operational SQL Server, AD, protected host credentials or environment-specific infrastructure. [Phase 6.1 implementation and evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md).
 
@@ -66,6 +66,7 @@ The Windows workflow retains pinned Actions, SDK setup, restore, Release build a
 
 ## Projects
 
+- `tools/LabAuthServer.LicenseIssuer` is explicitly included in `LabAuthServer.slnx` and is covered by the Release solution restore/build qualification. It is an offline issuer utility, not an API publish target.
 - `tests/LabAuthServer.UnitTests` covers application and infrastructure seams, configuration validation, LDAP boundaries, token issuance/signing/validation, role mapping, audit validation, and middleware behavior.
 - `tests/LabAuthServer.IntegrationTests` covers API/controller behavior, the ASP.NET Core request pipeline, protected-resource authorization, health behavior, authentication contracts, and selected environment/database boundaries.
 
@@ -79,6 +80,16 @@ dotnet restore .\LabAuthServer.slnx
 dotnet build .\LabAuthServer.slnx -c Release --no-restore --nologo
 dotnet test LabAuthServer.slnx -c Release --no-build --no-restore --filter "Category!=SqlInfrastructure&Category!=LdapAcceptance"
 ```
+
+The Phase 6.4 full qualification path, including the explicit issuer project, is:
+
+```powershell
+dotnet restore
+dotnet build LabAuthServer.slnx -c Release --no-restore
+dotnet test LabAuthServer.slnx --no-build --no-restore
+```
+
+The API `FolderProfile` remains a separate local publish validation path. Publishing is not performed by CI or by Phase 6.4, and publish output is not a release artifact.
 
 Use a dedicated shell if you need to preserve existing process environment values. No SQL connection target or real AD connectivity is required.
 

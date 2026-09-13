@@ -1,6 +1,6 @@
 # Phase 6.4 — Release-Build and Documentation Reconciliation
 
-Status: PLANNED — NOT AUTHORIZED FOR IMPLEMENTATION.
+Status: IMPLEMENTED AND LOCALLY VALIDATED; RELEASE QUALIFICATION COMPLETE. NO RELEASE AUTHORIZED.
 
 ## Purpose
 
@@ -10,9 +10,9 @@ Verify that the Release build and the current state documentation accurately mat
 
 ### Release build coverage
 
-[LabAuthServer.slnx](../../../LabAuthServer.slnx) currently includes the application, domain, infrastructure, and test projects, but it does not explicitly include the standalone issuer project at [tools/LabAuthServer.LicenseIssuer](../../../tools/LabAuthServer.LicenseIssuer).
+[LabAuthServer.slnx](../../../LabAuthServer.slnx) explicitly includes the API, application, domain, infrastructure, standalone issuer, and both test projects. The issuer project at [tools/LabAuthServer.LicenseIssuer](../../../tools/LabAuthServer.LicenseIssuer) is therefore covered by the solution Release restore/build path and is not an unqualified side project.
 
-The Phase 4 implementation history describes the issuer as a separate project used by tests and sign-off workflows. That means the Release build may not currently qualify the issuer as an explicit Release component even if the code is present in the repository and used as a supported utility.
+The Phase 4 implementation history describes the issuer as a separate project used by tests and sign-off workflows. It remains a build-qualified utility component, while the API publish profile remains API-only. Solution qualification does not create or publish a release artifact.
 
 ### Documentation drift
 
@@ -30,6 +30,18 @@ Priority documentation candidates include:
 - [docs/Operations.md](../../Operations.md)
 - [AGENTS.md](../../../AGENTS.md)
 - [.github/copilot-instructions.md](../../../.github/copilot-instructions.md)
+
+## Implemented qualification
+
+The supported repository qualification commands are:
+
+```powershell
+dotnet restore
+dotnet build LabAuthServer.slnx -c Release --no-restore
+dotnet test LabAuthServer.slnx --no-build --no-restore
+```
+
+The solution Release build covers seven projects: four production application projects, `LabAuthServer.LicenseIssuer`, and two test projects. The test command covers the two test projects; environment-dependent SQL and LDAP cases retain their explicit opt-in boundaries documented in [Testing](../../Testing.md). The API file-system publish profile is a separate local packaging validation path and is not run by CI or this phase.
 
 ## Problem to solve
 
@@ -49,11 +61,11 @@ The project must produce an accurate, current-state perspective that clearly sep
 - Phase 6.2 and 6.3 provide the corrected technical semantics for authorization, audit, and licensing.
 - The final documentation reconciliation should follow, not precede, those technical clarifications.
 
-## Decision gates required before implementation
+## Decision gates resolved in this implementation
 
-- Is the issuer library required as an explicit Release-valid component for the distribution workflow?
-- Which current-state docs are authoritative for the released baseline, and which remain historical evidence only?
-- What constitutes an acceptable current-state annotation when a file contains both historical and current material?
+- The issuer is required as an explicit Release-qualified solution component.
+- Current-state sections in `Project_Status.md`, `Validation_Status.md`, and `Testing.md` are authoritative for repository qualification; dated and archived records remain historical evidence.
+- Current-state sections identify implementation, test, environment-dependent, deferred, and unauthorized release boundaries explicitly.
 
 ## External/professional dependencies
 
@@ -63,9 +75,9 @@ The project must produce an accurate, current-state perspective that clearly sep
 
 ## Narrow implementation scope
 
-The future implementation may only do the following:
+This implementation only did the following:
 
-- correct the Release project graph so the issuer is deliberately included or intentionally excluded with the reason recorded;
+- correct the Release project graph so the issuer is deliberately included;
 - reconcile current-state documentation to match the actual code and repository evidence;
 - preserve historical records under docs/archive and earlier phase docs as evidence rather than rewriting them.
 
@@ -96,16 +108,16 @@ Likely review targets include:
 
 ## Required automated validation
 
-Implementation must include:
+Implementation included:
 
 - solution/project graph validation for Release build coverage;
-- build verification that demonstrates the Release solution status for the issuer if it is included;
+- build verification that demonstrates the Release solution status for the issuer;
 - documentation review against code and evidence boundaries;
 - no hidden changes to runtime or environment configuration.
 
 ## Acceptance criteria
 
-The future implementation is acceptable only if:
+This implementation is acceptable because:
 
 - the Release build graph clearly names the issuer component or explains why it is intentionally excluded;
 - the issue of current docs vs historical docs is reconciled without losing evidence;
@@ -118,7 +130,7 @@ The future implementation is acceptable only if:
 
 - Phase 6.1 is verified and clean.
 - The actual Release build coverage and current-state doc contradictions have been identified.
-- The issuer component status is clearly categorized as either included or intentionally excluded with rationale.
+- The issuer component is explicitly included in the Release-qualified solution graph.
 
 ### Exact implementation scope
 
@@ -153,8 +165,8 @@ The future implementation is acceptable only if:
 
 ### Owner/architect decisions required first
 
-- whether the issuer is part of the Release-qualified solution graph;
-- whether the documentation should call out a current-state-only conclusion vs a historical record.
+- Resolved by approved P6-I1 and this implementation: the issuer is part of the Release-qualified solution graph.
+- Resolved by this reconciliation: current-state conclusions are documented separately from historical records.
 
 ### External dependencies
 
@@ -169,8 +181,8 @@ The future implementation is acceptable only if:
 
 ### Recommended signed commit message
 
-Plan remaining Phase 6 work
+Implement Phase 6.4 release qualification
 
 ---
 
-This subphase remains planning-only and does not authorize implementation.
+This subphase does not authorize a release, deployment, customer delivery, production signing, tag creation, artifact publication, or implementation of Phases 6.5–6.7.

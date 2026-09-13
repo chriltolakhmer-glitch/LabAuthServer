@@ -1,12 +1,12 @@
 # Validation Status
 
-## Current validation — Phase 6.1 (2026-09-12)
+## Current validation — Phase 6.4 (2026-09-13)
 
-Baseline verified clean on `main` at `0b6d1ee92220090fb5570323e30f10bfc2dd9ed5`; prior hosted CI #39 succeeded. [Phase 6.1 evidence](plans/Phase-6/Phase-6.1-Safe-Automated-Validation-Boundaries.md) and [Testing commands](Testing.md) define the new safe execution boundary.
+The Phase 6.4 baseline gate was verified clean on `main` at `f1999839d455e852b487f302416a35ccbc52338e`, with hosted `LabAuthServer CI` run #44 completed successfully. [Phase 6.4 evidence](plans/Phase-6/Phase-6.4-Release-Build-and-Documentation-Reconciliation.md) and [Testing commands](Testing.md) define the current qualification boundary.
 
 | Local Release verification | Result |
 | --- | --- |
-| Restore/build, SDK 10.0.401 | PASS; zero warnings/errors |
+| Restore/build, SDK 10.0.401 | PASS; zero warnings/errors; solution includes `LabAuthServer.LicenseIssuer` |
 | Default unit-project tests, SQL target/enable flags absent | 783 passed, zero failed/skipped |
 | Default integration-project tests, same environment | 255 passed, zero failed/skipped |
 | Default aggregate | 1,038 passed; 3 infrastructure cases excluded |
@@ -52,7 +52,7 @@ This document is the authoritative summary of what can be established from the r
 
 ## Build status
 
-**VERIFIED:** The Release solution build completed successfully with zero errors and zero warnings during the final Phase 2A application-code review.
+**VERIFIED:** The Phase 6.4 Release solution build completed successfully with zero errors and zero warnings, including the explicitly listed `LabAuthServer.LicenseIssuer` project. This qualifies the repository build graph; it does not authorize a release or prove target-environment readiness.
 
 ## Automated test status
 
@@ -134,6 +134,8 @@ dotnet test .\LabAuthServer.slnx -c Release --no-build --nologo
 ```
 
 Historical phase documents remain available under `docs/archive/` for traceability. They may contain older counts, proposed designs, or environment-specific observations and must be interpreted as historical.
+
+The API file-system publish profile is intentionally separate from solution qualification and remains a local packaging path only. No publish was performed for Phase 6.4.
 
 ## Historical pre-deployment checkpoint: 2026-09-08 transport-compatible budget reduction
 

@@ -3,6 +3,7 @@
   <Project Path="src/LabAuthServer.Application/LabAuthServer.Application.csproj" />
   <Project Path="src/LabAuthServer.Domain/LabAuthServer.Domain.csproj" />
   <Project Path="src/LabAuthServer.Infrastructure/LabAuthServer.Infrastructure.csproj" />
+  <Project Path="tools/LabAuthServer.LicenseIssuer/LabAuthServer.LicenseIssuer.csproj" />
   <Project Path="tests/LabAuthServer.IntegrationTests/LabAuthServer.IntegrationTests.csproj" />
   <Project Path="tests/LabAuthServer.UnitTests/LabAuthServer.UnitTests.csproj" />
 </Solution>
