@@ -215,6 +215,8 @@ The checked-in development profile binds HTTPS to `https://localhost:7068` and H
 
 ### Publish
 
+Future releases follow [ALOT's solo developer release checklist](docs/plans/Phase-6/Release-Checklist.md): Release build, tests, artifact package, SHA256 checksum, smoke test, and Git tag.
+
 The API includes a file-system publish profile that targets `Build\Release`:
 
 ```powershell

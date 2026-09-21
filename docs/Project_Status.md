@@ -1,5 +1,23 @@
 # Project Status
 
+## Current update — Phase 9 maintenance and reliability (2026-09-21)
+
+**PHASE 9 COMPLETE.** The [small maintenance plan](plans/Phase-9/Phase-9-Maintenance-Reliability-Plan.md) and [read-only maintenance checker](../scripts/operations/Test-LabAuthServerMaintenance.ps1) are available. Live checks passed (8 PASS); warning/failure behavior was exercised. The [runbook](operations/LabAuthServer-Operations-Runbook.md) now includes a manual cadence, expiry handling, backup verification, off-host copy recommendation and minimal upgrade/rollback sequence.
+
+A non-production file restore copy matched all 52 backup files without hosting or executing them. Production rollback remains **READY — RESTORE NOT EXECUTED**; off-host recovery is untested. Runtime file logging remains intentionally disabled, and Reader smoke retains temporary membership restoration. No application source, deployed files/configuration, certificates, AD, SQL schema, v1.0.0 ZIP/tag or GitHub release changed; no rebuild/redeploy occurred.
+
+## Next activity — Phase 8 solo-developer operations handoff (2026-09-21)
+
+Phase 7 is complete: v1.0.0 is deployed, deployment verification passed, and rollback is **READY — RESTORE NOT EXECUTED**. Phase 8 operations handoff is the next activity; the verified operational baseline is documented in the [operations runbook](operations/LabAuthServer-Operations-Runbook.md) and [recovery checklist](operations/LabAuthServer-Recovery-Checklist.md). No application or deployment change accompanies this documentation.
+
+## Current update — Phase 7 v1.0.0 lab deployment (2026-09-20)
+
+**DEPLOYMENT COMPLETE.** The immutable `v1.0.0` package from source `784fa96b9436aee315fae2d7e669a2650dbff794` is deployed on `DC01.lab.local` through the existing IIS site and `LabAuthServerAppPool`, running as `LAB\svc_labauth`. ZIP SHA256: `564f5be016e7f679c32751c4f30488b8482ca57ccec8207c81802a8aee73f6a0`. All 51 artifact files matched; external configuration was preserved separately. No rebuild or source change occurred.
+
+Combined pre-deployment and final post-deployment smoke passed: trusted HTTPS, health 200, anonymous 401, real Reader login/JWT/access 200, Operator login/Reader denial 403, DPAPI and signing under the actual IIS identity, encrypted application-identity SQL access, and corresponding persisted audit rows. The existing test account's temporary role memberships were restored. Scoped Users write permissions were removed from deployment/release/backup directory trees. Rollback is **READY — RESTORE NOT EXECUTED**.
+
+See [Phase 7 deployment record](plans/Phase-7/Phase-7-Deployment-Record.md) for paths, changes, evidence and limitations. This current result supersedes the older incomplete package-smoke statements below. No application source, JWT/LDAP configuration, SQL schema, certificates, DNS, commit, tag, release or GitHub change was made. Build/unit/integration suites were not rerun because this deployment uses the exact released artifact.
+
 ## Current update — v1.0.0 package smoke checks (2026-09-13)
 
 **SMOKE INCOMPLETE; NO TAG CREATED.** The unchanged prepared package was cleanly extracted and started with external configuration under the current Administrator identity on a loopback-only HTTPS endpoint. Trusted HTTPS health 200/Healthy, anonymous protected 401, invalid-token rejection and SQL audit persistence, encrypted SQL connectivity, and LDAPS TLS validation passed. This does not establish IIS-identity or successful real-user authentication acceptance.
