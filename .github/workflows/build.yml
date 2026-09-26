@@ -15,6 +15,7 @@ jobs:
   build-and-test:
     name: Build and Test (Release)
     runs-on: windows-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -33,6 +34,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
+      - name: Report external acceptance limitation
+        shell: pwsh
+        run: |
+          Write-Output '::notice::Real LDAP acceptance is NOT RUN: hosted CI has no approved AD target or protected credentials. Deterministic tests and mandatory disposable SQL tests remain enabled. See docs/Release-Process.md.'
+
       - name: Restore
         run: dotnet restore LabAuthServer.slnx
 
@@ -43,15 +49,19 @@ jobs:
         shell: pwsh
         run: |
           Remove-Item Env:LABAUTHSERVER_RUN_SQL_TESTS, Env:LABAUTHSERVER_SQL_AUDIT_TEST_CONNECTION, Env:LABAUTHSERVER_RUN_LDAP_ACCEPTANCE -ErrorAction SilentlyContinue
-          dotnet test LabAuthServer.slnx --configuration Release --no-build --no-restore --filter "Category!=SqlInfrastructure&Category!=LdapAcceptance" --logger "console;verbosity=normal"
+          dotnet test LabAuthServer.slnx --configuration Release --no-build --no-restore -m:1 --filter "Category!=SqlInfrastructure&Category!=LdapAcceptance" --logger "console;verbosity=normal"
 
       - name: Provision disposable SQL audit test database
         shell: pwsh
         run: |
           sqllocaldb start MSSQLLocalDB
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           sqlcmd -S "(localdb)\MSSQLLocalDB" -E -b -i database\Phase11\01_CreateDatabase.sql
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           sqlcmd -S "(localdb)\MSSQLLocalDB" -E -d LabAuthServer -b -i database\Phase11\02_CreateSchemasTables.sql
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           sqlcmd -S "(localdb)\MSSQLLocalDB" -E -d LabAuthServer -b -i database\Phase11\03_CreateAuditProcedures.sql
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Test mandatory SQL persistence (Release)
         shell: pwsh

@@ -2,7 +2,7 @@
 
 LabAuthServer is a versioned ASP.NET Core API that authenticates users against Microsoft Active Directory over LDAPS, maps approved directory groups to application roles, issues RSA-signed JWT bearer tokens, and protects API resources with policy-based authorization.
 
-## Overview
+## Purpose
 
 The service is intended for Windows-hosted applications that need centralized Active Directory authentication without storing user passwords. A successful HTTPS login performs a user bind over LDAPS, resolves the user’s directory groups, selects an approved application role, signs a short-lived access token with an RSA certificate from the Windows certificate store, and records approved security events in SQL Server.
 
@@ -198,7 +198,7 @@ From the repository root:
 ```powershell
 dotnet restore .\LabAuthServer.slnx
 dotnet build .\LabAuthServer.slnx -c Release --no-restore --nologo
-dotnet test .\LabAuthServer.slnx -c Release --no-build --nologo
+dotnet test .\LabAuthServer.slnx -c Release --no-build --no-restore -m:1 --filter "Category!=SqlInfrastructure&Category!=LdapAcceptance" --nologo
 ```
 
 The unit suite isolates application and infrastructure seams. The integration suite exercises the ASP.NET Core request pipeline and selected infrastructure boundaries, including SQL audit behavior. Live AD credentials, private keys, and DPAPI contents are environment-bound and are not required to be placed in the repository.
@@ -299,3 +299,23 @@ LabAuthServer/
 ## Security and validation notes
 
 No passwords, access tokens, private keys, or DPAPI secret contents belong in source control. The repository includes security-focused tests and documentation, but live directory authentication and certificate/DPAPI behavior depend on protected infrastructure. Review [Validation Status](docs/Validation_Status.md) for the authoritative evidence boundary; historical phase records are preserved under `docs/archive/`.
+
+## CI and test instructions
+
+The [build workflow](.github/workflows/build.yml) restores, builds and tests on pushes and pull requests targeting `main`, using Windows and .NET SDK 10.0.400. Branch names are not changed by this setup. Repositories still on `master` will not trigger this workflow until work targets `main`.
+
+After the restore/build commands above, use this isolated local validation command:
+
+```powershell
+dotnet test LabAuthServer.slnx -c Release --no-build --no-restore -m:1 --filter "Category!=SqlInfrastructure&Category!=LdapAcceptance"
+```
+
+Clear operational test configuration/opt-in variables in the test process first, as the workflow does. See [release process and CI limitations](docs/Release-Process.md) for the exact external-dependency exclusions and required acceptance. CI does not deploy or substitute for live acceptance.
+
+## Architecture role
+
+See [Architecture](docs/Architecture.md) for Browser -> Web -> Auth/AD and API/SQL responsibilities. Auth owns authentication, verified identity and role issuance; API owns business authorization and database access; Web owns UI, server-side sessions/cookies and API clients.
+
+## API/Postman update requirement
+
+New, modified or removed API endpoints require matching Postman updates before completion. Acceptance tests are required before release, covering success, authentication, role-specific authorization, validation/errors and verified cleanup of run-owned fixtures. Web expectations must follow changed API contracts. Keep credentials and tokens out of collections and repository files. Follow [Release Process](docs/Release-Process.md) for tagging, build verification, artifact checksums and rollback readiness.

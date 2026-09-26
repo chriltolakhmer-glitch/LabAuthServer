@@ -65,3 +65,22 @@ The classification slice above is extended by the approved [cooperative cancella
 ## Login LDAP concurrency admission (source only)
 
 AuthController now acquires the singleton ILdapConcurrencyLimiter once for identity and group lookup, retaining the lease through both sequences and native cleanup. The permit is released before mapping/signing/audit; no nested per-bind/search acquisition occurs. Infrastructure implements the gate with SemaphoreSlim and an idempotent lease; the existing Application AuthenticationOperation supplies the only deadline/origin signal. ConcurrencyWait is appended to stages. The sole public LDAP route retains its existing shared 10/minute admission policy. Low-level helpers are not globally intercepted: future endpoints/jobs must explicitly adopt admission and waiting-resource policies. [Design, scope and native/waiter limitations](plans/Phase-2/Phase-2A-LDAP-Concurrency-Resource-Protection.md).
+
+## Three-application architecture
+
+```mermaid
+flowchart TD
+    Browser --> LabWebAppServer
+    LabWebAppServer --> LabAuthServer
+    LabAuthServer --> AD[Active Directory]
+    LabWebAppServer --> LabAPIServer
+    LabAPIServer --> SQL[SQL Server: business database]
+```
+
+- **LabAuthServer** owns authentication against Active Directory, verified identity and role issuance in signed JWTs. Its own SQL audit store is separate from the API business database. Auth signing keys and directory service credentials belong only to Auth.
+- **LabAPIServer** owns business APIs, bearer-token validation, authorization enforcement, business rules and SQL access through stored procedures. It does not issue tokens or authenticate passwords against AD.
+- **LabWebAppServer** owns the user interface, session/cookie handling and server-side Auth/API clients. After Auth login it calls the API session endpoint to obtain the verified identity/role before creating a local session. Bearer tokens remain server-side; the browser receives a protected session cookie. Web does not access SQL, own Auth keys or grant API permissions.
+
+HTTPS protects browser and service traffic; LDAPS protects Auth-to-directory traffic. API owns the final allow/deny decision on every business request, even when Web hides unavailable actions. Session loss on Web recycle requires login again. Deployment settings, credentials, certificates and database provisioning remain environment-managed, outside CI source artifacts.
+
+This diagram describes existing responsibility boundaries, not a change to authentication, application behavior or deployment topology.

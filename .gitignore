@@ -40,3 +40,30 @@ tests/LabAuthServer.IntegrationTests/TestResults/
 # OS
 Thumbs.db
 .DS_Store
+
+# Repository preparation: local-only artifacts
+.vscode/
+TestResults/
+appsettings.*.local.json
+appsettings.Production.json
+*.pem
+*.dll
+*.exe
+*.pdb
+*.trx
+*.bak
+*.zip
+*.runtime.json
+*-runtime.json
+!*-runtime.example.json
+# Operational folders must stay outside this source repository
+/Backup/
+/Backups/
+/Build/
+/Current/
+/Releases/
+/Staging/
+/Temp/
+/WorkingDrafts/
+/Logs/
+/Screenshots/
